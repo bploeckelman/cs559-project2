@@ -1,0 +1,110 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="framework\TrainFiles\Utilities\3DUtils.cpp">
+      <Filter>framework\TrainFiles\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="framework\TrainFiles\Utilities\ArcBallCam.cpp">
+      <Filter>framework\TrainFiles\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="framework\TrainFiles\Utilities\GLee.c">
+      <Filter>framework\TrainFiles\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="framework\TrainFiles\Utilities\Pnt3f.cpp">
+      <Filter>framework\TrainFiles\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="framework\TrainFiles\Utilities\ShaderTools.cpp">
+      <Filter>framework\TrainFiles\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="framework\TrainFiles\CallBacks.cpp">
+      <Filter>framework\TrainFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="framework\TrainFiles\ControlPoint.cpp">
+      <Filter>framework\TrainFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="framework\TrainFiles\Train.cpp">
+      <Filter>framework\TrainFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="framework\TrainFiles\TrainView.cpp">
+      <Filter>framework\TrainFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="framework\TrainFiles\TrainWindow.cpp">
+      <Filter>framework\TrainFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="framework\TrainFiles\World.cpp">
+      <Filter>framework\TrainFiles</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="framework\TrainFiles\Utilities\3DUtils.h">
+      <Filter>framework\TrainFiles\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="framework\TrainFiles\Utilities\ArcBallCam.H">
+      <Filter>framework\TrainFiles\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="framework\TrainFiles\Utilities\GLee.h">
+      <Filter>framework\TrainFiles\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="framework\TrainFiles\Utilities\Pnt3f.H">
+      <Filter>framework\TrainFiles\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="framework\TrainFiles\Utilities\ShaderTools.H">
+      <Filter>framework\TrainFiles\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="framework\TrainFiles\World.H">
+      <Filter>framework\TrainFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="framework\TrainFiles\CallBacks.H">
+      <Filter>framework\TrainFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="framework\TrainFiles\ControlPoint.H">
+      <Filter>framework\TrainFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="framework\TrainFiles\Object.H">
+      <Filter>framework\TrainFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="framework\TrainFiles\TrainView.H">
+      <Filter>framework\TrainFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="framework\TrainFiles\TrainWindow.H">
+      <Filter>framework\TrainFiles</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="framework\TrainFiles\TrackFiles\loop0.txt">
+      <Filter>framework\TrainFiles\TrackFiles</Filter>
+    </None>
+    <None Include="framework\TrainFiles\TrackFiles\figure8.txt">
+      <Filter>framework\TrainFiles\TrackFiles</Filter>
+    </None>
+    <None Include="framework\TrainFiles\TrackFiles\reset.txt">
+      <Filter>framework\TrainFiles\TrackFiles</Filter>
+    </None>
+    <None Include="framework\TrainFiles\TrackFiles\spiral.txt">
+      <Filter>framework\TrainFiles\TrackFiles</Filter>
+    </None>
+    <None Include="framework\TrainFiles\TrackFiles\sqiggle.txt">
+      <Filter>framework\TrainFiles\TrackFiles</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="framework">
+      <UniqueIdentifier>{a9efe99b-341a-4919-bf1d-0365d5016311}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="framework\TrainFiles">
+      <UniqueIdentifier>{ee082b59-a2c5-4e56-9e2c-8cd5769a03d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="framework\TrainFiles\TrackFiles">
+      <UniqueIdentifier>{c9970798-c43f-4529-8c81-0d0422b6fa90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="framework\TrainFiles\Utilities">
+      <UniqueIdentifier>{e0ebb966-0025-4dee-901b-4d21b67f8cdd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{12d36d86-4eb7-4b0e-ad22-2d3dd02b557d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source">
+      <UniqueIdentifier>{fda641e0-1727-431e-adf9-a88befd39e44}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
