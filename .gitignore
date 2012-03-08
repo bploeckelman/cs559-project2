@@ -30,7 +30,11 @@ Intermediates
 *.[Cc]ache
 *.ilk
 *.log
-*.lib
+# Normally we'd ignore libs, but for this project
+# it might be best to just have the libs included 
+# so that we don't have to assume anything about the 
+# TA's development environment variables or anything...
+#*.lib 
 *.sbr
 *.sdf
 *.opensdf
