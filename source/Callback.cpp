@@ -11,6 +11,7 @@
 #pragma warning(pop)
 
 #include <iostream>
+#include <time.h>
 
 
 void damageCB(Fl_Widget *widget, Phase2Window *window)
@@ -19,4 +20,18 @@ void damageCB(Fl_Widget *widget, Phase2Window *window)
 		std::cout << "Error in damage callback, null pointer passed." << std::endl;
 
 	window->damageMe();
+}
+
+void idleCB(Phase2Window *window)
+{
+	static const unsigned long interval = CLOCKS_PER_SEC / 30;
+	static unsigned long lastRedraw = 0;
+
+	const unsigned long delta = clock() - lastRedraw;
+
+	if( delta > interval ) 
+	{
+		lastRedraw = clock();
+		window->damageMe();
+	}
 }

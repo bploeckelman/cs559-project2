@@ -7,3 +7,4 @@ class Fl_Widget;
 
 
 void damageCB(Fl_Widget *widget, Phase2Window *window);
+void idleCB(Phase2Window *window);
