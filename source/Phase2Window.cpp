@@ -28,6 +28,10 @@
 #include <Fl/Fl_Button.h>
 #pragma warning(pop)
 
+// TODO - remove these and use constants in some header
+#define M_PI       3.141592653f
+#define M_2PI      2.f * M_PI
+
 #include <iostream>
 #include <vector>
 
@@ -193,6 +197,16 @@ Phase2Window::Phase2Window(const int x, const int y)
 		widgets->end();
 	}
 	end();
+
+	// Add initial points
+	const float step = M_2PI / 10.f;
+	const float radius = 60.f;
+	for(float i = 0.f; i < M_2PI; i += step)
+	{
+		const Vec3f     pos(cosf(i), 0.f, sinf(i));
+		const CtrlPoint point(pos * radius);
+		points.push_back(point);
+	}
 
 	// Setup idle callback
 	//Fl::add_idle(...);
