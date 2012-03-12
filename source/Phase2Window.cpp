@@ -72,7 +72,10 @@ int Phase2View::handle(int event)
 		focus(this);
 		break;
 	case FL_KEYBOARD : 
-		// TODO
+		int k  = Fl::event_key();
+		int ks = Fl::event_state();
+		if( k == 'n' ) --selectedPoint;
+		if( k == 'p' ) ++selectedPoint;
 		break;
 	}
 
@@ -141,6 +144,7 @@ void Phase2View::pick()
 	}
 
 	// See how picking did back in drawing mode
+	// TODO -  buf[3] is always 1, picking isn't working
 	int hits = glRenderMode(GL_RENDER);
 	selectedPoint = hits ? buf[3] - 1 : -1;
 
@@ -215,8 +219,13 @@ Phase2Window::Phase2Window(const int x, const int y)
 
 void Phase2Window::damageMe()
 {
-	// TODO : add some code here to wrap around 
-	// selected cube id if it is set too high
+	const int numPoints = static_cast<int>(points.size());
+	const int selected  = view->getSelectedPoint();
+
+	// Prevent selection of a non-existant point
+	// TODO - doesn't handle 'no point selected' case (ie. selected = -1)
+	if( selected >= numPoints ) view->setSelectedPoint(0);
+	if( selected <  0 )         view->setSelectedPoint(numPoints - 1);
 
 	view->damage(1);
 }

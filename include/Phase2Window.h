@@ -43,6 +43,9 @@ public:
 
 	inline void setWindow(Phase2Window *w)    { window = w; }
 	inline void setSelectedPoint(const int p) { selectedPoint = p; }
+
+	inline Phase2Window* getWindow() const { return window; }
+	inline int getSelectedPoint()    const { return selectedPoint; }
 };
 
 
