@@ -40,14 +40,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)\Build\$(Configuration)\</OutDir>
-    <IncludePath>.\libs\fltk\include;$(IncludePath)</IncludePath>
+    <IncludePath>.\libs\fltk\include;.\include;$(IncludePath)</IncludePath>
     <LibraryPath>.\libs\fltk\lib;$(LibraryPath)</LibraryPath>
     <IntDir>$(SolutionDir)\Intermediates\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)\Build\$(Configuration)\</OutDir>
-    <IncludePath>.\libs\fltk\include;$(IncludePath)</IncludePath>
+    <IncludePath>.\libs\fltk\include;.\include;$(IncludePath)</IncludePath>
     <LibraryPath>.\libs\fltk\lib;$(LibraryPath)</LibraryPath>
     <IntDir>$(SolutionDir)\Intermediates\$(Configuration)\</IntDir>
   </PropertyGroup>
@@ -102,6 +102,10 @@
     <ClCompile Include="framework\TrainFiles\Utilities\Pnt3f.cpp" />
     <ClCompile Include="framework\TrainFiles\Utilities\ShaderTools.cpp" />
     <ClCompile Include="framework\TrainFiles\World.cpp" />
+    <ClCompile Include="source\Callback.cpp" />
+    <ClCompile Include="source\CtrlPoint.cpp" />
+    <ClCompile Include="source\phase2.cpp" />
+    <ClCompile Include="source\Phase2Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework\TrainFiles\CallBacks.H" />
@@ -115,6 +119,9 @@
     <ClInclude Include="framework\TrainFiles\Utilities\Pnt3f.H" />
     <ClInclude Include="framework\TrainFiles\Utilities\ShaderTools.H" />
     <ClInclude Include="framework\TrainFiles\World.H" />
+    <ClInclude Include="include\Callback.h" />
+    <ClInclude Include="include\CtrlPoint.h" />
+    <ClInclude Include="include\Phase2Window.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

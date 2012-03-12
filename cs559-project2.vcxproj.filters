@@ -34,6 +34,18 @@
     <ClCompile Include="framework\TrainFiles\World.cpp">
       <Filter>framework\TrainFiles</Filter>
     </ClCompile>
+    <ClCompile Include="source\phase2.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Phase2Window.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\CtrlPoint.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Callback.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework\TrainFiles\Utilities\3DUtils.h">
@@ -68,6 +80,15 @@
     </ClInclude>
     <ClInclude Include="framework\TrainFiles\TrainWindow.H">
       <Filter>framework\TrainFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Phase2Window.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\CtrlPoint.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Callback.h">
+      <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

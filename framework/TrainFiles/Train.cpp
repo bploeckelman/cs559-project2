@@ -19,7 +19,8 @@
 #include <Fl/Fl.h>
 #pragma warning(pop)
 
-
+// Note : we don't want to use this entry point for phase-2
+/*
 int main(int, char**)
 {
 	printf("CS559 Train Assignment\n");
@@ -29,5 +30,5 @@ int main(int, char**)
 
 	Fl::run();
 }
-
+*/
 // $Header: /p/course/cs559-gleicher/private/CVS/TrainFiles/Train.cpp,v 1.2 2008/10/14 02:52:12 gleicher Exp $
