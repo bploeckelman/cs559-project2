@@ -72,10 +72,11 @@ int Phase2View::handle(int event)
 		focus(this);
 		break;
 	case FL_KEYBOARD : 
+		/* Note : use this format to process keyboard input
 		int k  = Fl::event_key();
 		int ks = Fl::event_state();
-		if( k == 'n' ) --selectedPoint;
-		if( k == 'p' ) ++selectedPoint;
+		if( k == 'a' ) ; // ...
+		*/
 		break;
 	}
 
@@ -84,16 +85,14 @@ int Phase2View::handle(int event)
 
 void Phase2View::draw()
 {
-	setupProjection();
-
 	glClearColor(0.f, 0.f, 0.3f, 0.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH);
 
-	glMatrixMode(GL_MODELVIEW);
+	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glRotatef(-90.f, 1.f, 0.f, 0.f);
-	
+	setupProjection();
+
 	// Draw the points
 	vector<CtrlPoint>::iterator it  = window->getPoints().begin();
 	vector<CtrlPoint>::iterator end = window->getPoints().end();
@@ -144,22 +143,42 @@ void Phase2View::pick()
 	}
 
 	// See how picking did back in drawing mode
-	// TODO -  buf[3] is always 1, picking isn't working
 	int hits = glRenderMode(GL_RENDER);
 	selectedPoint = hits ? buf[3] - 1 : -1;
 
-	cout << "Selected control point : " << selectedPoint << endl;
+	if( selectedPoint != -1 )
+	{
+		try { 
+			const CtrlPoint p(window->getPoints().at(selectedPoint));
+			cout << "Selected: "   << selectedPoint 
+				 << " at "         << p.pos()  
+				 << "oriented to " << p.orient() 
+				 << endl; 
+		} catch(std::out_of_range&) { 
+			cout << "Warning: point index (" 
+				 << selectedPoint 
+				 << ") out of range" 
+				 << endl;
+		}
+	} else {
+		cout << "Nothing selected..." << endl;
+	}
 }
 
 void Phase2View::setupProjection()
 {
 	const float aspect = static_cast<float>(w()) / static_cast<float>(h());
 	const float width  = (aspect >= 1) ? 110 : 110 * aspect;
-	const float height = (aspect >= 1) ? 110 * aspect : 110;
+	const float height = (aspect >= 1) ? 110 / aspect : 110;
 
 	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
+	// Note: no glLoadIdentity() here, caller clears projection (for picking)
 	glOrtho(-width, width, -height, height, 200, -200);
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glRotatef(-90.f, 1.f, 0.f, 0.f);
+
 	glViewport(0, 0, w(), h());
 }
 
@@ -219,13 +238,5 @@ Phase2Window::Phase2Window(const int x, const int y)
 
 void Phase2Window::damageMe()
 {
-	const int numPoints = static_cast<int>(points.size());
-	const int selected  = view->getSelectedPoint();
-
-	// Prevent selection of a non-existant point
-	// TODO - doesn't handle 'no point selected' case (ie. selected = -1)
-	if( selected >= numPoints ) view->setSelectedPoint(0);
-	if( selected <  0 )         view->setSelectedPoint(numPoints - 1);
-
 	view->damage(1);
 }
