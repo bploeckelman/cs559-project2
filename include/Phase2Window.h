@@ -23,6 +23,15 @@
 
 class Phase2Window;
 
+
+/* ==================================================================
+ * Phase2View class
+ *
+ * This class is the main fltk OpenGL view for the program, 
+ * it consists of a pointer to its fltk parent window
+ * and it tracks which of a group of control points is selected
+ * ==================================================================
+ */
 class Phase2View : public Fl_Gl_Window
 {
 private:
@@ -49,25 +58,39 @@ public:
 };
 
 
+/* ==================================================================
+ * Phase2Window class
+ *
+ * This class is the main fltk window for the program, 
+ * it consists of an fltk OpenGL view, fltk ui widgets, 
+ * and a group of control points.
+ * ==================================================================
+ */
 class Phase2Window : public Fl_Double_Window 
 {
 private:
 
-	// The opengl view
 	Phase2View *view;
 
-	// FlTk Widgets
 	Fl_Group  *widgets;
 	Fl_Button *animateButton;
 
 	std::vector<CtrlPoint> points;
 
+	bool animating;
+	float rotation;
+
 public:
 
-	Phase2Window(const int x=50, const int y=50);
+	Phase2Window(const int x=100, const int y=50);
 
 	void damageMe();
 
-	inline std::vector<CtrlPoint>& getPoints() { return points; }
+	inline bool isAnimating() const { return animating; }
+	inline void toggleAnimating()   { animating = !animating; }
 
+	inline float getRotation() const  { return rotation; }
+	inline void  setRotation(float r) { rotation = r; }
+
+	inline std::vector<CtrlPoint>& getPoints() { return points; }
 };

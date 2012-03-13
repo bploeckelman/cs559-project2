@@ -11,6 +11,8 @@
 #include "Callback.h"
 #include "CtrlPoint.h"
 
+#include "TrainFiles/Utilities/3DUtils.h"	// for drawCube()
+
 #include <windows.h>
 #define WIN32_LEAN_AND_MEAN
 
@@ -40,12 +42,18 @@ using std::cout;
 using std::endl;
 
 
+/* ==================================================================
+ * Phase2View class
+ * ==================================================================
+ */
+
 Phase2View::Phase2View(int x, int y, int w, int h, const char *l)
 	: Fl_Gl_Window(x,y,w,h,l)
 {
 	mode( FL_RGB | FL_ALPHA | FL_DEPTH | FL_DOUBLE );
 }
 
+/* handle() - Handles user input --------------------------------- */
 int Phase2View::handle(int event)
 {
 	// Remember what button was used
@@ -83,6 +91,7 @@ int Phase2View::handle(int event)
 	return Fl_Gl_Window::handle(event);
 }
 
+/* draw() - Draws to the screen ---------------------------------- */
 void Phase2View::draw()
 {
 	glClearColor(0.f, 0.f, 0.3f, 0.f);
@@ -105,8 +114,27 @@ void Phase2View::draw()
 
 		it->draw();
 	}
+
+	// Draw the orbiting shape
+	try { 
+		const CtrlPoint point(window->getPoints().at(selectedPoint));
+		const Vec3f p(point.pos());
+		const Vec3f r(10.f, 0.f, 10.f);
+
+		glColor3ub(30, 240, 30);
+		glPushMatrix();
+			glTranslatef(p.x(), p.y(), p.z());
+			glRotatef(window->getRotation(), 0.f, 1.f, 0.f);
+			drawCube(r.x(), r.y(), r.z(), 2.f);
+		glPopMatrix();
+	} catch(std::out_of_range&) { 
+		// only report an error on unexpected behavior, not 'nothing selected'
+		if( selectedPoint != -1 ) 
+			cout << "Warning: index "<<selectedPoint<<" out of range" << endl;
+	}	
 }
 
+/* pick() - Performs OpenGL picking ------------------------------ */
 void Phase2View::pick()
 {
 	// Make sure we're current so we can use OpenGL
@@ -155,16 +183,14 @@ void Phase2View::pick()
 				 << "oriented to " << p.orient() 
 				 << endl; 
 		} catch(std::out_of_range&) { 
-			cout << "Warning: point index (" 
-				 << selectedPoint 
-				 << ") out of range" 
-				 << endl;
+			cout << "Warning: index "<<selectedPoint<<" out of range" << endl;
 		}
 	} else {
 		cout << "Nothing selected..." << endl;
 	}
 }
 
+/* setupProject() - Sets up projection & modelview matrices ------ */
 void Phase2View::setupProjection()
 {
 	const float aspect = static_cast<float>(w()) / static_cast<float>(h());
@@ -183,15 +209,19 @@ void Phase2View::setupProjection()
 }
 
 
-// --------------------------------------------------------------
-
+/* ==================================================================
+ * Phase2Window class
+ * ==================================================================
+ */
 
 Phase2Window::Phase2Window(const int x, const int y) 
-	: Fl_Double_Window(x,y,800,600,"Train Project - Phase 2")
+	: Fl_Double_Window(x, y, 800, 600, "Train Project - Phase 2")
 	, view(nullptr)
 	, widgets(nullptr)
 	, animateButton(nullptr)
 	, points()
+	, animating(false)
+	, rotation(0.f)
 {
 	// Make all the widgets
 	begin();
@@ -209,9 +239,9 @@ Phase2Window::Phase2Window(const int x, const int y)
 		// Create the animate button
 		animateButton = new Fl_Button(605, 5, 60, 20, "Animate");
 		animateButton->type(FL_TOGGLE_BUTTON);
-		animateButton->value(0); //initially off
+		animateButton->value(0);                     // initially off
 		animateButton->selection_color((Fl_Color)3); // yellow when pressed
-		animateButton->callback((Fl_Callback*)damageCB, this);
+		animateButton->callback((Fl_Callback*)animateButtonCallback, this);
 
 		// Create a phantom widget to help resize things
 		Fl_Box *resizeBox = new Fl_Box(600, 595, 200, 5);
@@ -232,10 +262,10 @@ Phase2Window::Phase2Window(const int x, const int y)
 	}
 
 	// Setup idle callback
-	Fl::add_idle((void (*)(void*))idleCB, this);
+	Fl::add_idle((void (*)(void*))idleCallback, this);
 }
 
-
+/* damageMe() - Called to force an update of the window ---------- */
 void Phase2Window::damageMe()
 {
 	view->damage(1);

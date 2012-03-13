@@ -40,14 +40,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)\Build\$(Configuration)\</OutDir>
-    <IncludePath>.\libs\fltk\include;.\include;$(IncludePath)</IncludePath>
+    <IncludePath>.\libs\fltk\include;.\include;.\framework;$(IncludePath)</IncludePath>
     <LibraryPath>.\libs\fltk\lib;$(LibraryPath)</LibraryPath>
     <IntDir>$(SolutionDir)\Intermediates\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)\Build\$(Configuration)\</OutDir>
-    <IncludePath>.\libs\fltk\include;.\include;$(IncludePath)</IncludePath>
+    <IncludePath>.\libs\fltk\include;.\include;.\framework;$(IncludePath)</IncludePath>
     <LibraryPath>.\libs\fltk\lib;$(LibraryPath)</LibraryPath>
     <IntDir>$(SolutionDir)\Intermediates\$(Configuration)\</IntDir>
   </PropertyGroup>

@@ -13,17 +13,15 @@
 #include <iostream>
 #include <time.h>
 
+using std::cout;
+using std::endl;
 
-void damageCB(Fl_Widget *widget, Phase2Window *window)
+
+void idleCallback(Phase2Window *window)
 {
-	if( window == nullptr || widget == nullptr )
-		std::cout << "Error in damage callback, null pointer passed." << std::endl;
+	if( window == nullptr )
+		cout << "Error: idleCallback - null pointer passed." << endl;
 
-	window->damageMe();
-}
-
-void idleCB(Phase2Window *window)
-{
 	static const unsigned long interval = CLOCKS_PER_SEC / 30;
 	static unsigned long lastRedraw = 0;
 
@@ -32,6 +30,21 @@ void idleCB(Phase2Window *window)
 	if( delta > interval ) 
 	{
 		lastRedraw = clock();
+
+		static const float rotationStep = 2.f;
+		if( window->isAnimating() )
+			window->setRotation(window->getRotation() + rotationStep);
+
 		window->damageMe();
 	}
+}
+
+void animateButtonCallback(Fl_Widget *widget, Phase2Window *window)
+{
+	if( window == nullptr || widget == nullptr )
+		cout << "Error: damageCallback - null pointer passed." << endl;
+
+	window->toggleAnimating();
+
+	window->damageMe();
 }
