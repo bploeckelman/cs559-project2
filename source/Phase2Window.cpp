@@ -262,7 +262,7 @@ Phase2Window::Phase2Window(const int x, const int y)
 	}
 
 	// Setup idle callback
-	Fl::add_idle((void (*)(void*))idleCallback, this);
+	Fl::add_idle(idleCallback, this); 
 }
 
 /* damageMe() - Called to force an update of the window ---------- */

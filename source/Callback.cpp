@@ -17,16 +17,19 @@ using std::cout;
 using std::endl;
 
 
-void idleCallback(Phase2Window *window)
+void idleCallback(void *pData)
 {
-	if( window == nullptr )
-		cout << "Error: idleCallback - null pointer passed." << endl;
-
 	static const unsigned long interval = CLOCKS_PER_SEC / 30;
 	static unsigned long lastRedraw = 0;
 
-	const unsigned long delta = clock() - lastRedraw;
+	if( pData == nullptr ) 
+	{ 
+		cout << "Error: idleCallback - null pointer passed." << endl;
+		return;
+	}
+	Phase2Window *window = reinterpret_cast<Phase2Window*>(pData);
 
+	const unsigned long delta = clock() - lastRedraw;
 	if( delta > interval ) 
 	{
 		lastRedraw = clock();
