@@ -121,6 +121,7 @@
     <ClInclude Include="framework\TrainFiles\World.H" />
     <ClInclude Include="include\Callback.h" />
     <ClInclude Include="include\CtrlPoint.h" />
+    <ClInclude Include="include\MathUtils.h" />
     <ClInclude Include="include\Phase2Window.h" />
     <ClInclude Include="include\Vec3f.h" />
   </ItemGroup>
