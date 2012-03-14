@@ -22,6 +22,7 @@
 #pragma warning(push)
 #pragma warning(disable:4312)
 #pragma warning(disable:4311)
+#pragma warning(disable:4099)
 #include <Fl/fl.h>
 #include <Fl/Fl_Double_Window.h>
 #include <Fl/Fl_Gl_Window.h>
@@ -115,19 +116,31 @@ void Phase2View::draw()
 		it->draw();
 	}
 
-	// Draw the orbiting shape
+	// Draw the orbiting shapes, 3 cubes at different distances orbiting at different speeds
 	if( selectedPoint != -1 )
 	{
 		try { 
 			const CtrlPoint point(window->getPoints().at(selectedPoint));
 			const Vec3f p(point.pos());
-			const Vec3f r(10.f, 0.f, 10.f);
+			const Vec3f r(5.f, 0.f, 5.f);
+			const Vec3f r2(10.f, 0.f, 10.f);
+			const Vec3f r3(15.f, 0.f, 15.f);
 	
-			glColor3ub(30, 240, 30);
+			glColor3ub(0, 240, 255);
 			glPushMatrix();
 				glTranslatef(p.x(), p.y(), p.z());
 				glRotatef(window->getRotation(), 0.f, 1.f, 0.f);
-				drawCube(r.x(), r.y(), r.z(), 2.f);
+				drawCube(r.x(), r.y(), r.z(), 1.f);
+			glPopMatrix();
+			glPushMatrix();
+				glTranslatef(p.x(), p.y(), p.z());
+				glRotatef(-window->getRotation()*2, 0.f, 1.f, 0.f);
+				drawCube(r2.x(), r2.y(), r2.z(), 2.f);
+			glPopMatrix();
+			glPushMatrix();
+				glTranslatef(p.x(), p.y(), p.z());
+				glRotatef(window->getRotation()*4, 0.f, 1.f, 0.f);
+				drawCube(r3.x(), r3.y(), r3.z(), 3.f);
 			glPopMatrix();
 		} catch(std::out_of_range&) { 
 			cout << "Warning: index "<<selectedPoint<<" out of range" << endl;
