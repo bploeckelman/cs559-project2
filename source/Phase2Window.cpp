@@ -116,22 +116,23 @@ void Phase2View::draw()
 	}
 
 	// Draw the orbiting shape
-	try { 
-		const CtrlPoint point(window->getPoints().at(selectedPoint));
-		const Vec3f p(point.pos());
-		const Vec3f r(10.f, 0.f, 10.f);
-
-		glColor3ub(30, 240, 30);
-		glPushMatrix();
-			glTranslatef(p.x(), p.y(), p.z());
-			glRotatef(window->getRotation(), 0.f, 1.f, 0.f);
-			drawCube(r.x(), r.y(), r.z(), 2.f);
-		glPopMatrix();
-	} catch(std::out_of_range&) { 
-		// only report an error on unexpected behavior, not 'nothing selected'
-		if( selectedPoint != -1 ) 
+	if( selectedPoint != -1 )
+	{
+		try { 
+			const CtrlPoint point(window->getPoints().at(selectedPoint));
+			const Vec3f p(point.pos());
+			const Vec3f r(10.f, 0.f, 10.f);
+	
+			glColor3ub(30, 240, 30);
+			glPushMatrix();
+				glTranslatef(p.x(), p.y(), p.z());
+				glRotatef(window->getRotation(), 0.f, 1.f, 0.f);
+				drawCube(r.x(), r.y(), r.z(), 2.f);
+			glPopMatrix();
+		} catch(std::out_of_range&) { 
 			cout << "Warning: index "<<selectedPoint<<" out of range" << endl;
-	}	
+		}	
+	}
 }
 
 /* pick() - Performs OpenGL picking ------------------------------ */

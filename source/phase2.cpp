@@ -16,6 +16,7 @@
 #pragma warning(push)
 #pragma warning(disable:4312)
 #pragma warning(disable:4311)
+#pragma warning(disable:4099)
 #include <Fl/Fl.h>
 #pragma warning(pop)
 
