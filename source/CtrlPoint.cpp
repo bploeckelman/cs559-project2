@@ -2,25 +2,12 @@
  * CtrlPoint.cpp
  */
 #include "CtrlPoint.h"
-#include "Vec3f.h"
+#include "MathUtils.h"
 
 #include <Windows.h>
 #define WIN32_LEAN_AND_MEAN
 
 #include <GL/GL.h>
-
-// #include <math.h>
-// Frowny face at Microsoft for not including constants from math.h
-// without having to specify _USE_MATH_CONSTANTS... jerks...
-// TODO - remove this and use constants in some header
-#define M_PI       3.141592653f
-
-// TODO - move this elsewhere and include it
-float radToDeg(const float rad)
-{
-	static const float factor = 180.f / M_PI;
-	return rad * factor;
-}
 
 
 CtrlPoint::CtrlPoint(const Vec3f& pos, const Vec3f& orient)
@@ -97,6 +84,6 @@ void CtrlPoint::draw() const
 bool CtrlPoint::operator==(const CtrlPoint& other)
 {
 	// TODO : would a compare by address work?
-	// or should we compare by pos and orient? (once they are in place)
+	// or should we compare by pos and orient? 
 	return (this == &other) ? true : false;
 }

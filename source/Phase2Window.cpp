@@ -10,6 +10,7 @@
 #include "Phase2Window.h"
 #include "Callback.h"
 #include "CtrlPoint.h"
+#include "MathUtils.h"
 
 #include "TrainFiles/Utilities/3DUtils.h"	// for drawCube()
 
@@ -30,10 +31,6 @@
 #include <Fl/Fl_Group.h>
 #include <Fl/Fl_Button.h>
 #pragma warning(pop)
-
-// TODO - remove these and use constants in some header
-#define M_PI       3.141592653f
-#define M_2PI      2.f * M_PI
 
 #include <iostream>
 #include <vector>
@@ -266,9 +263,9 @@ Phase2Window::Phase2Window(const int x, const int y)
 	end();
 
 	// Add initial points
-	const float step = M_2PI / 10.f;
+	const float step = TWO_PI / 10.f;
 	const float radius = 60.f;
-	for(float i = 0.f; i < M_2PI; i += step)
+	for(float i = 0.f; i < TWO_PI; i += step)
 	{
 		const Vec3f     pos(cosf(i), 0.f, sinf(i));
 		const CtrlPoint point(pos * radius);

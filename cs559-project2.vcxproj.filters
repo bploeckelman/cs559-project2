@@ -93,6 +93,9 @@
     <ClInclude Include="include\Vec3f.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\MathUtils.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="framework\TrainFiles\TrackFiles\loop0.txt">
