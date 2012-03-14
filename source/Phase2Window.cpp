@@ -12,6 +12,7 @@
 #include "CtrlPoint.h"
 #include "MathUtils.h"
 
+#include "TrainFiles/Utilities/ArcBallCam.H"
 #include "TrainFiles/Utilities/3DUtils.h"	// for drawCube()
 
 #include <windows.h>
@@ -47,13 +48,21 @@ using std::endl;
 
 Phase2View::Phase2View(int x, int y, int w, int h, const char *l)
 	: Fl_Gl_Window(x,y,w,h,l)
+	, arcballCam()
 {
 	mode( FL_RGB | FL_ALPHA | FL_DEPTH | FL_DOUBLE );
+	resetArcball();
 }
 
 /* handle() - Handles user input --------------------------------- */
 int Phase2View::handle(int event)
 {
+	if( useArcball ) 
+	{
+		if( arcballCam.handle(event) )
+			return 1;
+	}
+
 	// Remember what button was used
 	static int lastPush;
 
@@ -78,11 +87,11 @@ int Phase2View::handle(int event)
 		focus(this);
 		break;
 	case FL_KEYBOARD : 
-		/* Note : use this format to process keyboard input
+		//* Note : use this format to process keyboard input
 		int k  = Fl::event_key();
 		int ks = Fl::event_state();
-		if( k == 'a' ) ; // ...
-		*/
+		if( k == ' ' ) toggleUseArcball(); // ...
+		//*/
 		break;
 	}
 
@@ -99,19 +108,6 @@ void Phase2View::draw()
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	setupProjection();
-
-	// Draw the points
-	vector<CtrlPoint>::iterator it  = window->getPoints().begin();
-	vector<CtrlPoint>::iterator end = window->getPoints().end();
-	for(int i = 0; it != end; ++it, ++i)
-	{
-		if( i == selectedPoint )
-			glColor3ub(240, 240, 30);
-		else 
-			glColor3ub(240, 60, 60);
-
-		it->draw();
-	}
 
 	// Draw the orbiting shapes, 3 cubes at different distances orbiting at different speeds
 	if( selectedPoint != -1 )
@@ -142,6 +138,19 @@ void Phase2View::draw()
 		} catch(std::out_of_range&) { 
 			cout << "Warning: index "<<selectedPoint<<" out of range" << endl;
 		}	
+	}
+
+	// Draw the points
+	vector<CtrlPoint>::iterator it  = window->getPoints().begin();
+	vector<CtrlPoint>::iterator end = window->getPoints().end();
+	for(int i = 0; it != end; ++it, ++i)
+	{
+		if( i == selectedPoint )
+			glColor3ub(240, 240, 30);
+		else 
+			glColor3ub(250, 20, 20);
+
+		it->draw();
 	}
 }
 
@@ -204,6 +213,12 @@ void Phase2View::pick()
 /* setupProject() - Sets up projection & modelview matrices ------ */
 void Phase2View::setupProjection()
 {
+	if( useArcball )
+	{
+		arcballCam.setProjection(false);
+		return;
+	}
+
 	const float aspect = static_cast<float>(w()) / static_cast<float>(h());
 	const float width  = (aspect >= 1) ? 110 : 110 * aspect;
 	const float height = (aspect >= 1) ? 110 / aspect : 110;
@@ -217,6 +232,11 @@ void Phase2View::setupProjection()
 	glRotatef(-90.f, 1.f, 0.f, 0.f);
 
 	glViewport(0, 0, w(), h());
+}
+
+void Phase2View::resetArcball()
+{
+	arcballCam.setup(this, 40.f, 250.f, 0.2f, 0.4f, 0.f);
 }
 
 

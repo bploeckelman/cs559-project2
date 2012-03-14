@@ -10,6 +10,8 @@
  */
 #include "CtrlPoint.h"
 
+#include "TrainFiles/Utilities/ArcBallCam.H"
+
 #pragma warning(push)
 #pragma warning(disable:4312)
 #pragma warning(disable:4311)
@@ -39,6 +41,10 @@ private:
 	Phase2Window *window;
 	int selectedPoint;
 
+	ArcBallCam arcballCam;
+	bool useArcball;
+
+	void resetArcball();
 	void setupProjection();
 
 public:
@@ -49,6 +55,8 @@ public:
 	virtual void draw();
 
 	void pick();
+
+	inline void toggleUseArcball() { useArcball = !useArcball; }
 
 	inline void setWindow(Phase2Window *w)    { window = w; }
 	inline void setSelectedPoint(const int p) { selectedPoint = p; }

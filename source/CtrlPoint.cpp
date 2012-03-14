@@ -28,7 +28,7 @@ void CtrlPoint::draw() const
 
 		float theta2 = -radToDeg(acos(_orient.y()));
 		glRotatef(theta2,0,0,1);
-
+		
 		glBegin(GL_QUADS);
 			glNormal3f( 0,0,1);
 			glVertex3f( size, size, size);
@@ -62,6 +62,8 @@ void CtrlPoint::draw() const
 			glVertex3f(-size,-size,-size);
 			glVertex3f(-size,-size, size);
 		glEnd();
+
+		glColor3ub(252, 209, 22);
 
 		glBegin(GL_TRIANGLE_FAN);
 			glNormal3f(0,1.0f,0);
