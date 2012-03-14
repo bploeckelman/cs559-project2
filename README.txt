@@ -17,13 +17,11 @@ If you click on the animate button, the three smaller cubes orbit the
  highlighted control point. If you click the animate button again, the
  animation stops.
 
-You can change which control point is highlighted by using the mouse.
+Controls: 
+---------
+Left mouse button - select a control point
+Right mouse button - if in ArcBallCam mode, clicking and dragging reorients the view
+Space key - toggles between ArcBallCam mode and top-down view
 
-If no control point is clicked then there is no selection made and all the
- control points are the base (unselected color)
-
-There should also be a console output window that gives you the point location
- of any control point you click on in an (x,y,z) format.
-
-The console output also displays if you click on somewhere in the drawing
- window that is not a control point.
+There is console output that prints the selected point's position and orientation, 
+or prints that nothing is selected if that is the case.
