@@ -25,5 +25,4 @@ public:
 	inline const Vec3f& orient() const { return _orient; }
 
 	bool operator==(const CtrlPoint& other);
-
 };

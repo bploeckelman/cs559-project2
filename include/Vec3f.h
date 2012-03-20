@@ -103,6 +103,14 @@ public:
 		return *this;
 	}
 
+	// Equality operator
+	inline bool operator==(const Vec3f& other)
+	{
+		return (this->_x == other._x 
+			 && this->_y == other._y
+			 && this->_z == other._z);
+	}
+
 	// Print components to a given ostream (defaults to cout)
 	inline void print(std::ostream& out=std::cout) const 
 	{

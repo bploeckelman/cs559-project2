@@ -104,6 +104,7 @@
     <ClCompile Include="framework\TrainFiles\World.cpp" />
     <ClCompile Include="source\Callback.cpp" />
     <ClCompile Include="source\CtrlPoint.cpp" />
+    <ClCompile Include="source\Curve.cpp" />
     <ClCompile Include="source\phase2.cpp" />
     <ClCompile Include="source\Phase2Window.cpp" />
   </ItemGroup>
@@ -121,6 +122,7 @@
     <ClInclude Include="framework\TrainFiles\World.H" />
     <ClInclude Include="include\Callback.h" />
     <ClInclude Include="include\CtrlPoint.h" />
+    <ClInclude Include="include\Curve.h" />
     <ClInclude Include="include\MathUtils.h" />
     <ClInclude Include="include\Phase2Window.h" />
     <ClInclude Include="include\Vec3f.h" />

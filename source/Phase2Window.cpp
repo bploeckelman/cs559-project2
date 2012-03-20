@@ -51,7 +51,70 @@ Phase2View::Phase2View(int x, int y, int w, int h, const char *l)
 	, arcballCam()
 {
 	mode( FL_RGB | FL_ALPHA | FL_DEPTH | FL_DOUBLE );
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+	glLineWidth(2.f);
 	resetArcball();
+}
+
+/* draw() - Draws to the screen ---------------------------------- */
+void Phase2View::draw()
+{
+	glClearColor(0.f, 0.f, 0.2f, 0.f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_DEPTH);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	setupProjection();
+
+	// Draw the orbiting shapes, 3 cubes at different distances orbiting at different speeds
+	if( selectedPoint != -1 )
+	{
+		try { 
+			const CtrlPoint point(window->getPoints().at(selectedPoint));
+			const Vec3f p(point.pos());
+			const Vec3f r(5.f, 0.f, 5.f);
+			const Vec3f r2(10.f, 0.f, 10.f);
+			const Vec3f r3(15.f, 0.f, 15.f);
+	
+			glColor3ub(0, 240, 255);
+			glPushMatrix();
+				glTranslatef(p.x(), p.y(), p.z());
+				glRotatef(window->getRotation(), 0.f, 1.f, 0.f);
+				drawCube(r.x(), r.y(), r.z(), 1.f);
+			glPopMatrix();
+			glPushMatrix();
+				glTranslatef(p.x(), p.y(), p.z());
+				glRotatef(-window->getRotation()*2, 0.f, 1.f, 0.f);
+				drawCube(r2.x(), r2.y(), r2.z(), 2.f);
+			glPopMatrix();
+			glPushMatrix();
+				glTranslatef(p.x(), p.y(), p.z());
+				glRotatef(window->getRotation()*4, 0.f, 1.f, 0.f);
+				drawCube(r3.x(), r3.y(), r3.z(), 3.f);
+			glPopMatrix();
+		} catch(std::out_of_range&) { 
+			cout << "Warning: index "<<selectedPoint<<" out of range" << endl;
+		}	
+	}
+
+	// Draw the points
+	glColor3ub(250, 250, 250);
+	window->getCurve().draw();
+	/*
+	vector<CtrlPoint>::iterator it  = window->getPoints().begin();
+	vector<CtrlPoint>::iterator end = window->getPoints().end();
+	for(int i = 0; it != end; ++it, ++i)
+	{
+		if( i == selectedPoint )
+			glColor3ub(240, 240, 30);
+		else 
+			glColor3ub(250, 20, 20);
+
+		it->draw();
+	}
+	*/
 }
 
 /* handle() - Handles user input --------------------------------- */
@@ -96,62 +159,6 @@ int Phase2View::handle(int event)
 	}
 
 	return Fl_Gl_Window::handle(event);
-}
-
-/* draw() - Draws to the screen ---------------------------------- */
-void Phase2View::draw()
-{
-	glClearColor(0.f, 0.f, 0.3f, 0.f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glEnable(GL_DEPTH);
-
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	setupProjection();
-
-	// Draw the orbiting shapes, 3 cubes at different distances orbiting at different speeds
-	if( selectedPoint != -1 )
-	{
-		try { 
-			const CtrlPoint point(window->getPoints().at(selectedPoint));
-			const Vec3f p(point.pos());
-			const Vec3f r(5.f, 0.f, 5.f);
-			const Vec3f r2(10.f, 0.f, 10.f);
-			const Vec3f r3(15.f, 0.f, 15.f);
-	
-			glColor3ub(0, 240, 255);
-			glPushMatrix();
-				glTranslatef(p.x(), p.y(), p.z());
-				glRotatef(window->getRotation(), 0.f, 1.f, 0.f);
-				drawCube(r.x(), r.y(), r.z(), 1.f);
-			glPopMatrix();
-			glPushMatrix();
-				glTranslatef(p.x(), p.y(), p.z());
-				glRotatef(-window->getRotation()*2, 0.f, 1.f, 0.f);
-				drawCube(r2.x(), r2.y(), r2.z(), 2.f);
-			glPopMatrix();
-			glPushMatrix();
-				glTranslatef(p.x(), p.y(), p.z());
-				glRotatef(window->getRotation()*4, 0.f, 1.f, 0.f);
-				drawCube(r3.x(), r3.y(), r3.z(), 3.f);
-			glPopMatrix();
-		} catch(std::out_of_range&) { 
-			cout << "Warning: index "<<selectedPoint<<" out of range" << endl;
-		}	
-	}
-
-	// Draw the points
-	vector<CtrlPoint>::iterator it  = window->getPoints().begin();
-	vector<CtrlPoint>::iterator end = window->getPoints().end();
-	for(int i = 0; it != end; ++it, ++i)
-	{
-		if( i == selectedPoint )
-			glColor3ub(240, 240, 30);
-		else 
-			glColor3ub(250, 20, 20);
-
-		it->draw();
-	}
 }
 
 /* pick() - Performs OpenGL picking ------------------------------ */
@@ -251,13 +258,14 @@ Phase2Window::Phase2Window(const int x, const int y)
 	, widgets(nullptr)
 	, animateButton(nullptr)
 	, points()
+	, curve(lines)
 	, animating(false)
 	, rotation(0.f)
 {
 	// Make all the widgets
 	begin();
 	{
-		// Create the opengl view
+		// Create the OpenGL view
 		view = new Phase2View(5, 5, 590, 590);
 		view->setWindow(this);
 		view->setSelectedPoint(0);
@@ -290,6 +298,7 @@ Phase2Window::Phase2Window(const int x, const int y)
 		const Vec3f     pos(cosf(i), 0.f, sinf(i));
 		const CtrlPoint point(pos * radius);
 		points.push_back(point);
+		curve.addControlPoint(point);
 	}
 
 	// Setup idle callback
@@ -301,3 +310,5 @@ void Phase2Window::damageMe()
 {
 	view->damage(1);
 }
+
+inline const Curve& Phase2Window::getCurve() const { return curve; }

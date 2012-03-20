@@ -8,6 +8,7 @@
  * Authors: Brian Ploeckelman
  *          Matthew Bayer
  */
+#include "Curve.h"
 #include "CtrlPoint.h"
 
 #include "TrainFiles/Utilities/ArcBallCam.H"
@@ -51,8 +52,8 @@ public:
 
 	Phase2View(int x, int y, int w, int h, const char *l=0);
 
-	virtual int handle(int event);
 	virtual void draw();
+	virtual int handle(int event);
 
 	void pick();
 
@@ -84,6 +85,7 @@ private:
 	Fl_Button *animateButton;
 
 	std::vector<CtrlPoint> points;
+	Curve curve;
 
 	bool animating;
 	float rotation;
@@ -101,4 +103,5 @@ public:
 	inline void  setRotation(float r) { rotation = r; }
 
 	inline std::vector<CtrlPoint>& getPoints() { return points; }
+	const Curve& getCurve() const;
 };

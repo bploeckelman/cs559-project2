@@ -46,6 +46,9 @@
     <ClCompile Include="source\Callback.cpp">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="source\Curve.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework\TrainFiles\Utilities\3DUtils.h">
@@ -94,6 +97,9 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\MathUtils.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Curve.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

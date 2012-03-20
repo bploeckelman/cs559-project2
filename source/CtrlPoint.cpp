@@ -28,6 +28,11 @@ void CtrlPoint::draw() const
 
 		float theta2 = -radToDeg(acos(_orient.y()));
 		glRotatef(theta2,0,0,1);
+
+		// TODO: this has to change 
+		// if this point is selected or not
+		// pass flag into method?
+		glColor3ub(240, 20, 20);
 		
 		glBegin(GL_QUADS);
 			glNormal3f( 0,0,1);
@@ -85,7 +90,6 @@ void CtrlPoint::draw() const
 
 bool CtrlPoint::operator==(const CtrlPoint& other)
 {
-	// TODO : would a compare by address work?
-	// or should we compare by pos and orient? 
-	return (this == &other) ? true : false;
+	return (_pos    == other._pos
+		 && _orient == other._orient);
 }
