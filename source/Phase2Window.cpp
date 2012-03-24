@@ -234,7 +234,7 @@ Phase2Window::Phase2Window(const int x, const int y)
 	, widgets(nullptr)
 	, animateButton(nullptr)
 	, points()
-	, curve(lines)
+	, curve(catmull)
 	, animating(true)
 	, rotation(0.f)
 {
@@ -267,7 +267,7 @@ Phase2Window::Phase2Window(const int x, const int y)
 	end();
 
 	// Add initial points
-	const float step = TWO_PI / 5.f;
+	const float step = TWO_PI / 10.f;
 	const float radius = 30.f;
 	for(float i = 0.f; i < TWO_PI; i += step)
 	{

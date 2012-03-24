@@ -8,6 +8,7 @@ enum CurveType {
 	points = 0, 
 	lines,
 	catmull,
+	hermite,
 	bspline
 };
 
@@ -34,10 +35,10 @@ public:
 		, control2(control2)
 	{ }
 
-	virtual void draw() const = 0;
+	virtual void draw() = 0;
 
-	virtual Vec3f getPosition  (const float t) = 0;
-	virtual Vec3f getDirection (const float t) = 0;;
+	virtual Vec3f getPosition  (float t) = 0;
+	virtual Vec3f getDirection (float t) = 0;;
 
 	int	      getNumber    () const;
 	CurveType getCurveType () const;
@@ -59,10 +60,10 @@ public:
 		: CurveSegment(number, lines, startPoint, endPoint, control1, control2) 
 	{ }
 
-	void draw() const;
+	void draw();
 
-	Vec3f getPosition(const float t);
-	Vec3f getDirection(const float t);
+	Vec3f getPosition(float t);
+	Vec3f getDirection(float t);
 };
 
 
@@ -75,8 +76,8 @@ public:
 		: CurveSegment(number, catmull, startPoint, endPoint, control1, control2) 
 	{ }
 
-	void draw() const;
+	void draw();
 
-	Vec3f getPosition(const float t);
-	Vec3f getDirection(const float t);
+	Vec3f getPosition(float t);
+	Vec3f getDirection(float t);
 };

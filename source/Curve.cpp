@@ -56,7 +56,7 @@ Vec3f Curve::getPosition( const float t )
 			<< "t=" << t << "  seg#=" << segmentNumber << "  " 
 			<< "#segs=" << segments.size() << endl;
 		cout << ss.str();
-//		throw NoSuchPoint(ss.str());
+		throw NoSuchPoint(ss.str());
 	}
 }
 
@@ -73,7 +73,7 @@ Vec3f Curve::getDirection( const float t )
 			<< "t=" << t << "  seg#=" << segmentNumber << "  " 
 			<< "#segs=" << segments.size() << endl;
 		cout << ss.str();
-//		throw NoSuchPoint(ss.str());		
+		throw NoSuchPoint(ss.str());		
 	}
 }
 
@@ -128,7 +128,39 @@ void Curve::regenerateLineSegments()
 
 void Curve::regenerateCatmullSegments()
 {
-	throw std::exception("The method or operation is not implemented.");
+	if( controlPoints.size() < 4 )
+		return;
+
+	auto it  = controlPoints.begin();
+	auto end = controlPoints.end();
+	for(int i = 0; it != end; ++i, ++it)
+	{
+		if( i == 0 )
+		{
+			const CtrlPoint& c1(*(end - 1));
+			const CtrlPoint& p0(*(it));
+			const CtrlPoint& p1(*(it + 1));
+			const CtrlPoint& c2(*(it + 2));
+			segments.push_back(
+				new CatmullRomSegment(i, p0.pos(), p1.pos(), c1.pos(), c2.pos()) );
+		} else {
+			auto next1 = it + 1;
+			if( next1 >= end )
+				next1 = controlPoints.begin();
+
+			auto next2 = next1 + 1; 
+			if( next2 >= end )
+				next2 = controlPoints.begin();
+
+			const CtrlPoint& c1(*(it - 1));
+			const CtrlPoint& p0(*(it));
+			const CtrlPoint& p1(*next1);
+			const CtrlPoint& c2(*next2);
+
+			segments.push_back(
+				new CatmullRomSegment(i, p0.pos(), p1.pos(), c1.pos(), c2.pos()) );
+		}
+	}
 }
 
 void Curve::regenerateBSplineSegments()
@@ -199,7 +231,8 @@ void Curve::drawPoints() const
 }
 
 void Curve::drawSegment( const int number )
-{	try {
+{
+	try {
 		segments.at(number)->draw();
 	} catch(std::out_of_range&) {
 		stringstream ss;

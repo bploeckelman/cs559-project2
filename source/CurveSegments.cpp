@@ -15,6 +15,7 @@ std::string CurveTypeNames[] = {
 	"Points", 
 	"Lines",
 	"Catmull-Rom",
+	"Hermite",
 	"B-Spline"
 };
 
@@ -29,7 +30,7 @@ Vec3f CurveSegment::getControl2   () const { return control2; }
 
 
 
-void LineSegment::draw() const
+void LineSegment::draw() 
 {
 	glBegin(GL_LINES);
 
@@ -39,29 +40,67 @@ void LineSegment::draw() const
 	glEnd();
 }
 
-Vec3f LineSegment::getPosition( const float t )
+Vec3f LineSegment::getPosition( float t )
 {
 	return lerp(t, startPoint, endPoint);
 }
 
-Vec3f LineSegment::getDirection( const float t )
+Vec3f LineSegment::getDirection( float t )
 {
-//	return (endPoint - startPoint).normalize();
-	return (endPoint - startPoint);
+	return (endPoint - startPoint); //.normalize();
 }
 
 
-void CatmullRomSegment::draw() const
+void CatmullRomSegment::draw() 
 {
-	throw std::runtime_error("CatmullRomSegment::draw() not implemented");
+	glBegin(GL_LINE_STRIP);
+
+	float t = 0.f;
+	for(int i = 0; i <= 25; ++i, t += 0.04f)
+	{
+		const Vec3f p(getPosition(t));
+		glVertex3f(p.x(), p.y(), p.z());	
+	}
+
+	glEnd();
 }
 
-Vec3f CatmullRomSegment::getPosition( const float t )
+Vec3f CatmullRomSegment::getPosition( float t )
 {
-	throw std::runtime_error("CatmullRomSegment::() not implemented");
+	const Vec3f p0(startPoint);
+	const Vec3f p1(endPoint);
+	const Vec3f m0((p1 - control1).normalize());
+	const Vec3f m1((control2 - p0).normalize());
+
+	const float tt  = t * t;
+	const float ttt = t * tt;
+
+	// Not sure if this is right :/
+	Vec3f pos( 0.5f * (
+		(-1.f * ttt + 2.f * tt - t)   * m0
+	  + ( 3.f * ttt - 5.f * tt + 2.f) * p0 
+	  + (-3.f * ttt + 4.f * tt + t)   * p1
+	  + (       ttt -       tt)       * m1 ) 
+	);
+
+	return pos;
 }
 
-Vec3f CatmullRomSegment::getDirection( const float t )
-{
-	throw std::runtime_error("CatmullRomSegment::getDirection() not implemented");
+Vec3f CatmullRomSegment::getDirection( float t )
+{	const Vec3f p0(startPoint);
+	const Vec3f p1(endPoint);
+	const Vec3f m0((p1 - control1).normalize());
+	const Vec3f m1((control2 - p0).normalize());
+
+	const float tt  = t * t;
+
+	// Not sure if this is right :/
+	Vec3f dir( 0.5f * (
+		(-3.f * tt + 4.f  * t - 1.f) * m0
+	  + ( 9.f * tt - 10.f * t)       * p0 
+	  + (-9.f * tt + 8.f  * t + 1.f) * p1
+	  + ( 2.f * tt -        t)       * m1 ) 
+	);
+
+	return dir.normalize();
 }
