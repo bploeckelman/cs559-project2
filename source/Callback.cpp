@@ -3,6 +3,7 @@
  */
 #include "Callback.h"
 #include "Phase2Window.h"
+#include "Curve.h"
 
 #pragma warning(push)
 #pragma warning(disable:4312)
@@ -19,7 +20,7 @@ using std::endl;
 
 void idleCallback(void *pData)
 {
-	static const unsigned long interval = CLOCKS_PER_SEC / 30;
+	static const unsigned long interval = CLOCKS_PER_SEC / 10;
 	static unsigned long lastRedraw = 0;
 
 	if( pData == nullptr ) 
@@ -34,9 +35,15 @@ void idleCallback(void *pData)
 	{
 		lastRedraw = clock();
 
-		static const float rotationStep = 2.f;
+		static const float rotationStep = 0.08f;
+		const float rotation = window->getRotation();
+
 		if( window->isAnimating() )
-			window->setRotation(window->getRotation() + rotationStep);
+		{
+			window->setRotation(rotation + rotationStep);
+			if( window->getRotation() > window->getCurve().numSegments() )
+				window->setRotation(0.f);
+		}
 
 		window->damageMe();
 	}

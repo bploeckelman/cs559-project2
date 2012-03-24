@@ -60,7 +60,12 @@ public:
 	// Normalization
 	inline Vec3f& normalize() 
 	{
-		(*this) *= 1.f / sqrt(_x * _x + _y * _y + _z * _z);
+		float d = sqrt(_x * _x + _y * _y + _z * _z);
+		if( d == 0.f )
+			d = 1.f;
+
+		(*this) *= 1.f / d; 
+
 		return *this;
 	}
 
@@ -170,4 +175,9 @@ inline std::ostream& operator<<(std::ostream& out, const Vec3f& rhs)
 {
 	rhs.print(out);
 	return out;
+}
+
+inline Vec3f lerp(const float t, const Vec3f& p0, const Vec3f& p1)
+{
+	return (p0 + t * (p1 - p0));
 }

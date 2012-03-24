@@ -3,20 +3,11 @@
  * Curve.h
  */
 #include "CtrlPoint.h"
+#include "CurveSegments.h"
 
 #include <stdexcept>
 #include <string>
 #include <vector>
-
-enum CurveType {
-	points = 0, 
-	lines,
-	bezier,
-	catmull,
-	bspline
-};
-
-extern std::string CurveTypeNames[];
 
 
 class Curve
@@ -24,22 +15,34 @@ class Curve
 private:
 	CurveType type;
 	std::vector<CtrlPoint> controlPoints;
+	std::vector<CurveSegment*> segments;
 
 	void drawPoints()  const;
-	void drawLines()   const;
-	void drawBezier()  const;
-	void drawCatmull() const;
-	void drawBSpline() const;
+
+	void regenerateSegments();
+	void regenerateLineSegments();
+	void regenerateCatmullSegments();
+	void regenerateBSplineSegments();
 
 public:
 	Curve(const CurveType& type=points);
 
-	virtual void draw() const;
+	void draw();
+	void drawSegment(const int number);
 
-	int addControlPoint(const CtrlPoint& point);
+	Vec3f getPosition(const float t);
+	Vec3f getDirection(const float t);
+	CurveSegment* getSegment(const int number);
+
+	int  addControlPoint(const CtrlPoint& point);
+	void delControlPoint(const int id);
+
+	void setCurveType(const CurveType& curveType);
+	CurveType getCurveType() const;
+
 	int numControlPoints() const; 
+	int numSegments() const;
 
-	CtrlPoint& point(int id);
-	
+	CtrlPoint& getPoint(int id);
 	class NoSuchPoint : public std::runtime_error { public: NoSuchPoint(const std::string& what_arg) : std::runtime_error(what_arg) { } };
 };

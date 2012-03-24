@@ -103,5 +103,5 @@ public:
 	inline void  setRotation(float r) { rotation = r; }
 
 	inline std::vector<CtrlPoint>& getPoints() { return points; }
-	const Curve& getCurve() const;
+	Curve& getCurve();
 };
