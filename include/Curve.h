@@ -21,6 +21,7 @@ private:
 
 	void regenerateLineSegments();
 	void regenerateCatmullSegments();
+	void regenerateHermiteSegments();
 	void regenerateBSplineSegments();
 
 public:

@@ -106,8 +106,8 @@
     <ClCompile Include="source\CtrlPoint.cpp" />
     <ClCompile Include="source\Curve.cpp" />
     <ClCompile Include="source\CurveSegments.cpp" />
-    <ClCompile Include="source\phase2.cpp" />
-    <ClCompile Include="source\Phase2Window.cpp" />
+    <ClCompile Include="source\main.cpp" />
+    <ClCompile Include="source\MainWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework\TrainFiles\CallBacks.H" />
@@ -127,7 +127,7 @@
     <ClInclude Include="include\CurveSegments.h" />
     <ClInclude Include="include\GLUtils.h" />
     <ClInclude Include="include\MathUtils.h" />
-    <ClInclude Include="include\Phase2Window.h" />
+    <ClInclude Include="include\MainWindow.h" />
     <ClInclude Include="include\Vec3f.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

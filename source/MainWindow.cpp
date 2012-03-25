@@ -2,12 +2,12 @@
  * CS559   - Train Project 
  * Phase 2 - OpenGL Programming Signs of Life
  *
- * The Phase2Window class is a basic FlTk window.
+ * The MainWindow class is a basic FlTk window.
  *
  * Authors: Brian Ploeckelman
  *          Matthew Bayer
  */
-#include "Phase2Window.h"
+#include "MainWindow.h"
 #include "Callback.h"
 #include "CtrlPoint.h"
 #include "MathUtils.h"
@@ -50,11 +50,11 @@ using std::endl;
 
 
 /* ==================================================================
- * Phase2View class
+ * MainView class
  * ==================================================================
  */
 
-Phase2View::Phase2View(int x, int y, int w, int h, const char *l)
+MainView::MainView(int x, int y, int w, int h, const char *l)
 	: Fl_Gl_Window(x,y,w,h,l)
 	, arcballCam()
 {
@@ -63,95 +63,21 @@ Phase2View::Phase2View(int x, int y, int w, int h, const char *l)
 }
 
 /* draw() - Draws to the screen ---------------------------------- */
-void Phase2View::draw()
+void MainView::draw()
 {
 	const float t = window->getRotation();
+	updateTextWidget(t);
 
-	// Update window's textOutput widget
-	stringstream ss; ss << "rot = " << t;
-	window->setDebugText(ss.str());
+	openglFrameSetup();
 
-/* TODO: remove this, it checks allowable line width values
-	GLfloat sizes[2]; 
-	GLfloat step;
-	glGetFloatv(GL_LINE_WIDTH_RANGE, sizes);
-	glGetFloatv(GL_LINE_WIDTH_GRANULARITY, &step);
-*/
-	// TODO: call these once only
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
-	glLineWidth(5.f);
-
-	glClearColor(0.f, 0.f, 0.2f, 0.f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glEnable(GL_DEPTH);
-
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	setupProjection();
-
-	// Draw the floor and a basis --------------------------------
-	glColor4ub(255, 255, 255, 200);
-	glPushMatrix();
-		glTranslatef(0.f, -20.f, 0.f);
-		drawFloor(150.f);
-
-		glTranslatef(0.f, 0.1f, 0.f);
-		drawBasis(Vec3f(20.f, 0.f, 0.f), 
-				  Vec3f(0.f, 20.f, 0.f), 
-				  Vec3f(0.f, 0.f, 20.f));
-	glPopMatrix();
-
-	// Draw the curve, highlighting the current segment ----------
-	Curve& curve(window->getCurve());
-	curve.selectedSegment = static_cast<int>(std::floor(t));
-
-	glColor4ub(255, 255, 255, 255);
-	curve.draw();
-	glColor4ub(255, 0, 0, 255);
-	curve.drawSelectedSegment();
-
-	// Draw the moving cube --------------------------------------
-	const Vec3f p(curve.getPosition(t));	// position  @ t
-	const Vec3f d(curve.getDirection(t));	// direction @ t (non-normalized)
-
-	const Vec3f wup(0.f, 0.f, 1.f);         // world up vector
-
-	const Vec3f dir(normalize(d));                  // tangent
-	const Vec3f rit(cross(dir, wup).normalize());   // local right vector
-	const Vec3f lup(cross(rit, dir).normalize());   // local up vector
-
-	glColor4ub(20, 250, 20, 255);
-	glPushMatrix();
-		glTranslatef(0.f, 1.f, 0.f);
-		glTranslatef(p.x(), p.y(), p.z());
-
-		GLfloat m[] = {
-			rit.x(), rit.y(), rit.z(), 0.f,
-			lup.x(), lup.y(), lup.z(), 0.f,
-			dir.x(), dir.y(), dir.z(), 0.f,
-			0.f,     0.f,     0.f,     1.f
-		};
-		glMultMatrixf(m);
-
-		drawCube(0.f, 0.f, 0.f, 2.5f);
-		drawBasis();
-		drawVector(Vec3f(0.f, 0.f, 0.f), 
-				   Vec3f(0.f, 0.f, 5.f),
-				   Vec3f(1.f, 0.f, 1.f));
-	glPopMatrix();
-
-	// Draw selected control point -------------------------------
-	glColor4ub(250, 20, 20, 255);
-	try {
-		window->getPoints().at(selectedPoint).draw();
-	} catch(std::out_of_range&) {}
+	drawFloor();
+	drawCurve(t);
+	drawPathObject(t);
+	drawSelectedControlPoint();
 }
 
 /* handle() - Handles user input --------------------------------- */
-int Phase2View::handle(int event)
+int MainView::handle(int event)
 {
 	if( useArcball ) 
 	{
@@ -222,7 +148,7 @@ int Phase2View::handle(int event)
 }
 
 /* pick() - Performs OpenGL picking ------------------------------ */
-void Phase2View::pick()
+void MainView::pick()
 {
 	// Make sure we're current so we can use OpenGL
 	make_current();
@@ -278,7 +204,7 @@ void Phase2View::pick()
 }
 
 /* setupProject() - Sets up projection & modelview matrices ------ */
-void Phase2View::setupProjection()
+void MainView::setupProjection()
 {
 	if( useArcball )
 	{
@@ -301,18 +227,125 @@ void Phase2View::setupProjection()
 	glViewport(0, 0, w(), h());
 }
 
-void Phase2View::resetArcball()
+/* resetArcball() - Resets the arcball camera orientation -------- */
+void MainView::resetArcball()
 {
 	arcballCam.setup(this, 40.f, 250.f, 0.2f, 0.4f, 0.f);
 }
 
+/* updateTextWidget() - Prints rotation amount to text widget ---- */
+void MainView::updateTextWidget( const float t )
+{
+	stringstream ss; ss << "rot = " << t;
+	window->setDebugText(ss.str());
+}
+
+/* openglFrameSetup() - Clears framebuffers and sets projection -- */
+void MainView::openglFrameSetup()
+{
+	// TODO: call these once only, not every frame
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+	glLineWidth(5.f);
+	// -------------------------------------------
+
+	glClearColor(0.f, 0.f, 0.2f, 0.f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_DEPTH);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	setupProjection();
+}
+
+/* drawFloor() - Draws the flor plane and a coordinate basis ----- */
+void MainView::drawFloor()
+{
+	glColor4ub(255, 255, 255, 200);
+	glPushMatrix();
+		glTranslatef(0.f, -20.f, 0.f);
+		::drawFloor(150.f);
+
+		glTranslatef(0.f, 0.1f, 0.f);
+		drawBasis(Vec3f(20.f, 0.f, 0.f), 
+				  Vec3f(0.f, 20.f, 0.f), 
+				  Vec3f(0.f, 0.f, 20.f));
+	glPopMatrix();
+}
+
+/* drawCurve() - Draws the window's curve object ----------------- */
+void MainView::drawCurve( const float t )
+{
+	Curve& curve(window->getCurve());
+	curve.selectedSegment = static_cast<int>(std::floor(t));
+
+	glColor4ub(255, 255, 255, 255);
+	curve.draw();
+
+	glColor4ub(255, 0, 0, 255);
+	curve.drawSelectedSegment();
+}
+
+/* drawPathObject() - Draws the object that travels along the path */
+void MainView::drawPathObject( const float t )
+{
+	Curve& curve(window->getCurve());
+
+	const Vec3f p(curve.getPosition(t));	// position  @ t
+	const Vec3f d(curve.getDirection(t));	// direction @ t (non-normalized)
+
+	const Vec3f wup(0.f, 0.f, 1.f);         // world up vector
+
+	const Vec3f dir(normalize(d));                  // tangent
+	const Vec3f rit(cross(dir, wup).normalize());   // local right vector
+	const Vec3f lup(cross(rit, dir).normalize());   // local up vector
+
+	glColor4ub(20, 250, 20, 255);
+	glPushMatrix();
+	glTranslatef(0.f, 1.f, 0.f);
+	glTranslatef(p.x(), p.y(), p.z());
+
+	GLfloat m[] = {
+		rit.x(), rit.y(), rit.z(), 0.f,
+		lup.x(), lup.y(), lup.z(), 0.f,
+		dir.x(), dir.y(), dir.z(), 0.f,
+		0.f,     0.f,     0.f,     1.f
+	};
+	glMultMatrixf(m);
+
+	drawCube(0.f, 0.f, 0.f, 2.5f);
+	/* TODO: drawing the basis shows that sometimes the local 
+	coordinate system flips over, this will need to be 
+	fixed before the final version so the train doesn't 
+	go upside down
+	drawBasis(Vec3f(5.f, 0.f, 0.f),
+	Vec3f(0.f, 5.f, 0.f),
+	Vec3f(0.f, 0.f, 5.f));
+	*/
+	drawVector(Vec3f(0.f, 0.f, 0.f), 
+		Vec3f(0.f, 0.f, 5.f),
+		Vec3f(1.f, 0.f, 1.f));
+	glPopMatrix();
+}
+
+/* drawSelectedControlPoint() - Draws the selected point highlighted */
+void MainView::drawSelectedControlPoint()
+{
+	glColor4ub(250, 20, 20, 255);
+	try {
+		window->getPoints().at(selectedPoint).draw();
+	} catch(std::out_of_range&) {}
+}
+
 
 /* ==================================================================
- * Phase2Window class
+ * MainWindow class
  * ==================================================================
  */
 
-Phase2Window::Phase2Window(const int x, const int y) 
+MainWindow::MainWindow(const int x, const int y) 
 	: Fl_Double_Window(x, y, 800, 600, "Train Project - Phase 2")
 	, view(nullptr)
 	, widgets(nullptr)
@@ -332,13 +365,13 @@ Phase2Window::Phase2Window(const int x, const int y)
 }
 
 /* damageMe() - Called to force an update of the window ---------- */
-void Phase2Window::damageMe()
+void MainWindow::damageMe()
 {
 	view->damage(1);
 }
 
 /* setDebugText() - Called to update fltk multiline output text -- */
-void Phase2Window::setDebugText(const string& text)
+void MainWindow::setDebugText(const string& text)
 {
 	assert(textOutput != nullptr);
 	textOutput->value("");
@@ -346,13 +379,13 @@ void Phase2Window::setDebugText(const string& text)
 }
 
 /* createWidgets() - Called on construction to build fltk widgets  */
-void Phase2Window::createWidgets()
+void MainWindow::createWidgets()
 {
 	// Make all the widgets
 	begin();
 	{
 		// Create the OpenGL view
-		view = new Phase2View(5, 5, 590, 590);
+		view = new MainView(5, 5, 590, 590);
 		view->setWindow(this);
 		view->setSelectedPoint(0);
 //		this->resizable(view);
@@ -403,7 +436,7 @@ void Phase2Window::createWidgets()
 }
 
 /* createPoints() - Called on construction to create initial points */
-void Phase2Window::createPoints()
+void MainWindow::createPoints()
 {
 	// Add initial points
 	const float step = TWO_PI / 5.f;

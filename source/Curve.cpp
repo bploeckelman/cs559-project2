@@ -188,6 +188,11 @@ void Curve::regenerateCatmullSegments()
 	}
 }
 
+void Curve::regenerateHermiteSegments()
+{
+	throw std::exception("The method or operation is not implemented.");
+}
+
 void Curve::regenerateBSplineSegments()
 {
 	throw std::exception("The method or operation is not implemented.");

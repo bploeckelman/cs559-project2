@@ -1,9 +1,9 @@
 #pragma once
 /*
  * CS559   - Train Project 
- * Phase 2 - OpenGL Programming Signs of Life
+ * Phase 4 - OpenGL Programming Signs of Life
  *
- * The Phase2Window class is a basic FlTk window.
+ * The MainWindow class is a basic FlTk window.
  *
  * Authors: Brian Ploeckelman
  *          Matthew Bayer
@@ -26,62 +26,68 @@
 
 #include <vector>
 
-class Phase2Window;
+class MainWindow;
 
 
 /* ==================================================================
- * Phase2View class
+ * MainView class
  *
  * This class is the main fltk OpenGL view for the program, 
  * it consists of a pointer to its fltk parent window
  * and it tracks which of a group of control points is selected
  * ==================================================================
  */
-class Phase2View : public Fl_Gl_Window
+class MainView : public Fl_Gl_Window
 {
 private:
-
-	Phase2Window *window;
+	MainWindow *window;
 	int selectedPoint;
 
 	ArcBallCam arcballCam;
 	bool useArcball;
 
-	void resetArcball();
-	void setupProjection();
-
 public:
-
-	Phase2View(int x, int y, int w, int h, const char *l=0);
+	MainView(int x, int y, int w, int h, const char *l=0);
 
 	virtual void draw();
 	virtual int handle(int event);
 
 	void pick();
 
+	inline void setSelectedPoint(const int p) { selectedPoint = p; }
+	inline int  getSelectedPoint() const      { return selectedPoint; }
+
+	inline void setWindow(MainWindow *w) { window = w; }
+	inline MainWindow* getWindow() const { return window; }
+
 	inline void toggleUseArcball() { useArcball = !useArcball; }
 
-	inline void setWindow(Phase2Window *w)    { window = w; }
-	inline void setSelectedPoint(const int p) { selectedPoint = p; }
+private:
+	void resetArcball();
+	void setupProjection();
 
-	inline Phase2Window* getWindow() const { return window; }
-	inline int getSelectedPoint()    const { return selectedPoint; }
+	void updateTextWidget( const float t );
+	void openglFrameSetup();
+	void drawFloor();
+	void drawCurve( const float t );
+	void drawPathObject( const float t );
+	void drawSelectedControlPoint();
 };
 
 
 /* ==================================================================
- * Phase2Window class
+ * MainWindow class
  *
  * This class is the main fltk window for the program, 
  * it consists of an fltk OpenGL view, fltk ui widgets, 
- * and a group of control points.
+ * and a cubic curve.
  * ==================================================================
  */
-class Phase2Window : public Fl_Double_Window 
+class MainWindow : public Fl_Double_Window 
 {
 private:
 
-	Phase2View *view;
+	MainView *view;
 
 	Fl_Group   *widgets;
 	Fl_Button  *animateButton;
@@ -99,7 +105,7 @@ private:
 	void createPoints();
 
 public:
-	Phase2Window(const int x=100, const int y=50);
+	MainWindow(const int x=100, const int y=50);
 
 	void damageMe();
 	void setDebugText(const std::string& text);
@@ -110,7 +116,7 @@ public:
 	inline float getRotation() const  { return rotation; }
 	inline void  setRotation(float r) { rotation = r; }
 
-	inline const Phase2View& getView() const { return *view; }
+	inline const MainView& getView() const { return *view; }
 
 	inline Curve& getCurve() { return curve; }
 	inline std::vector<CtrlPoint>& getPoints() { return curve.getControlPoints(); }

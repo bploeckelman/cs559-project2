@@ -2,7 +2,7 @@
  * Callback functions for FlTk
  */
 #include "Callback.h"
-#include "Phase2Window.h"
+#include "MainWindow.h"
 #include "Curve.h"
 #include "CtrlPoint.h"
 #include "Vec3f.h"
@@ -32,7 +32,7 @@ void idleCallback(void *pData)
 		cout << "Error: idleCallback - null pointer passed." << endl;
 		return;
 	}
-	Phase2Window *window = reinterpret_cast<Phase2Window*>(pData);
+	MainWindow *window = reinterpret_cast<MainWindow*>(pData);
 
 	const unsigned long delta = clock() - lastRedraw;
 	if( delta > interval ) 
@@ -53,7 +53,7 @@ void idleCallback(void *pData)
 	}
 }
 
-void animateButtonCallback(Fl_Widget *widget, Phase2Window *window)
+void animateButtonCallback(Fl_Widget *widget, MainWindow *window)
 {
 	if( window == nullptr || widget == nullptr )
 	{
@@ -66,8 +66,9 @@ void animateButtonCallback(Fl_Widget *widget, Phase2Window *window)
 	window->damageMe();
 }
 
-void addPointButtonCallback( Fl_Widget *widget, Phase2Window *window )
-{	if( window == nullptr || widget == nullptr )
+void addPointButtonCallback( Fl_Widget *widget, MainWindow *window )
+{
+	if( window == nullptr || widget == nullptr )
 	{
 		cout << "Error: damageCallback - null pointer passed." << endl;
 		return;
@@ -84,7 +85,7 @@ void addPointButtonCallback( Fl_Widget *widget, Phase2Window *window )
 	window->damageMe();
 }
 
-void delPointButtonCallback( Fl_Widget *widget, Phase2Window *window )
+void delPointButtonCallback( Fl_Widget *widget, MainWindow *window )
 {
 	if( window == nullptr || widget == nullptr )
 	{
@@ -106,7 +107,7 @@ void delPointButtonCallback( Fl_Widget *widget, Phase2Window *window )
 	window->damageMe();
 }
 
-void curveTypeChoiceCallback( Fl_Widget *widget, Phase2Window *window )
+void curveTypeChoiceCallback( Fl_Widget *widget, MainWindow *window )
 {
 	if( window == nullptr || widget == nullptr )
 	{

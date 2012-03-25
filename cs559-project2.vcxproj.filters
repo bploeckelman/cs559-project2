@@ -34,12 +34,6 @@
     <ClCompile Include="framework\TrainFiles\World.cpp">
       <Filter>framework\TrainFiles</Filter>
     </ClCompile>
-    <ClCompile Include="source\phase2.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Phase2Window.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
     <ClCompile Include="source\CtrlPoint.cpp">
       <Filter>source</Filter>
     </ClCompile>
@@ -50,6 +44,12 @@
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="source\CurveSegments.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\MainWindow.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\main.cpp">
       <Filter>source</Filter>
     </ClCompile>
   </ItemGroup>
@@ -87,9 +87,6 @@
     <ClInclude Include="framework\TrainFiles\TrainWindow.H">
       <Filter>framework\TrainFiles</Filter>
     </ClInclude>
-    <ClInclude Include="include\Phase2Window.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="include\CtrlPoint.h">
       <Filter>include</Filter>
     </ClInclude>
@@ -109,6 +106,9 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\GLUtils.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MainWindow.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
