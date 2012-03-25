@@ -40,8 +40,6 @@ void Curve::draw()
 		if( segment != nullptr )
 			segment->draw();
 	}
-
-//	drawPoints();
 }
 
 void Curve::drawPoint( int index )
@@ -50,6 +48,18 @@ void Curve::drawPoint( int index )
 		return;
 
 	controlPoints[index].draw();
+}
+
+void Curve::drawPoints() const
+{
+	// Note: visual studio 2010 implemented c++0x range-based for loops 
+	// in this non-standard way apparently, see: 
+	// http://blogs.msdn.com/b/vcblog/archive/2009/07/13/intellisense-and-browsing-with-c-0x.aspx
+
+	for each(const auto& p in controlPoints)
+	{
+		p.draw();			
+	}
 }
 
 void Curve::drawSelectedSegment()
@@ -222,6 +232,8 @@ CurveType Curve::getCurveType() const { return type; }
 int Curve::numControlPoints  () const { return controlPoints.size(); }
 int Curve::numSegments       () const { return segments.size(); }
 
+vector<CtrlPoint>& Curve::getControlPoints() { return controlPoints; }
+
 CtrlPoint& Curve::getPoint( int id )
 {
 	try {
@@ -231,18 +243,6 @@ CtrlPoint& Curve::getPoint( int id )
 		stringstream ss;
 		ss << "Warning: no point on curve with id=" << id;
 		throw NoSuchPoint(ss.str());
-	}
-}
-
-void Curve::drawPoints() const
-{
-	// Note: visual studio 2010 implemented c++0x range-based for loops 
-	// in this non-standard way apparently, see: 
-	// http://blogs.msdn.com/b/vcblog/archive/2009/07/13/intellisense-and-browsing-with-c-0x.aspx
-
-	for each(const auto& p in controlPoints)
-	{
-		p.draw();			
 	}
 }
 

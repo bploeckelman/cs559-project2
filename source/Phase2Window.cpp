@@ -136,7 +136,16 @@ void Phase2View::draw()
 		glMultMatrixf(m);
 
 		drawCube(0.f, 0.f, 0.f, 2.5f);
+		drawVector(Vec3f(0.f, 0.f, 0.f), 
+				   Vec3f(0.f, 0.f, 5.f),
+				   Vec3f(1.f, 0.f, 1.f));
 	glPopMatrix();
+
+	// Draw selected control point -------------------------------
+	glColor4ub(250, 20, 20, 255);
+	try {
+		window->getPoints().at(selectedPoint).draw();
+	} catch(std::out_of_range&) {}
 }
 
 /* handle() - Handles user input --------------------------------- */
@@ -295,7 +304,6 @@ Phase2Window::Phase2Window(const int x, const int y)
 	, animateButton(nullptr)
 	, textOutput(nullptr)
 	, curveTypeChoice(nullptr)
-	, points()
 	, curve(lines)
 	, animating(false)
 	, rotation(0.f)
@@ -375,7 +383,6 @@ void Phase2Window::createPoints()
 	{
 		const Vec3f     pos(cosf(i), 0.f, sinf(i));
 		const CtrlPoint point(pos * radius);
-		points.push_back(point);
 		curve.addControlPoint(point);
 	}
 }

@@ -17,7 +17,6 @@ private:
 	std::vector<CtrlPoint> controlPoints;
 	std::vector<CurveSegment*> segments;
 
-	void drawPoints()  const;
 	void drawSegment(const int number);
 
 	void regenerateSegments();
@@ -33,6 +32,7 @@ public:
 
 	void draw();
 	void drawPoint(int index);
+	void drawPoints() const;
 	void drawSelectedSegment();
 
 	Vec3f getPosition(const float t);
@@ -47,6 +47,8 @@ public:
 
 	int numControlPoints() const; 
 	int numSegments() const;
+
+	std::vector<CtrlPoint>& getControlPoints(); 
 
 	CtrlPoint& getPoint(int id);
 	class NoSuchPoint : public std::runtime_error { public: NoSuchPoint(const std::string& what_arg) : std::runtime_error(what_arg) { } };

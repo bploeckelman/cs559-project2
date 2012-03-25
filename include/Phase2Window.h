@@ -88,7 +88,6 @@ private:
 	Fl_Output  *textOutput;
 	Fl_Choice  *curveTypeChoice;
 
-	std::vector<CtrlPoint> points;
 	Curve curve;
 
 	bool animating;
@@ -110,6 +109,6 @@ public:
 	inline float getRotation() const  { return rotation; }
 	inline void  setRotation(float r) { rotation = r; }
 
-	inline std::vector<CtrlPoint>& getPoints() { return points; }
 	inline Curve& getCurve() { return curve; }
+	inline std::vector<CtrlPoint>& getPoints() { return curve.getControlPoints(); }
 };
