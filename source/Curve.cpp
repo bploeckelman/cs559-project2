@@ -46,7 +46,7 @@ void Curve::draw()
 
 void Curve::drawPoint( int index )
 {
-	if( index < 0 || index >= controlPoints.size() )
+	if( index < 0 || index >= (int)controlPoints.size() )
 		return;
 
 	controlPoints[index].draw();
@@ -54,7 +54,7 @@ void Curve::drawPoint( int index )
 
 void Curve::drawSelectedSegment()
 {
-	if( selectedSegment < 0 || selectedSegment >= segments.size() )
+	if( selectedSegment < 0 || selectedSegment >= (int)segments.size() )
 		return;
 
 	segments[selectedSegment]->draw();
@@ -65,7 +65,7 @@ Vec3f Curve::getPosition( const float t )
 	const int segmentNumber = static_cast<int>(std::floor(t));
 	try {
 		CurveSegment *segment = segments.at(segmentNumber);
-		const float tUnit = t / numSegments();
+		const float tUnit = t - segmentNumber; 
 		return segment->getPosition(tUnit); 
 	}
 	catch(std::out_of_range&) {
@@ -83,7 +83,7 @@ Vec3f Curve::getDirection( const float t )
 	const int segmentNumber = static_cast<int>(std::floor(t));
 	try	{
 		CurveSegment *segment = segments.at(segmentNumber);
-		const float tUnit = t / numSegments();
+		const float tUnit = t - segmentNumber; 
 		return segment->getDirection(tUnit);
 	} catch(std::out_of_range&) {
 		stringstream ss;
@@ -121,8 +121,6 @@ void Curve::regenerateSegments()
 	// Create new segments using control points and curve type
 	switch(type)
 	{
-	default:
-	case points:  break;
 	case lines:   regenerateLineSegments();    break;
 	case catmull: regenerateCatmullSegments(); break;
 	case bspline: regenerateBSplineSegments(); break;

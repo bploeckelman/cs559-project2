@@ -52,9 +52,28 @@ void idleCallback(void *pData)
 void animateButtonCallback(Fl_Widget *widget, Phase2Window *window)
 {
 	if( window == nullptr || widget == nullptr )
+	{
 		cout << "Error: damageCallback - null pointer passed." << endl;
+		return;
+	}
 
 	window->toggleAnimating();
+
+	window->damageMe();
+}
+
+void curveTypeChoiceCallback( Fl_Widget *widget, Phase2Window *window )
+{
+	if( window == nullptr || widget == nullptr )
+	{
+		cout << "Error: curveTypeBrowserCallback - null pointer passed." << endl;
+		return;
+	}
+
+	Fl_Choice *curveTypeChoice = dynamic_cast<Fl_Choice*>(widget);
+	CurveType curveType = static_cast<CurveType>(curveTypeChoice->value());
+
+	window->getCurve().setCurveType(curveType);
 
 	window->damageMe();
 }

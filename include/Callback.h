@@ -9,3 +9,5 @@ class Phase2Window;
 void idleCallback(void *pData);
 
 void animateButtonCallback(Fl_Widget *widget, Phase2Window *window);
+
+void curveTypeChoiceCallback(Fl_Widget *widget, Phase2Window *window);

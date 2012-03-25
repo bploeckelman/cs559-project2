@@ -12,7 +12,6 @@
 
 // Map CurveType enum value to string representation
 std::string CurveTypeNames[] = {
-	"Points", 
 	"Lines",
 	"Catmull-Rom",
 	"Hermite",
@@ -42,7 +41,7 @@ void LineSegment::draw()
 
 Vec3f LineSegment::getPosition( float t )
 {
-	return lerp(t, startPoint, endPoint);
+	return lerp(-t, startPoint, endPoint);
 }
 
 Vec3f LineSegment::getDirection( float t )

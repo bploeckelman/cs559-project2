@@ -29,7 +29,7 @@ public:
 	int selectedPoint;
 	int selectedSegment;
 
-	Curve(const CurveType& type=points);
+	Curve(const CurveType& type=lines);
 
 	void draw();
 	void drawPoint(int index);

@@ -32,11 +32,18 @@
 #include <Fl/Fl_Box.h>
 #include <Fl/Fl_Group.h>
 #include <Fl/Fl_Button.h>
+#include <Fl/Fl_Output.h>
+#include <Fl/Fl_Choice.h>
 #pragma warning(pop)
 
 #include <iostream>
+#include <cassert>
+#include <sstream>
+#include <string>
 #include <vector>
 
+using std::stringstream;
+using std::string;
 using std::vector;
 using std::cout;
 using std::endl;
@@ -58,13 +65,17 @@ Phase2View::Phase2View(int x, int y, int w, int h, const char *l)
 /* draw() - Draws to the screen ---------------------------------- */
 void Phase2View::draw()
 {
-/*
+	const float t = window->getRotation();
+
+	// Update window's textOutput widget
+	stringstream ss; ss << "rot = " << t;
+	window->setDebugText(ss.str());
+
+/* TODO: remove this, it checks allowable line width values
 	GLfloat sizes[2]; 
 	GLfloat step;
 	glGetFloatv(GL_LINE_WIDTH_RANGE, sizes);
 	glGetFloatv(GL_LINE_WIDTH_GRANULARITY, &step);
-	glCullFace(GL_BACK);
-	glEnable(GL_CULL_FACE);
 */
 	// TODO: call these once only
 	glEnable(GL_DEPTH_TEST);
@@ -81,11 +92,13 @@ void Phase2View::draw()
 
 	glColor4ub(255, 255, 255, 128);
 	glPushMatrix();
-	glTranslatef(0.f, -20.f, 0.f);
-	drawFloor(150.f);
-	drawBasis(Vec3f(20.f, 0.f, 0.f), 
-			  Vec3f(0.f, 20.f, 0.f), 
-			  Vec3f(0.f, 0.f, 20.f));
+		glTranslatef(0.f, -20.f, 0.f);
+		drawFloor(150.f);
+
+		glTranslatef(0.f, 0.1f, 0.f);
+		drawBasis(Vec3f(20.f, 0.f, 0.f), 
+				  Vec3f(0.f, 20.f, 0.f), 
+				  Vec3f(0.f, 0.f, 20.f));
 	glPopMatrix();
 
 	glColor4ub(255, 255, 255, 255);
@@ -93,16 +106,16 @@ void Phase2View::draw()
 	curve.draw();
 
 	glColor4ub(255, 0, 0, 255);
+	// Select current segment
+	curve.selectedSegment = static_cast<int>(std::floor(t));
 	curve.drawSelectedSegment();
 
-/*
-	glPushMatrix();
-	const Vec3f p(curve.getPosition(window->getRotation()));
-	glTranslatef(p.x(), p.y(), p.z());
 	glColor4ub(20, 250, 20, 255);
-	drawCube(0.f, 0.f, 0.f, 2.5f);
+	const Vec3f p(curve.getPosition(t));
+	glPushMatrix();
+		glTranslatef(p.x(), p.y(), p.z());
+		drawCube(0.f, 0.f, 0.f, 2.5f);
 	glPopMatrix();
-*/
 }
 
 /* handle() - Handles user input --------------------------------- */
@@ -259,10 +272,35 @@ Phase2Window::Phase2Window(const int x, const int y)
 	, view(nullptr)
 	, widgets(nullptr)
 	, animateButton(nullptr)
+	, textOutput(nullptr)
+	, curveTypeChoice(nullptr)
 	, points()
-	, curve(catmull)
-	, animating(true)
+	, curve(lines)
+	, animating(false)
 	, rotation(0.f)
+{
+	createWidgets();
+	createPoints();
+
+	Fl::add_idle(idleCallback, this); 
+}
+
+/* damageMe() - Called to force an update of the window ---------- */
+void Phase2Window::damageMe()
+{
+	view->damage(1);
+}
+
+/* setDebugText() - Called to update fltk multiline output text -- */
+void Phase2Window::setDebugText(const string& text)
+{
+	assert(textOutput != nullptr);
+	textOutput->value("");
+	textOutput->value(text.c_str());
+}
+
+/* createWidgets() - Called on construction to build fltk widgets  */
+void Phase2Window::createWidgets()
 {
 	// Make all the widgets
 	begin();
@@ -284,6 +322,19 @@ Phase2Window::Phase2Window(const int x, const int y)
 		animateButton->selection_color((Fl_Color)3); // yellow when pressed
 		animateButton->callback((Fl_Callback*)animateButtonCallback, this);
 
+		// Create curve type browser (drop down)
+		curveTypeChoice = new Fl_Choice(605, 30, 90, 20);
+		curveTypeChoice->clear();
+		curveTypeChoice->add((CurveTypeNames[lines]).c_str());
+		curveTypeChoice->add((CurveTypeNames[catmull]).c_str());
+//		curveTypeChoice->add((CurveTypeNames[hermite]).c_str());
+//		curveTypeChoice->add((CurveTypeNames[bspline]).c_str());
+		curveTypeChoice->value(0);
+		curveTypeChoice->callback((Fl_Callback*)curveTypeChoiceCallback, this);
+
+		// Create text display
+		textOutput = new Fl_Output(605, 55, 90, 20);
+
 		// Create a phantom widget to help resize things
 		Fl_Box *resizeBox = new Fl_Box(600, 595, 200, 5);
 		widgets->resizable(resizeBox);
@@ -291,8 +342,11 @@ Phase2Window::Phase2Window(const int x, const int y)
 		widgets->end();
 	}
 	end();
+}
 
-	// Add initial points
+/* createPoints() - Called on construction to create initial points */
+void Phase2Window::createPoints()
+{	// Add initial points
 	const float step = TWO_PI / 5.f;
 	const float radius = 30.f;
 	for(float i = 0.f; i < TWO_PI; i += step)
@@ -302,15 +356,4 @@ Phase2Window::Phase2Window(const int x, const int y)
 		points.push_back(point);
 		curve.addControlPoint(point);
 	}
-
-	// Setup idle callback
-	Fl::add_idle(idleCallback, this); 
 }
-
-/* damageMe() - Called to force an update of the window ---------- */
-void Phase2Window::damageMe()
-{
-	view->damage(1);
-}
-
-Curve& Phase2Window::getCurve() { return curve; }

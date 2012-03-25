@@ -20,6 +20,8 @@
 #include <Fl/Fl_Gl_Window.h>
 #include <Fl/Fl_Group.h>
 #include <Fl/Fl_Button.h>
+#include <Fl/Fl_Output.h>
+#include <Fl/Fl_Choice.h>
 #pragma warning(pop)
 
 #include <vector>
@@ -81,8 +83,10 @@ private:
 
 	Phase2View *view;
 
-	Fl_Group  *widgets;
-	Fl_Button *animateButton;
+	Fl_Group   *widgets;
+	Fl_Button  *animateButton;
+	Fl_Output  *textOutput;
+	Fl_Choice  *curveTypeChoice;
 
 	std::vector<CtrlPoint> points;
 	Curve curve;
@@ -90,11 +94,15 @@ private:
 	bool animating;
 	float rotation;
 
+	void createWidgets();
+	void createPoints();
+
 public:
 
 	Phase2Window(const int x=100, const int y=50);
 
 	void damageMe();
+	void setDebugText(const std::string& text);
 
 	inline bool isAnimating() const { return animating; }
 	inline void toggleAnimating()   { animating = !animating; }
@@ -103,5 +111,5 @@ public:
 	inline void  setRotation(float r) { rotation = r; }
 
 	inline std::vector<CtrlPoint>& getPoints() { return points; }
-	Curve& getCurve();
+	inline Curve& getCurve() { return curve; }
 };

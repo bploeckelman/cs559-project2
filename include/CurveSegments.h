@@ -5,8 +5,7 @@
 #include "Vec3f.h"
 
 enum CurveType {
-	points = 0, 
-	lines,
+	lines = 0, 
 	catmull,
 	hermite,
 	bspline
