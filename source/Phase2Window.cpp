@@ -91,6 +91,15 @@ void Phase2View::draw()
 	glColor4ub(255, 255, 255, 255);
 	Curve& curve(window->getCurve());
 	curve.draw();
+
+/*
+	glPushMatrix();
+	const Vec3f p(curve.getPosition(window->getRotation()));
+	glTranslatef(p.x(), p.y(), p.z());
+	glColor4ub(20, 250, 20, 255);
+	drawCube(0.f, 0.f, 0.f, 2.5f);
+	glPopMatrix();
+*/
 }
 
 /* handle() - Handles user input --------------------------------- */
@@ -267,7 +276,7 @@ Phase2Window::Phase2Window(const int x, const int y)
 	end();
 
 	// Add initial points
-	const float step = TWO_PI / 10.f;
+	const float step = TWO_PI / 5.f;
 	const float radius = 30.f;
 	for(float i = 0.f; i < TWO_PI; i += step)
 	{

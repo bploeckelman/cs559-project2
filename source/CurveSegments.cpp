@@ -69,13 +69,12 @@ Vec3f CatmullRomSegment::getPosition( float t )
 {
 	const Vec3f p0(startPoint);
 	const Vec3f p1(endPoint);
-	const Vec3f m0((p1 - control1).normalize());
-	const Vec3f m1((control2 - p0).normalize());
+	const Vec3f m0(control1);
+	const Vec3f m1(control2);
 
 	const float tt  = t * t;
 	const float ttt = t * tt;
 
-	// Not sure if this is right :/
 	Vec3f pos( 0.5f * (
 		(-1.f * ttt + 2.f * tt - t)   * m0
 	  + ( 3.f * ttt - 5.f * tt + 2.f) * p0 
@@ -89,12 +88,11 @@ Vec3f CatmullRomSegment::getPosition( float t )
 Vec3f CatmullRomSegment::getDirection( float t )
 {	const Vec3f p0(startPoint);
 	const Vec3f p1(endPoint);
-	const Vec3f m0((p1 - control1).normalize());
-	const Vec3f m1((control2 - p0).normalize());
+	const Vec3f m0(control1);
+	const Vec3f m1(control2);
 
 	const float tt  = t * t;
 
-	// Not sure if this is right :/
 	Vec3f dir( 0.5f * (
 		(-3.f * tt + 4.f  * t - 1.f) * m0
 	  + ( 9.f * tt - 10.f * t)       * p0 
