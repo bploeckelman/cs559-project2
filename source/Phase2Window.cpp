@@ -90,6 +90,7 @@ void Phase2View::draw()
 	glLoadIdentity();
 	setupProjection();
 
+	// Draw the floor and a basis --------------------------------
 	glColor4ub(255, 255, 255, 128);
 	glPushMatrix();
 		glTranslatef(0.f, -20.f, 0.f);
@@ -101,19 +102,38 @@ void Phase2View::draw()
 				  Vec3f(0.f, 0.f, 20.f));
 	glPopMatrix();
 
-	glColor4ub(255, 255, 255, 255);
+	// Draw the curve, highlighting the current segment ----------
 	Curve& curve(window->getCurve());
-	curve.draw();
-
-	glColor4ub(255, 0, 0, 255);
-	// Select current segment
 	curve.selectedSegment = static_cast<int>(std::floor(t));
+
+	glColor4ub(255, 255, 255, 255);
+	curve.draw();
+	glColor4ub(255, 0, 0, 255);
 	curve.drawSelectedSegment();
 
+	// Draw the moving cube --------------------------------------
 	glColor4ub(20, 250, 20, 255);
-	const Vec3f p(curve.getPosition(t));
+
+	const Vec3f p(curve.getPosition(t));	// position  @ t
+	const Vec3f d(curve.getDirection(t));	// direction @ t (non-normalized)
+
+	const Vec3f wup(0.f, 0.f, 1.f);		// world up vector
+
+	const Vec3f dir(normalize(d));                  // tangent
+	const Vec3f rit(cross(dir, wup).normalize());   // local right vector
+	const Vec3f lup(cross(rit, dir).normalize());   // local up vector
+
 	glPushMatrix();
 		glTranslatef(p.x(), p.y(), p.z());
+
+		GLfloat m[] = {
+			rit.x(), rit.y(), rit.z(), 0.f,
+			lup.x(), lup.y(), lup.z(), 0.f,
+			dir.x(), dir.y(), dir.z(), 0.f,
+			0.f,     0.f,     0.f,     1.f
+		};
+		glMultMatrixf(m);
+
 		drawCube(0.f, 0.f, 0.f, 2.5f);
 	glPopMatrix();
 }
@@ -346,7 +366,8 @@ void Phase2Window::createWidgets()
 
 /* createPoints() - Called on construction to create initial points */
 void Phase2Window::createPoints()
-{	// Add initial points
+{
+	// Add initial points
 	const float step = TWO_PI / 5.f;
 	const float radius = 30.f;
 	for(float i = 0.f; i < TWO_PI; i += step)
