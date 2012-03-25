@@ -148,27 +148,23 @@ void Curve::regenerateLineSegments()
 		const CtrlPoint& p0(*it);
 		const CtrlPoint& p1(last ? *(controlPoints.begin()) : *(it + 1));
 
-		segments.push_back(new LineSegment(i, p0.pos(), p1.pos()));
+		segments.push_back(new LineSegment(i, p0, p1));
 	}
 }
 
 void Curve::regenerateCatmullSegments()
 {
-	if( controlPoints.size() < 4 )
-		return;
-
 	auto it  = controlPoints.begin();
 	auto end = controlPoints.end();
 	for(int i = 0; it != end; ++i, ++it)
 	{
-		if( i == 0 )
+		if( i == 0 && controlPoints.size() >= 4 )
 		{
 			const CtrlPoint& c1(*(end - 1));
 			const CtrlPoint& p0(*(it));
 			const CtrlPoint& p1(*(it + 1));
 			const CtrlPoint& c2(*(it + 2));
-			segments.push_back(
-				new CatmullRomSegment(i, p0.pos(), p1.pos(), c1.pos(), c2.pos()) );
+			segments.push_back(new CatmullRomSegment(i, p0, p1, c1, c2));
 		} else {
 			auto next1 = it + 1;
 			if( next1 >= end )
@@ -178,13 +174,16 @@ void Curve::regenerateCatmullSegments()
 			if( next2 >= end )
 				next2 = controlPoints.begin();
 
-			const CtrlPoint& c1(*(it - 1));
+			auto prev = it;
+			if( prev != controlPoints.begin() )
+				prev -= 1;
+
+			const CtrlPoint& c1(*prev);
 			const CtrlPoint& p0(*(it));
 			const CtrlPoint& p1(*next1);
 			const CtrlPoint& c2(*next2);
 
-			segments.push_back(
-				new CatmullRomSegment(i, p0.pos(), p1.pos(), c1.pos(), c2.pos()) );
+			segments.push_back(new CatmullRomSegment(i, p0, p1, c1, c2));
 		}
 	}
 }

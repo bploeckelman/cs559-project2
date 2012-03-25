@@ -117,7 +117,7 @@ void Phase2View::draw()
 	const Vec3f p(curve.getPosition(t));	// position  @ t
 	const Vec3f d(curve.getDirection(t));	// direction @ t (non-normalized)
 
-	const Vec3f wup(0.f, 0.f, 1.f);		// world up vector
+	const Vec3f wup(0.f, 0.f, 1.f);         // world up vector
 
 	const Vec3f dir(normalize(d));                  // tangent
 	const Vec3f rit(cross(dir, wup).normalize());   // local right vector
@@ -317,9 +317,11 @@ Phase2Window::Phase2Window(const int x, const int y)
 	, view(nullptr)
 	, widgets(nullptr)
 	, animateButton(nullptr)
+	, addPointButton(nullptr)
+	, delPointButton(nullptr)
 	, textOutput(nullptr)
 	, curveTypeChoice(nullptr)
-	, curve(lines)
+	, curve(catmull)
 	, animating(false)
 	, rotation(0.f)
 {
@@ -353,7 +355,7 @@ void Phase2Window::createWidgets()
 		view = new Phase2View(5, 5, 590, 590);
 		view->setWindow(this);
 		view->setSelectedPoint(0);
-		this->resizable(view);
+//		this->resizable(view);
 
 		// Group widgets to help ease resizing
 		widgets = new Fl_Group(600, 5, 190, 590); // x,y,w,h
@@ -366,6 +368,18 @@ void Phase2Window::createWidgets()
 		animateButton->selection_color((Fl_Color)3); // yellow when pressed
 		animateButton->callback((Fl_Callback*)animateButtonCallback, this);
 
+		// Create the add control point button
+		addPointButton = new Fl_Button(670, 5, 60, 20, "Add");
+		addPointButton->type(FL_NORMAL_BUTTON);
+		addPointButton->selection_color((Fl_Color)3); // yellow when pressed
+		addPointButton->callback((Fl_Callback*)addPointButtonCallback, this);
+
+		// Create the delete control point button
+		delPointButton = new Fl_Button(735, 5, 60, 20, "Delete");
+		delPointButton->type(FL_NORMAL_BUTTON);
+		delPointButton->selection_color((Fl_Color)3); // yellow when pressed
+		delPointButton->callback((Fl_Callback*)delPointButtonCallback, this);
+
 		// Create curve type browser (drop down)
 		curveTypeChoice = new Fl_Choice(605, 30, 90, 20);
 		curveTypeChoice->clear();
@@ -373,15 +387,15 @@ void Phase2Window::createWidgets()
 		curveTypeChoice->add((CurveTypeNames[catmull]).c_str());
 //		curveTypeChoice->add((CurveTypeNames[hermite]).c_str());
 //		curveTypeChoice->add((CurveTypeNames[bspline]).c_str());
-		curveTypeChoice->value(0);
+		curveTypeChoice->value(1);
 		curveTypeChoice->callback((Fl_Callback*)curveTypeChoiceCallback, this);
 
 		// Create text display
 		textOutput = new Fl_Output(605, 55, 90, 20);
 
 		// Create a phantom widget to help resize things
-		Fl_Box *resizeBox = new Fl_Box(600, 595, 200, 5);
-		widgets->resizable(resizeBox);
+//		Fl_Box *resizeBox = new Fl_Box(600, 595, 200, 5);
+//		widgets->resizable(resizeBox);
 
 		widgets->end();
 	}

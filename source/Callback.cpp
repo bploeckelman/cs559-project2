@@ -4,6 +4,8 @@
 #include "Callback.h"
 #include "Phase2Window.h"
 #include "Curve.h"
+#include "CtrlPoint.h"
+#include "Vec3f.h"
 
 #pragma warning(push)
 #pragma warning(disable:4312)
@@ -12,8 +14,10 @@
 #pragma warning(pop)
 
 #include <iostream>
-#include <time.h>
+#include <cstdlib>
+#include <ctime>
 
+using std::rand;
 using std::cout;
 using std::endl;
 
@@ -58,6 +62,46 @@ void animateButtonCallback(Fl_Widget *widget, Phase2Window *window)
 	}
 
 	window->toggleAnimating();
+
+	window->damageMe();
+}
+
+void addPointButtonCallback( Fl_Widget *widget, Phase2Window *window )
+{	if( window == nullptr || widget == nullptr )
+	{
+		cout << "Error: damageCallback - null pointer passed." << endl;
+		return;
+	}
+
+	const float x = static_cast<float>((rand() % 150) - 75);
+	const float y = static_cast<float>((rand() % 50));
+	const float z = static_cast<float>((rand() % 150) - 75);
+
+	window->getCurve().addControlPoint(CtrlPoint(Vec3f(x,y,z)));
+	// Reset t so we don't try to access out of bounds
+	window->setRotation(0.f);
+
+	window->damageMe();
+}
+
+void delPointButtonCallback( Fl_Widget *widget, Phase2Window *window )
+{
+	if( window == nullptr || widget == nullptr )
+	{
+		cout << "Error: damageCallback - null pointer passed." << endl;
+		return;
+	}
+
+	// Don't allow deletion of points if we are down to just 2
+	if( window->getCurve().numControlPoints() <= 2 )
+		return;
+
+	const int selected = window->getView().getSelectedPoint();
+	try {
+		window->getCurve().delControlPoint(selected);
+		// Reset t so we don't try to access out of bounds
+		window->setRotation(0.f);
+	} catch(Curve::NoSuchPoint&) { }
 
 	window->damageMe();
 }

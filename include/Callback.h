@@ -10,4 +10,8 @@ void idleCallback(void *pData);
 
 void animateButtonCallback(Fl_Widget *widget, Phase2Window *window);
 
+void addPointButtonCallback(Fl_Widget *widget, Phase2Window *window);
+
+void delPointButtonCallback(Fl_Widget *widget, Phase2Window *window);
+
 void curveTypeChoiceCallback(Fl_Widget *widget, Phase2Window *window);

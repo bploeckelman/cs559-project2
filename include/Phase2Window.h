@@ -85,6 +85,8 @@ private:
 
 	Fl_Group   *widgets;
 	Fl_Button  *animateButton;
+	Fl_Button  *addPointButton;
+	Fl_Button  *delPointButton;
 	Fl_Output  *textOutput;
 	Fl_Choice  *curveTypeChoice;
 
@@ -97,7 +99,6 @@ private:
 	void createPoints();
 
 public:
-
 	Phase2Window(const int x=100, const int y=50);
 
 	void damageMe();
@@ -108,6 +109,8 @@ public:
 
 	inline float getRotation() const  { return rotation; }
 	inline void  setRotation(float r) { rotation = r; }
+
+	inline const Phase2View& getView() const { return *view; }
 
 	inline Curve& getCurve() { return curve; }
 	inline std::vector<CtrlPoint>& getPoints() { return curve.getControlPoints(); }
