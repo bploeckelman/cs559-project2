@@ -19,7 +19,6 @@ private:
 
 	void drawSegment(const int number);
 
-	void regenerateSegments();
 	void regenerateLineSegments();
 	void regenerateCatmullSegments();
 	void regenerateBSplineSegments();
@@ -30,6 +29,7 @@ public:
 
 	Curve(const CurveType& type=lines);
 
+	void regenerateSegments();
 	void draw();
 	void drawPoint(int index);
 	void drawPoints() const;

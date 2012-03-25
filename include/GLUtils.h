@@ -23,7 +23,9 @@ inline void drawVector(const Vec3f& pos, const Vec3f& vec, const Vec3f& color)
 	glEnd();
 }
 
-inline void drawBasis(const Vec3f& x, const Vec3f& y, const Vec3f& z)
+inline void drawBasis(const Vec3f& x=Vec3f(1.f, 0.f, 0.f), 
+					  const Vec3f& y=Vec3f(0.f, 1.f, 0.f),
+					  const Vec3f& z=Vec3f(0.f, 0.f, 1.f))
 {
 	const Vec3f origin(0.f, 0.f, 0.f);
 

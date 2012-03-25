@@ -24,5 +24,8 @@ public:
 	inline const Vec3f& pos()    const { return _pos; }
 	inline const Vec3f& orient() const { return _orient; }
 
+	inline Vec3f& pos()    { return _pos; }
+	inline Vec3f& orient() { return _orient; }
+
 	bool operator==(const CtrlPoint& other);
 };

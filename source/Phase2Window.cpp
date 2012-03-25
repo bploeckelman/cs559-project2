@@ -14,7 +14,7 @@
 #include "GLUtils.h"
 
 #include "TrainFiles/Utilities/ArcBallCam.H"
-#include "TrainFiles/Utilities/3DUtils.h"	// for drawCube()
+#include "TrainFiles/Utilities/3DUtils.h"
 
 #include <windows.h>
 #define WIN32_LEAN_AND_MEAN
@@ -125,6 +125,7 @@ void Phase2View::draw()
 
 	glColor4ub(20, 250, 20, 255);
 	glPushMatrix();
+		glTranslatef(0.f, 1.f, 0.f);
 		glTranslatef(p.x(), p.y(), p.z());
 
 		GLfloat m[] = {
@@ -136,6 +137,7 @@ void Phase2View::draw()
 		glMultMatrixf(m);
 
 		drawCube(0.f, 0.f, 0.f, 2.5f);
+		drawBasis();
 		drawVector(Vec3f(0.f, 0.f, 0.f), 
 				   Vec3f(0.f, 0.f, 5.f),
 				   Vec3f(1.f, 0.f, 1.f));
@@ -175,6 +177,33 @@ int Phase2View::handle(int event)
 		damage(1);
 		lastPush = 0;
 		return 1;
+	case FL_DRAG:
+		if ((lastPush == 1) && (selectedPoint >=0)) 
+		{
+			try {
+				CtrlPoint& cp = window->getPoints().at(selectedPoint);
+
+				double r1x, r1y, r1z, r2x, r2y, r2z;
+				getMouseLine(r1x,r1y,r1z, r2x,r2y,r2z);
+
+				double rx, ry, rz;
+				mousePoleGo(r1x,r1y,r1z, r2x,r2y,r2z, 
+					static_cast<double>(cp.pos().x()), 
+					static_cast<double>(cp.pos().y()),
+					static_cast<double>(cp.pos().z()),
+					rx, ry, rz,
+					(Fl::event_state() & FL_CTRL) != 0);
+
+				cp.pos().x(static_cast<float>(rx));
+				cp.pos().y(static_cast<float>(ry));
+				cp.pos().z(static_cast<float>(rz));
+
+				window->getCurve().regenerateSegments();
+
+				damage(1);
+			} catch(std::out_of_range&) {}
+		}
+		break;
 	case FL_FOCUS:
 		return 1;
 	case FL_ENTER: // take focus anytime mouse enters window
@@ -185,20 +214,6 @@ int Phase2View::handle(int event)
 		int k  = Fl::event_key();
 		int ks = Fl::event_state();
 		if( k == ' ' ) toggleUseArcball(); // ...
-		if( k == 'c' ) 
-		{
-			Curve& curve = window->getCurve();
-			++curve.selectedSegment;
-			if( curve.selectedSegment >= curve.numSegments() )
-				curve.selectedSegment = 0;
-		}
-		if( k == 'z' )
-		{
-			Curve& curve = window->getCurve();
-			--curve.selectedSegment;
-			if( curve.selectedSegment < 0 )
-				curve.selectedSegment = curve.numSegments() - 1;
-		}
 		//*/
 		break;
 	}
