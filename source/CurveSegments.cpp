@@ -2,6 +2,8 @@
  * CurveSegments.cpp
  */
 #include "CurveSegments.h"
+#include "CtrlPoint.h"
+#include "Vec3f.h"
 
 #include <Windows.h>
 #define WIN32_LEAN_AND_MEAN
@@ -19,60 +21,93 @@ std::string CurveTypeNames[] = {
 };
 
 
+/* ==================================================================
+ * CurveSegment base class
+ * ==================================================================
+ */
 int       CurveSegment::getNumber    () const { return number; }
 CurveType CurveSegment::getCurveType () const { return curveType; }
 
-Vec3f CurveSegment::getStartPoint () const { return startPoint; }
-Vec3f CurveSegment::getEndPoint   () const { return endPoint; }
-Vec3f CurveSegment::getControl1   () const { return control1; }
-Vec3f CurveSegment::getControl2   () const { return control2; }
+CtrlPoint& CurveSegment::getStartPoint () { return startPoint; }
+CtrlPoint& CurveSegment::getEndPoint   () { return endPoint; }
+CtrlPoint& CurveSegment::getControl1   () { return control1; }
+CtrlPoint& CurveSegment::getControl2   () { return control2; }
 
 
-
-void LineSegment::draw() 
+/* ==================================================================
+ * LineSegment class
+ * ==================================================================
+ */
+void LineSegment::draw(bool drawPoints) 
 {
+	const Vec3f& start(startPoint.pos());
+	const Vec3f& end(endPoint.pos());
+
+	glColor3ub(255, 255, 255);
 	glBegin(GL_LINES);
-
-	glVertex3f(startPoint.x(), startPoint.y(), startPoint.z());
-	glVertex3f(endPoint.x(), endPoint.y(), endPoint.z());
-
+		glVertex3f(start.x(), start.y(), start.z());
+		glVertex3f(end.x(), end.y(), end.z());
 	glEnd();
+
+	if( drawPoints )
+	{
+		glColor3ub(255, 255, 255);
+		startPoint.draw();
+		endPoint.draw();
+
+		glColor3ub(128, 128, 128);
+		control1.draw();
+		control2.draw();
+	}
 }
 
 Vec3f LineSegment::getPosition( float t )
 {
-	return lerp(-t, startPoint, endPoint);
+	return lerp(-t, startPoint.pos(), endPoint.pos());
 }
 
 Vec3f LineSegment::getDirection( float t )
 {
-	return (endPoint - startPoint); //.normalize();
+	return (endPoint.pos() - startPoint.pos()); //.normalize();
 }
 
 
-void CatmullRomSegment::draw() 
+/* ==================================================================
+ * CatmullRomSegment class
+ * ==================================================================
+ */
+void CatmullRomSegment::draw(bool drawPoints) 
 {
+	static const int   lines = 25;
+	static const float step  = 1.f / lines;
+
 	glBegin(GL_LINE_STRIP);
-
-	const int lines = 25;
-	const float step = 1.f / lines;
-	float t = 0.f;
-
-	for(int i = 0; i <= lines; ++i, t += step)
-	{
-		const Vec3f p(getPosition(t));
-		glVertex3f(p.x(), p.y(), p.z());	
-	}
-
+		float t = 0.f;
+		for(int i = 0; i <= lines; ++i, t += step)
+		{
+			const Vec3f p(getPosition(t));
+			glVertex3f(p.x(), p.y(), p.z());	
+		}
 	glEnd();
+
+	if( drawPoints )
+	{
+		glColor4ub(255, 255, 255, 255);
+		startPoint.draw();
+		endPoint.draw();
+
+		glColor4ub(128, 128, 128, 128);
+		control1.draw();
+		control2.draw();
+	}
 }
 
 Vec3f CatmullRomSegment::getPosition( float t )
 {
-	const Vec3f p0(startPoint);
-	const Vec3f p1(endPoint);
-	const Vec3f m0(control1);
-	const Vec3f m1(control2);
+	const Vec3f p0(startPoint.pos());
+	const Vec3f p1(endPoint.pos());
+	const Vec3f m0(control1.pos());
+	const Vec3f m1(control2.pos());
 
 	const float tt  = t * t;
 	const float ttt = t * tt;
@@ -88,10 +123,11 @@ Vec3f CatmullRomSegment::getPosition( float t )
 }
 
 Vec3f CatmullRomSegment::getDirection( float t )
-{	const Vec3f p0(startPoint);
-	const Vec3f p1(endPoint);
-	const Vec3f m0(control1);
-	const Vec3f m1(control2);
+{
+	const Vec3f p0(startPoint.pos());
+	const Vec3f p1(endPoint.pos());
+	const Vec3f m0(control1.pos());
+	const Vec3f m1(control2.pos());
 
 	const float tt  = t * t;
 
@@ -104,3 +140,17 @@ Vec3f CatmullRomSegment::getDirection( float t )
 
 	return dir.normalize();
 }
+
+
+/* ==================================================================
+ * HermiteSegment class
+ * ==================================================================
+ */
+// TODO
+
+
+/* ==================================================================
+ * BSplineSegment class
+ * ==================================================================
+ */
+// TODO

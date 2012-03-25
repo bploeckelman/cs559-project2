@@ -41,7 +41,7 @@ void Curve::draw()
 			segment->draw();
 	}
 
-	drawPoints();
+//	drawPoints();
 }
 
 void Curve::drawPoint( int index )
@@ -57,7 +57,7 @@ void Curve::drawSelectedSegment()
 	if( selectedSegment < 0 || selectedSegment >= (int)segments.size() )
 		return;
 
-	segments[selectedSegment]->draw();
+	segments[selectedSegment]->draw(true);
 }
 
 Vec3f Curve::getPosition( const float t )

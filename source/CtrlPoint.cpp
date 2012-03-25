@@ -32,7 +32,7 @@ void CtrlPoint::draw() const
 		// TODO: this has to change 
 		// if this point is selected or not
 		// pass flag into method?
-		glColor3ub(240, 20, 20);
+//		glColor4ub(240, 20, 20);
 		
 		glBegin(GL_QUADS);
 			glNormal3f( 0,0,1);
@@ -68,7 +68,7 @@ void CtrlPoint::draw() const
 			glVertex3f(-size,-size, size);
 		glEnd();
 
-		glColor3ub(252, 209, 22);
+//		glColor3ub(252, 209, 22);
 
 		glBegin(GL_TRIANGLE_FAN);
 			glNormal3f(0,1.0f,0);

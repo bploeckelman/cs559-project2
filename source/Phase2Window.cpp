@@ -78,6 +78,8 @@ void Phase2View::draw()
 	glGetFloatv(GL_LINE_WIDTH_GRANULARITY, &step);
 */
 	// TODO: call these once only
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 	glLineWidth(5.f);
@@ -91,7 +93,7 @@ void Phase2View::draw()
 	setupProjection();
 
 	// Draw the floor and a basis --------------------------------
-	glColor4ub(255, 255, 255, 128);
+	glColor4ub(255, 255, 255, 200);
 	glPushMatrix();
 		glTranslatef(0.f, -20.f, 0.f);
 		drawFloor(150.f);
@@ -112,8 +114,6 @@ void Phase2View::draw()
 	curve.drawSelectedSegment();
 
 	// Draw the moving cube --------------------------------------
-	glColor4ub(20, 250, 20, 255);
-
 	const Vec3f p(curve.getPosition(t));	// position  @ t
 	const Vec3f d(curve.getDirection(t));	// direction @ t (non-normalized)
 
@@ -123,6 +123,7 @@ void Phase2View::draw()
 	const Vec3f rit(cross(dir, wup).normalize());   // local right vector
 	const Vec3f lup(cross(rit, dir).normalize());   // local up vector
 
+	glColor4ub(20, 250, 20, 255);
 	glPushMatrix();
 		glTranslatef(p.x(), p.y(), p.z());
 
