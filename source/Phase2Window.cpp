@@ -92,6 +92,9 @@ void Phase2View::draw()
 	Curve& curve(window->getCurve());
 	curve.draw();
 
+	glColor4ub(255, 0, 0, 255);
+	curve.drawSelectedSegment();
+
 /*
 	glPushMatrix();
 	const Vec3f p(curve.getPosition(window->getRotation()));
@@ -139,6 +142,20 @@ int Phase2View::handle(int event)
 		int k  = Fl::event_key();
 		int ks = Fl::event_state();
 		if( k == ' ' ) toggleUseArcball(); // ...
+		if( k == 'c' ) 
+		{
+			Curve& curve = window->getCurve();
+			++curve.selectedSegment;
+			if( curve.selectedSegment >= curve.numSegments() )
+				curve.selectedSegment = 0;
+		}
+		if( k == 'z' )
+		{
+			Curve& curve = window->getCurve();
+			--curve.selectedSegment;
+			if( curve.selectedSegment < 0 )
+				curve.selectedSegment = curve.numSegments() - 1;
+		}
 		//*/
 		break;
 	}

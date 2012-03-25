@@ -55,8 +55,11 @@ void CatmullRomSegment::draw()
 {
 	glBegin(GL_LINE_STRIP);
 
+	const int lines = 25;
+	const float step = 1.f / lines;
 	float t = 0.f;
-	for(int i = 0; i <= 25; ++i, t += 0.04f)
+
+	for(int i = 0; i <= lines; ++i, t += step)
 	{
 		const Vec3f p(getPosition(t));
 		glVertex3f(p.x(), p.y(), p.z());	

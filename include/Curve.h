@@ -18,6 +18,7 @@ private:
 	std::vector<CurveSegment*> segments;
 
 	void drawPoints()  const;
+	void drawSegment(const int number);
 
 	void regenerateSegments();
 	void regenerateLineSegments();
@@ -25,10 +26,14 @@ private:
 	void regenerateBSplineSegments();
 
 public:
+	int selectedPoint;
+	int selectedSegment;
+
 	Curve(const CurveType& type=points);
 
 	void draw();
-	void drawSegment(const int number);
+	void drawPoint(int index);
+	void drawSelectedSegment();
 
 	Vec3f getPosition(const float t);
 	Vec3f getDirection(const float t);

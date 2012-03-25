@@ -23,6 +23,8 @@ Curve::Curve(const CurveType& type)
 	: type(type)
 	, controlPoints()
 	, segments()
+	, selectedPoint(-1)
+	, selectedSegment(-1)
 { }
 
 void Curve::draw() 
@@ -40,6 +42,22 @@ void Curve::draw()
 	}
 
 	drawPoints();
+}
+
+void Curve::drawPoint( int index )
+{
+	if( index < 0 || index >= controlPoints.size() )
+		return;
+
+	controlPoints[index].draw();
+}
+
+void Curve::drawSelectedSegment()
+{
+	if( selectedSegment < 0 || selectedSegment >= segments.size() )
+		return;
+
+	segments[selectedSegment]->draw();
 }
 
 Vec3f Curve::getPosition( const float t )
