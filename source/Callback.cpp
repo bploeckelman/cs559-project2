@@ -20,7 +20,7 @@ using std::endl;
 
 void idleCallback(void *pData)
 {
-	static const unsigned long interval = CLOCKS_PER_SEC / 10;
+	static const unsigned long interval = CLOCKS_PER_SEC / 30;
 	static unsigned long lastRedraw = 0;
 
 	if( pData == nullptr ) 
@@ -35,7 +35,7 @@ void idleCallback(void *pData)
 	{
 		lastRedraw = clock();
 
-		static const float rotationStep = 0.08f;
+		static const float rotationStep = 0.01f;
 		const float rotation = window->getRotation();
 
 		if( window->isAnimating() )
