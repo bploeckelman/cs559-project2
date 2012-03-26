@@ -34,6 +34,7 @@
 #include <Fl/Fl_Button.h>
 #include <Fl/Fl_Output.h>
 #include <Fl/Fl_Choice.h>
+#include <Fl/glut.h>		// for primitive drawing
 #pragma warning(pop)
 
 #include <iostream>
@@ -70,7 +71,7 @@ void MainView::draw()
 
 	openglFrameSetup();
 
-	drawFloor();
+	drawScenery();
 	drawCurve(t);
 	drawPathObject(t);
 	drawSelectedControlPoint();
@@ -244,6 +245,25 @@ void MainView::updateTextWidget( const float t )
 void MainView::openglFrameSetup()
 {
 	// TODO: call these once only, not every frame
+	glEnable(GL_LIGHTING);
+	GLfloat gAmbient[] = { 0.2f, 0.2f, 0.2f, 1.f };
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, gAmbient);
+
+	GLfloat ambient[] = { 0.5f, 0.5f, 0.5f, 1.f };
+	GLfloat diffuse[] = { 0.7f, 0.7f, 0.7f, 1.f };
+	GLfloat specular[] = { 1.f, 1.f, 1.f, 1.f };
+	GLfloat position[] = { 0.f, 200.f, 0.f, 1.f };
+
+	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
+	glLightfv(GL_LIGHT0, GL_POSITION, position);
+	glEnable(GL_LIGHT0);
+
+	glShadeModel(GL_SMOOTH);
+	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+	glEnable(GL_COLOR_MATERIAL);
+
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_DEPTH_TEST);
@@ -251,7 +271,7 @@ void MainView::openglFrameSetup()
 	glLineWidth(5.f);
 	// -------------------------------------------
 
-	glClearColor(0.f, 0.f, 0.2f, 0.f);
+	glClearColor(0.f, 0.f, 0.2f, 1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH);
 
@@ -260,19 +280,65 @@ void MainView::openglFrameSetup()
 	setupProjection();
 }
 
-/* drawFloor() - Draws the flor plane and a coordinate basis ----- */
-void MainView::drawFloor()
+/* drawFloor() - Draws the floor plane and assorted scenery ------ */ 
+void MainView::drawScenery()
 {
-	glColor4ub(255, 255, 255, 200);
+	glDisable(GL_BLEND);
+
 	glPushMatrix();
+		glColor4ub(255, 255, 255, 255);
 		glTranslatef(0.f, -20.f, 0.f);
-		::drawFloor(150.f);
+		drawFloor(150.f);
 
 		glTranslatef(0.f, 0.1f, 0.f);
 		drawBasis(Vec3f(20.f, 0.f, 0.f), 
 				  Vec3f(0.f, 20.f, 0.f), 
 				  Vec3f(0.f, 0.f, 20.f));
+
+		glLineWidth(1.f);
+		glPushMatrix();
+			glColor4ub(0, 0, 255, 255);
+			glTranslatef(-50.f, 10.f, 50.f);
+			glRotatef(-90.f, 1.f, 0.f, 0.f);
+			static const GLushort pattern = 0x00ff;
+			glLineStipple(1, pattern);
+			glEnable(GL_LINE_STIPPLE);
+			glutWireSphere(10.f, 20, 20);
+			glDisable(GL_LINE_STIPPLE);
+		glPopMatrix();
+		glPushMatrix();
+			glColor4ub(200, 50, 200, 255);
+			glTranslatef(-50.f, 6.f, -50.f);
+			glRotatef(-45.f, 0.f, 1.f, 0.f);
+			glutSolidTeapot(8.f);
+		glPopMatrix();
+		glLineWidth(5.f);
+
+		glPushMatrix();
+			glColor4ub(0, 255, 0, 255);
+			glPushMatrix();
+				glTranslatef(50.f, 5.f, 50.f);
+				glRotatef(-90.f, 1.f, 0.f, 0.f);
+				glutSolidCone(10.f, 20.f, 10, 10);
+			glPopMatrix();
+			
+			glColor4ub(139, 69, 19, 255);
+			glPushMatrix();
+				glTranslatef(50.f, 2.5f, 50.f);
+				glutSolidCube(5.f);
+			glPopMatrix();
+		glPopMatrix();
+
+		glPushMatrix();
+			glColor4ub(255, 255, 10, 255);
+			glTranslatef(50.f, 8.1f, -50.f);
+			glScalef(5.f, 5.f, 5.f);
+			glutWireDodecahedron();
+		glPopMatrix();
+
 	glPopMatrix();
+
+	glEnable(GL_BLEND);
 }
 
 /* drawCurve() - Draws the window's curve object ----------------- */

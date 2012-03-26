@@ -68,7 +68,7 @@ private:
 
 	void updateTextWidget( const float t );
 	void openglFrameSetup();
-	void drawFloor();
+	void drawScenery();
 	void drawCurve( const float t );
 	void drawPathObject( const float t );
 	void drawSelectedControlPoint();
