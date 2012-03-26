@@ -106,7 +106,6 @@ void MainView::draw()
 		tt = curve.numSegments() + (tt - 0.0001f);
 	drawPathObject(tt);
 //*/
->>>>>>> 35fa07c6426bf564896a79cb348b4b5b386d79ad
 	drawSelectedControlPoint();
 }
 
