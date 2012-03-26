@@ -66,14 +66,17 @@ MainView::MainView(int x, int y, int w, int h, const char *l)
 /* draw() - Draws to the screen ---------------------------------- */
 void MainView::draw()
 {
-	const float t = window->getRotation();
+	float t = window->getRotation();
+	Curve& curve(window->getCurve());
+
 	updateTextWidget(t);
 
 	openglFrameSetup();
 
 	drawScenery();
 	drawCurve(t);
-	drawPathObject(t);
+	drawPathObject(t+0.3f); // need to have +.3f to draw the 2 cars behind it
+
 	drawSelectedControlPoint();
 }
 
@@ -359,41 +362,118 @@ void MainView::drawPathObject( const float t )
 {
 	Curve& curve(window->getCurve());
 
-	const Vec3f p(curve.getPosition(t));	// position  @ t
-	const Vec3f d(curve.getDirection(t));	// direction @ t (non-normalized)
-
 	const Vec3f wup(0.f, 0.f, 1.f);         // world up vector
 
-	const Vec3f dir(normalize(d));                  // tangent
-	const Vec3f rit(cross(dir, wup).normalize());   // local right vector
-	const Vec3f lup(cross(rit, dir).normalize());   // local up vector
+	vector<Vec3f> train_vectors(15); //create 3 pairs of 5 vectors for each train car
 
-	glColor4ub(20, 250, 20, 255);
-	glPushMatrix();
-	glTranslatef(0.f, 1.f, 0.f);
-	glTranslatef(p.x(), p.y(), p.z());
+	//printf("t is %f \n", t);
+	float tcar1;
+	float tcar2;
+	float tcar3;
 
-	GLfloat m[] = {
-		rit.x(), rit.y(), rit.z(), 0.f,
-		lup.x(), lup.y(), lup.z(), 0.f,
-		dir.x(), dir.y(), dir.z(), 0.f,
-		0.f,     0.f,     0.f,     1.f
-	};
-	glMultMatrixf(m);
+	//the following can probably be called recursively to make this method customizable
+	if(t > curve.numSegments())
+	{
+		tcar1 = t-(float)curve.numSegments();
+		//printf("tcar1 at t:%f is %f \n",t , tcar1);
 
-	drawCube(0.f, 0.f, 0.f, 2.5f);
-	/* TODO: drawing the basis shows that sometimes the local 
-	coordinate system flips over, this will need to be 
-	fixed before the final version so the train doesn't 
-	go upside down
-	drawBasis(Vec3f(5.f, 0.f, 0.f),
-	Vec3f(0.f, 5.f, 0.f),
-	Vec3f(0.f, 0.f, 5.f));
-	*/
-	drawVector(Vec3f(0.f, 0.f, 0.f), 
+		if((t-0.1f) > curve.numSegments())
+		{
+			tcar2 = t- 0.1f-(float)curve.numSegments();
+			//printf("tcar2 at t:%f is %f \n",t , tcar2);
+
+			if((t-0.2f) > curve.numSegments())
+			{
+				tcar3 = t- 0.2f-(float)curve.numSegments();
+				//printf("tcar3 at t:%f is %f \n",t , tcar3);
+			}
+			else
+			{
+				tcar3 = t- 0.2f;
+				//printf("tcar3 (in else) at t:%f is %f \n",t , tcar3);
+			}
+		}
+		else
+		{
+			tcar2 = t- 0.1f;
+			//printf("tcar2 (in else) at t:%f is %f \n",t , tcar2);
+
+			if((t-0.2f) > curve.numSegments())
+			{
+				tcar3 = t- 0.2f-(float)curve.numSegments();
+				//printf("tcar3 at t:%f is %f \n",t , tcar3);
+			}
+			else
+			{
+				tcar3 = t- 0.2f;
+				//printf("tcar3 (in else) at t:%f is %f \n",t , tcar3);
+			}
+		}
+	}
+	else
+	{
+		//printf("t is %f \n", t);
+		tcar1 = t;
+		tcar2 = t- 0.1f;
+		tcar3 = t- 0.2f;
+	}
+	//end recursiveness
+
+
+	for(int x = 0; x<15; x=x+5) //this can be made customizable
+	{
+		if(x == 0)
+		{
+			train_vectors.at(x)= curve.getPosition(tcar1); // position  @ t
+			train_vectors.at(x+1) = curve.getDirection(tcar1); // direction @ t (non-normalized)
+		}
+		else if(x == 5)
+		{
+			train_vectors.at(x)= curve.getPosition(tcar2); // position  @ t- 1.f
+			train_vectors.at(x+1) = curve.getDirection(tcar2); // direction @ t - 1.f (non-normalized)
+		}
+		else if(x == 10)
+		{
+			train_vectors.at(x)= curve.getPosition(tcar3); // position  @ t- 2.f
+			train_vectors.at(x+1) = curve.getDirection(tcar3); // direction @ t - 2.f (non-normalized)
+		}
+
+		train_vectors.at(x+2)= normalize(train_vectors.at(x+1)); //tangent
+		train_vectors.at(x+3)= cross(train_vectors.at(x+2), wup).normalize(); // local right vector
+		train_vectors.at(x+4)= cross(train_vectors.at(x+3), train_vectors.at(x+2)).normalize(); // local up vector
+
+		if(x == 0)
+		{
+			glColor4ub(20, 250, 20, 255); //lime green
+		}
+		else if(x == 5)
+		{
+			glColor4ub(255, 255, 0, 255); //yellow
+		}
+		else if(x == 10)
+		{
+			glColor4ub(0, 0, 255, 255); //blue
+		}
+
+		glPushMatrix();
+		glTranslatef(0.f, 1.f, 0.f);
+		glTranslatef(train_vectors.at(x).x(), train_vectors.at(x).y(), train_vectors.at(x).z());
+
+		GLfloat m[] = {
+			train_vectors.at(x+3).x(), train_vectors.at(x+3).y(), train_vectors.at(x+3).z(), 0.f,
+			train_vectors.at(x+4).x(), train_vectors.at(x+4).y(), train_vectors.at(x+4).z(), 0.f,
+			train_vectors.at(x+2).x(), train_vectors.at(x+2).y(), train_vectors.at(x+2).z(), 0.f,
+			0.f,     0.f,     0.f,     1.f
+		};
+		glMultMatrixf(m);
+
+		drawCube(0.f, 0.f, 0.f, 2.5f);
+		drawVector(Vec3f(0.f, 0.f, 0.f), 
 		Vec3f(0.f, 0.f, 5.f),
 		Vec3f(1.f, 0.f, 1.f));
-	glPopMatrix();
+		glPopMatrix();
+	}
+
 }
 
 /* drawSelectedControlPoint() - Draws the selected point highlighted */
