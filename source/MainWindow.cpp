@@ -75,8 +75,38 @@ void MainView::draw()
 
 	drawScenery();
 	drawCurve(t);
-	drawPathObject(t+0.3f); // need to have +.3f to draw the 2 cars behind it
 
+	const Curve& curve(window->getCurve());
+	float tt = t + 0.2f;
+	if( tt >= curve.numSegments() )
+		tt -= curve.numSegments();
+	drawPathObject(tt);
+
+	tt = t + 0.1f;
+	if( tt >= curve.numSegments() ) 
+		tt -= curve.numSegments();
+	drawPathObject(tt);
+
+	drawPathObject(t);
+
+/* Note: this works for drawing them front to back
+   but we have to do some rather ugly adjustments 
+   to avoid trying to index a non-existent segment 
+   due to floating point rounding...
+   -----------------------------------------------
+	drawPathObject(t);
+
+	float tt = t - 0.1f;
+	if( tt <= 0.f )
+		tt = curve.numSegments() + (tt - 0.0001f);
+	drawPathObject(tt);
+
+	tt = t - 0.2f;
+	if( tt <= 0.f )
+		tt = curve.numSegments() + (tt - 0.0001f);
+	drawPathObject(tt);
+//*/
+>>>>>>> 35fa07c6426bf564896a79cb348b4b5b386d79ad
 	drawSelectedControlPoint();
 }
 
