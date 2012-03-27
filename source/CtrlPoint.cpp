@@ -3,6 +3,7 @@
  */
 #include "CtrlPoint.h"
 #include "MathUtils.h"
+#include "GLUtils.h"
 
 #include <Windows.h>
 #define WIN32_LEAN_AND_MEAN
@@ -85,6 +86,9 @@ void CtrlPoint::draw() const
 			glVertex3f( size, size , size);
 		glEnd();
 
+		drawVector(Vec3f(0.f, 0.f, 0.f),
+				   Vec3f(0.f, 8.f, 0.f),
+				   Vec3f(0.f, 1.f, 0.f));
 	glPopMatrix();
 }
 
