@@ -106,6 +106,7 @@
     <ClCompile Include="source\CtrlPoint.cpp" />
     <ClCompile Include="source\Curve.cpp" />
     <ClCompile Include="source\CurveSegments.cpp" />
+    <ClCompile Include="source\highprecisiontime.cpp" />
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\MainWindow.cpp" />
   </ItemGroup>
@@ -126,6 +127,7 @@
     <ClInclude Include="include\Curve.h" />
     <ClInclude Include="include\CurveSegments.h" />
     <ClInclude Include="include\GLUtils.h" />
+    <ClInclude Include="include\highprecisiontime.h" />
     <ClInclude Include="include\MathUtils.h" />
     <ClInclude Include="include\MainWindow.h" />
     <ClInclude Include="include\Vec3f.h" />
