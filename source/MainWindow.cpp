@@ -12,6 +12,7 @@
 #include "CtrlPoint.h"
 #include "MathUtils.h"
 #include "GLUtils.h"
+#include "highPrecisionTime.h"
 
 #include "TrainFiles/Utilities/ArcBallCam.H"
 #include "TrainFiles/Utilities/3DUtils.h"
@@ -61,12 +62,36 @@ MainView::MainView(int x, int y, int w, int h, const char *l)
 {
 	mode( FL_RGB | FL_ALPHA | FL_DEPTH | FL_DOUBLE );
 	resetArcball();
+
+	/*GLfloat da[] = {0.4f, 1.0f, 1.0f, 1.0f};
+
+	GLuint arc_length_display_list = GL_INVALID_VALUE;
+	GLUquadric * q = gluNewQuadric();
+
+	double s = 3.0 / sqrt(3.0) * 0.1;
+
+	arc_length_display_list = glGenLists(1);
+	glNewList(arc_length_display_list, GL_COMPILE);
+	glColor4fv(da);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, da);
+	s *= 3;
+	glPushMatrix();
+	glScaled(s, s, s);
+	glutSolidIcosahedron();
+	glPopMatrix();
+	glEndList();
+	gluDeleteQuadric(q);*/
+
+	time_mode_started = hpTime.TotalTime();
 }
 
 /* draw() - Draws to the screen ---------------------------------- */
 void MainView::draw()
 {
+
 	const float t = window->getRotation();
+	const Curve& curve(window->getCurve());
+
 	updateTextWidget(t);
 
 	openglFrameSetup();
@@ -74,7 +99,6 @@ void MainView::draw()
 	drawScenery();
 	drawCurve(t);
 
-	const Curve& curve(window->getCurve());
 	float tt = t + 0.2f;
 	if( tt >= curve.numSegments() )
 		tt -= curve.numSegments();
@@ -435,7 +459,54 @@ void MainView::drawSelectedControlPoint()
 	} catch(std::out_of_range&) {}
 }
 
+void MainView::reparameterizing(Curve& curve)
+{
+	double seconds_per_sample = 1;
+	double flight_time = seconds_per_sample * curve.numSegments(); // This should actually be decoupled.
+	double time_now = hpTime.TotalTime() - time_mode_started;
 
+	//AnimateEqualSamples(time_now, seconds_per_sample);
+	//DrawControlPointsAndTangents(true);
+	double dmod = fmod(time_now, flight_time);
+	double big_t = dmod / flight_time;
+	int segment;
+	double lil_t = arcLengthInterpolation(big_t, segment);
+	//printf("dmod %f segment %d big_t %f lil_t %f time_now %f\n", dmod, segment, big_t, lil_t, time_now);
+
+	std::vector<CtrlPoint> ctrlpts = curve.getControlPoints();//bezier_segments[segment].EvaluateAt(lil_t);
+	Vec3f p = ctrlpts.at(0).pos();//fix this
+	glPushMatrix();
+	glTranslatef(p.x(), p.y(), p.z());
+	//call draw curve?
+	//glCallList(arc_length_display_list);
+	glPopMatrix();
+}
+
+float MainView::arcLengthInterpolation(float big_t, int& segment_number)
+{
+	float epsilon = 0.0000001;
+	if (abs(big_t) < epsilon)
+		return 0;
+	if (abs(big_t - 1) < epsilon)
+		return 1;
+	
+	size_t index;
+	for (index = 1; index < parameter_table.size(); index++)
+	{
+		if (big_t < parameter_table[index].fraction_of_accumulated_length)
+			break;
+	}
+	if (index >= parameter_table.size())
+		throw "big_t not found.";
+	float lower_fraction = parameter_table[index - 1].fraction_of_accumulated_length;
+	float upper_fraction = parameter_table[index].fraction_of_accumulated_length;
+	float lower_local_t = ((parameter_table[index - 1].segment_number != parameter_table[index].segment_number) ? 0 : parameter_table[index - 1].local_t);
+	float upper_local_t = parameter_table[index].local_t;
+	float result = lower_local_t + (big_t - lower_fraction) / (upper_fraction - lower_fraction) * (upper_local_t - lower_local_t);
+	segment_number = parameter_table[index].segment_number;
+	//printf("big_t: %f lil_t: %f lower fraction: %f upper_fraction: %f lower_t: %f upper_t: %f\n", big_t, result, lower_fraction, upper_fraction, lower_local_t, upper_local_t);
+	return result;
+}
 /* ==================================================================
  * MainWindow class
  * ==================================================================
