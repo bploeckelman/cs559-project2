@@ -341,9 +341,10 @@ void MainView::drawScenery()
 	glPushMatrix();
 		glColor4ub(255, 255, 255, 255);
 		glTranslatef(0.f, -20.f, 0.f);
-		drawFloor(150.f);
+		drawGroundPlane(400.f);
 
-		glTranslatef(0.f, 0.1f, 0.f);
+		glColor4ub(255, 255, 255, 255);
+		glTranslatef(0.f, 0.2f, 0.f);
 		drawBasis(Vec3f(20.f, 0.f, 0.f), 
 				  Vec3f(0.f, 20.f, 0.f), 
 				  Vec3f(0.f, 0.f, 20.f));
@@ -437,10 +438,12 @@ void MainView::drawPathObject( const float t )
 /* drawSelectedControlPoint() - Draws the selected point highlighted */
 void MainView::drawSelectedControlPoint()
 {
-	glColor4ub(250, 20, 20, 255);
-	try {
-		window->getPoints().at(selectedPoint).draw();
-	} catch(std::out_of_range&) {}
+	auto points = window->getPoints();
+	if( selectedPoint >= 0 && selectedPoint < points.size() )
+	{
+		glColor4ub(250, 20, 20, 255);
+		points[selectedPoint].draw();
+	}
 }
 
 void MainView::reparameterizing(Curve& curve)
@@ -469,7 +472,7 @@ void MainView::reparameterizing(Curve& curve)
 float MainView::arcLengthInterpolation(float big_t, int& segment_number)
 {
 	//double epsilon = 0.0000001;
-	float epsilon = 0.0001;
+	float epsilon = 0.0001f;
 	if (abs(big_t) < epsilon)
 		return 0;
 	if (abs(big_t - 1) < epsilon)

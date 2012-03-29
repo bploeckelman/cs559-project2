@@ -65,3 +65,33 @@ inline void lookAt(const Vec3f& position,
 			  direction.x(), direction.y(), direction.z(),
 			  up.x(), up.y(), up.z());
 }
+
+inline void drawGroundPlane(float size, int numSquares=8)
+{
+	static const GLfloat color1[] = { 0.f, 0.4f, 0.f, 1.f };
+	static const GLfloat color2[] = { 0.f, 0.3f, 0.f, 1.f };
+
+	const float maxX =  size / 2 , maxY =  size / 2;
+	const float minX = -size / 2 , minY = -size / 2;
+	const float xd   = (maxX - minX) / ((float) numSquares);
+	const float yd   = (maxY - minY) / ((float) numSquares);
+
+	float xp = minX;
+	float yp = minY;
+
+	glBegin(GL_QUADS);
+	for(int x = 0, i = 0; x < numSquares; ++x, xp += xd) 
+	{
+		yp = minY;
+		for(int y = 0, i = x; y < numSquares; ++y, ++i, yp += yd) 
+		{
+			glColor4fv((i % 2 == 0) ? color1 : color2);
+			glNormal3f(0, 1, 0); 
+			glVertex3d(xp,      0, yp);
+			glVertex3d(xp,      0, yp + yd);
+			glVertex3d(xp + xd, 0, yp + yd);
+			glVertex3d(xp + xd, 0, yp);
+		}
+	}
+	glEnd();
+}
