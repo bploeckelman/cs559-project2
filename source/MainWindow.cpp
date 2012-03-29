@@ -88,7 +88,6 @@ MainView::MainView(int x, int y, int w, int h, const char *l)
 /* draw() - Draws to the screen ---------------------------------- */
 void MainView::draw()
 {
-
 	const float t = window->getRotation();
 	const Curve& curve(window->getCurve());
 
@@ -412,41 +411,26 @@ void MainView::drawCurve( const float t )
 void MainView::drawPathObject( const float t )
 {
 	Curve& curve(window->getCurve());
-
 	const Vec3f p(curve.getPosition(t));	// position  @ t
 	const Vec3f d(curve.getDirection(t));	// direction @ t (non-normalized)
 
-	const Vec3f wup(0.f, 0.f, 1.f);         // world up vector
-
-	const Vec3f dir(normalize(d));                  // tangent
-	const Vec3f rit(cross(dir, wup).normalize());   // local right vector
-	const Vec3f lup(cross(rit, dir).normalize());   // local up vector
-
 	glColor4ub(20, 250, 20, 255);
 	glPushMatrix();
-	glTranslatef(0.f, 1.f, 0.f);
-	glTranslatef(p.x(), p.y(), p.z());
+		glTranslatef(p.x(), p.y() + 1.5f, p.z());
+		applyBasisFromTangent(normalize(d));
 
-	GLfloat m[] = {
-		rit.x(), rit.y(), rit.z(), 0.f,
-		lup.x(), lup.y(), lup.z(), 0.f,
-		dir.x(), dir.y(), dir.z(), 0.f,
-		0.f,     0.f,     0.f,     1.f
-	};
-	glMultMatrixf(m);
-
-	drawCube(0.f, 0.f, 0.f, 2.5f);
-	/* TODO: drawing the basis shows that sometimes the local 
-	coordinate system flips over, this will need to be 
-	fixed before the final version so the train doesn't 
-	go upside down
-	drawBasis(Vec3f(5.f, 0.f, 0.f),
-	Vec3f(0.f, 5.f, 0.f),
-	Vec3f(0.f, 0.f, 5.f));
-	*/
-	drawVector(Vec3f(0.f, 0.f, 0.f), 
-		Vec3f(0.f, 0.f, 5.f),
-		Vec3f(1.f, 0.f, 1.f));
+		drawCube(0.f, 0.f, 0.f, 2.5f);
+		/* TODO: drawing the basis shows that sometimes the local 
+		coordinate system flips over, this will need to be 
+		fixed before the final version so the train doesn't 
+		go upside down
+		drawBasis(Vec3f(5.f, 0.f, 0.f),
+				  Vec3f(0.f, 5.f, 0.f),
+				  Vec3f(0.f, 0.f, 5.f));
+		*/
+		drawVector(Vec3f(0.f, 0.f, 0.f), 
+				   Vec3f(0.f, 0.f, 5.f),
+				   Vec3f(1.f, 0.f, 1.f));
 	glPopMatrix();
 }
 
