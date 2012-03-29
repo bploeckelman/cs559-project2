@@ -10,6 +10,7 @@
  */
 #include "Curve.h"
 #include "CtrlPoint.h"
+#include "highPrecisionTime.h"
 
 #include "TrainFiles/Utilities/ArcBallCam.H"
 
@@ -46,6 +47,20 @@ private:
 	ArcBallCam arcballCam;
 	bool useArcball;
 
+	//GLuint arc_length_display_list;
+	HighPrecisionTime hpTime;
+	float time_mode_started;
+
+	struct ParameterTable
+	{
+		float local_t;
+		float accumulated_length;
+		float fraction_of_accumulated_length;
+		int segment_number;
+	};
+
+	std::vector<ParameterTable> parameter_table;
+
 public:
 	MainView(int x, int y, int w, int h, const char *l=0);
 
@@ -61,6 +76,8 @@ public:
 	inline MainWindow* getWindow() const { return window; }
 
 	inline void toggleUseArcball() { useArcball = !useArcball; }
+	float arcLengthInterpolation(float big_t, int& segment_number);
+	void BuildParameterTable(int number_of_samples, Curve& curve);
 
 private:
 	void resetArcball();
@@ -72,6 +89,9 @@ private:
 	void drawCurve( const float t );
 	void drawPathObject( const float t );
 	void drawSelectedControlPoint();
+	void reparameterizing(Curve& curve);
+	
+
 };
 
 
@@ -95,10 +115,12 @@ private:
 	Fl_Button  *delPointButton;
 	Fl_Output  *textOutput;
 	Fl_Choice  *curveTypeChoice;
+	Fl_Button  *paramButton;
 
 	Curve curve;
 
 	bool animating;
+	bool isArcLengthParam;
 	float rotation;
 
 	void createWidgets();
@@ -120,4 +142,6 @@ public:
 
 	inline Curve& getCurve() { return curve; }
 	inline std::vector<CtrlPoint>& getPoints() { return curve.getControlPoints(); }
+	inline void toggleArcParam() { isArcLengthParam = !isArcLengthParam;}
+
 };

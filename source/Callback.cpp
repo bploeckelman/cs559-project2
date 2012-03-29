@@ -122,3 +122,16 @@ void curveTypeChoiceCallback( Fl_Widget *widget, MainWindow *window )
 
 	window->damageMe();
 }
+
+void paramButtonCallback( Fl_Widget *widget, MainWindow *window )
+{
+	if( window == nullptr || widget == nullptr )
+	{
+		cout << "Error: curveTypeBrowserCallback - null pointer passed." << endl;
+		return;
+	}
+
+	window->toggleArcParam();
+
+	window->damageMe();
+}

@@ -124,6 +124,8 @@ void Curve::regenerateSegments()
 	}
 	segments.clear();
 
+	//this may need to take in a t value? for arc length parametrization
+
 	// Can't create segments without control points
 	if( controlPoints.empty() )
 		return;
@@ -135,6 +137,7 @@ void Curve::regenerateSegments()
 	case catmull: regenerateCatmullSegments(); break;
 	case bspline: regenerateBSplineSegments(); break;
 	}
+
 }
 
 void Curve::regenerateLineSegments()

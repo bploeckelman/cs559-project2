@@ -125,6 +125,11 @@ public:
 			<< ") ";
 	}
 
+	inline float Magnitude()
+	{
+		return sqrt(_x * _x + _y * _y + _z * _z);
+	}
+
 };
 
 inline float dot(const Vec3f& lhs, const Vec3f& rhs)

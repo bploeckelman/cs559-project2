@@ -82,7 +82,7 @@ MainView::MainView(int x, int y, int w, int h, const char *l)
 	glEndList();
 	gluDeleteQuadric(q);*/
 
-	time_mode_started = hpTime.TotalTime();
+	time_mode_started = (float)hpTime.TotalTime();
 }
 
 /* draw() - Draws to the screen ---------------------------------- */
@@ -461,20 +461,20 @@ void MainView::drawSelectedControlPoint()
 
 void MainView::reparameterizing(Curve& curve)
 {
-	double seconds_per_sample = 1;
-	double flight_time = seconds_per_sample * curve.numSegments(); // This should actually be decoupled.
-	double time_now = hpTime.TotalTime() - time_mode_started;
+	float seconds_per_sample = 1;
+	float flight_time = seconds_per_sample * curve.numSegments(); // This should actually be decoupled.
+	float time_now = (float)hpTime.TotalTime() - time_mode_started;
 
 	//AnimateEqualSamples(time_now, seconds_per_sample);
 	//DrawControlPointsAndTangents(true);
-	double dmod = fmod(time_now, flight_time);
-	double big_t = dmod / flight_time;
+	float dmod = fmod(time_now, flight_time);
+	float big_t = dmod / flight_time;
 	int segment;
-	double lil_t = arcLengthInterpolation(big_t, segment);
+	float lil_t = arcLengthInterpolation(big_t, segment);
 	//printf("dmod %f segment %d big_t %f lil_t %f time_now %f\n", dmod, segment, big_t, lil_t, time_now);
 
 	std::vector<CtrlPoint> ctrlpts = curve.getControlPoints();//bezier_segments[segment].EvaluateAt(lil_t);
-	Vec3f p = ctrlpts.at(0).pos();//fix this
+	Vec3f p = ctrlpts.at(segment).pos();//fix this using lil_t
 	glPushMatrix();
 	glTranslatef(p.x(), p.y(), p.z());
 	//call draw curve?
@@ -484,7 +484,8 @@ void MainView::reparameterizing(Curve& curve)
 
 float MainView::arcLengthInterpolation(float big_t, int& segment_number)
 {
-	float epsilon = 0.0000001;
+	//double epsilon = 0.0000001;
+	float epsilon = 0.0001;
 	if (abs(big_t) < epsilon)
 		return 0;
 	if (abs(big_t - 1) < epsilon)
@@ -507,6 +508,37 @@ float MainView::arcLengthInterpolation(float big_t, int& segment_number)
 	//printf("big_t: %f lil_t: %f lower fraction: %f upper_fraction: %f lower_t: %f upper_t: %f\n", big_t, result, lower_fraction, upper_fraction, lower_local_t, upper_local_t);
 	return result;
 }
+
+void MainView::BuildParameterTable(int number_of_samples, Curve& curve)
+{
+	std::vector<CtrlPoint> ctrlpts = curve.getControlPoints();
+	Vec3f previous_point = ctrlpts.at(0).pos();
+	ParameterTable p;
+	p.segment_number = 0;
+	p.accumulated_length = 0;
+	p.fraction_of_accumulated_length = 0;
+	p.local_t = 0;
+	parameter_table.push_back(p);
+
+	for (int i = 0; i < curve.numSegments(); i++)
+	{
+		for (int j = 1; j < number_of_samples; j++)
+		{
+			p.segment_number = i;
+			p.local_t = ((float) j) / ((float) number_of_samples - 1);
+			Vec3f v = ctrlpts.at(i).pos();//bezier_segments[i].EvaluateAt(p.local_t); //fix this? use p.local_t
+			p.accumulated_length = (previous_point - v).Magnitude() + parameter_table[parameter_table.size() - 1].accumulated_length;
+			parameter_table.push_back(p);
+			previous_point = v;
+		}
+	}
+	float total_length = parameter_table[parameter_table.size() - 1].accumulated_length;
+	for (size_t i = 0; i < parameter_table.size(); i++)
+	{
+		parameter_table[i].fraction_of_accumulated_length = parameter_table[i].accumulated_length / total_length;
+	}
+}
+
 /* ==================================================================
  * MainWindow class
  * ==================================================================
@@ -521,6 +553,7 @@ MainWindow::MainWindow(const int x, const int y)
 	, delPointButton(nullptr)
 	, textOutput(nullptr)
 	, curveTypeChoice(nullptr)
+	, paramButton(false)
 	, curve(catmull)
 	, animating(false)
 	, rotation(0.f)
@@ -590,8 +623,14 @@ void MainWindow::createWidgets()
 		curveTypeChoice->value(1);
 		curveTypeChoice->callback((Fl_Callback*)curveTypeChoiceCallback, this);
 
+		paramButton = new Fl_Button(605, 55, 120, 20, "Arclength Param");
+		paramButton->type(FL_TOGGLE_BUTTON);
+		paramButton->value(0);
+		paramButton->selection_color((Fl_Color)3); // yellow when pressed
+		paramButton->callback((Fl_Callback*)paramButtonCallback, this);
+
 		// Create text display
-		textOutput = new Fl_Output(605, 55, 90, 20);
+		textOutput = new Fl_Output(605, 80, 90, 20);
 
 		// Create a phantom widget to help resize things
 //		Fl_Box *resizeBox = new Fl_Box(600, 595, 200, 5);
