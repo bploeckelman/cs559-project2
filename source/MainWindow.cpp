@@ -35,6 +35,8 @@
 #include <Fl/Fl_Button.h>
 #include <Fl/Fl_Output.h>
 #include <Fl/Fl_Choice.h>
+#include <Fl/Fl_Slider.h>
+#include <Fl/Fl_Value_Slider.h>
 #include <Fl/glut.h>		// for primitive drawing
 #pragma warning(pop)
 
@@ -94,21 +96,38 @@ void MainView::draw()
 	updateTextWidget(t);
 
 	openglFrameSetup();
-
 	drawScenery();
 	drawCurve(t);
+	//printf("t is %f \n", t);
 
 	float tt = t + 0.2f;
 	if( tt >= curve.numSegments() )
+	{
 		tt -= curve.numSegments();
+	}
+	else if(tt < 0)
+	{
+		tt += curve.numSegments();
+	}
 	drawPathObject(tt);
 
 	tt = t + 0.1f;
-	if( tt >= curve.numSegments() ) 
+	if( tt >= curve.numSegments() )
+	{
 		tt -= curve.numSegments();
+	}
+	else if(tt < 0)
+	{
+		tt += curve.numSegments();
+	}
 	drawPathObject(tt);
 
-	drawPathObject(t);
+	tt = t;
+	if(tt < 0)
+	{
+		tt += curve.numSegments();
+	}
+	drawPathObject(tt);
 
 /* Note: this works for drawing them front to back
    but we have to do some rather ugly adjustments 
@@ -439,7 +458,7 @@ void MainView::drawPathObject( const float t )
 void MainView::drawSelectedControlPoint()
 {
 	auto points = window->getPoints();
-	if( selectedPoint >= 0 && selectedPoint < points.size() )
+	if( selectedPoint >= 0 && selectedPoint < (signed)points.size() )
 	{
 		glColor4ub(250, 20, 20, 255);
 		points[selectedPoint].draw();
@@ -541,9 +560,14 @@ MainWindow::MainWindow(const int x, const int y)
 	, textOutput(nullptr)
 	, curveTypeChoice(nullptr)
 	, paramButton(false)
+	, forwardButton(nullptr)
+	, backwardButton(nullptr)
+	, speedSlider(nullptr)
 	, curve(catmull)
 	, animating(false)
 	, rotation(0.f)
+	, rotationStep(0.01f)
+	, speed(2.f)
 {
 	createWidgets();
 	createPoints();
@@ -610,14 +634,34 @@ void MainWindow::createWidgets()
 		curveTypeChoice->value(1);
 		curveTypeChoice->callback((Fl_Callback*)curveTypeChoiceCallback, this);
 
+		//create arc length parameterization button
 		paramButton = new Fl_Button(605, 55, 120, 20, "Arclength Param");
 		paramButton->type(FL_TOGGLE_BUTTON);
 		paramButton->value(0);
 		paramButton->selection_color((Fl_Color)3); // yellow when pressed
 		paramButton->callback((Fl_Callback*)paramButtonCallback, this);
 
+		// Create the manual backwards button
+		backwardButton = new Fl_Button(730, 55, 30, 20, "<<");
+		backwardButton->type(FL_NORMAL_BUTTON);
+		backwardButton->selection_color((Fl_Color)3); // yellow when pressed
+		backwardButton->callback((Fl_Callback*)backwardButtonCallback, this);
+
+		// Create the manual forwards button
+		forwardButton = new Fl_Button(765, 55, 30, 20, ">>");
+		forwardButton->type(FL_NORMAL_BUTTON);
+		forwardButton->selection_color((Fl_Color)3); // yellow when pressed
+		forwardButton->callback((Fl_Callback*)forwardButtonCallback, this);
+
+		speedSlider = new Fl_Value_Slider(645,80,140,20,"Speed");
+		speedSlider->range(0,10);
+		speedSlider->value(2);
+		speedSlider->align(FL_ALIGN_LEFT);
+		speedSlider->type(FL_HORIZONTAL);
+		speedSlider->callback((Fl_Callback*)speedSliderCallback, this);
+
 		// Create text display
-		textOutput = new Fl_Output(605, 80, 90, 20);
+		textOutput = new Fl_Output(605, 105, 90, 20);
 
 		// Create a phantom widget to help resize things
 //		Fl_Box *resizeBox = new Fl_Box(600, 595, 200, 5);

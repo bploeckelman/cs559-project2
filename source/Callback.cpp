@@ -39,12 +39,14 @@ void idleCallback(void *pData)
 	{
 		lastRedraw = clock();
 
-		static const float rotationStep = 0.01f;
+		//need rotationStep here
 		const float rotation = window->getRotation();
+		const float rotationStep = window->getRotationStep();
+		const float speed = window->getSpeed();
 
 		if( window->isAnimating() )
 		{
-			window->setRotation(rotation + rotationStep);
+			window->setRotation(rotation + (rotationStep*speed*0.5f));
 			if( window->getRotation() > window->getCurve().numSegments() )
 				window->setRotation(0.f);
 		}
@@ -132,6 +134,60 @@ void paramButtonCallback( Fl_Widget *widget, MainWindow *window )
 	}
 
 	window->toggleArcParam();
+
+	window->damageMe();
+}
+
+void forwardButtonCallback(Fl_Widget *widget, MainWindow *window)
+{
+	if( window == nullptr || widget == nullptr )
+	{
+		cout << "Error: damageCallback - null pointer passed." << endl;
+		return;
+	}
+
+	const float rotation = window->getRotation();
+	const float rotationStep = window->getRotationStep();
+
+	window->setRotation(rotation + rotationStep);
+	if( window->getRotation() >= window->getCurve().numSegments() )
+	{
+		window->setRotation(0.f);
+	}
+
+	window->damageMe();
+}
+
+void backwardButtonCallback(Fl_Widget *widget, MainWindow *window)
+{
+	if( window == nullptr || widget == nullptr )
+	{
+		cout << "Error: damageCallback - null pointer passed." << endl;
+		return;
+	}
+
+	const float rotation = window->getRotation();
+	const float rotationStep = window->getRotationStep();
+
+	window->setRotation(rotation - rotationStep);
+	if( window->getRotation() < 0.f )
+	{
+		window->setRotation(window->getCurve().numSegments()- rotationStep);
+	}
+
+	window->damageMe();
+}
+
+void speedSliderCallback(Fl_Widget *widget, MainWindow *window)
+{
+	if( window == nullptr || widget == nullptr )
+	{
+		cout << "Error: damageCallback - null pointer passed." << endl;
+		return;
+	}
+
+	Fl_Value_Slider *speedSlider = dynamic_cast<Fl_Value_Slider*>(widget);
+	window->setSpeed((float)speedSlider->value());
 
 	window->damageMe();
 }

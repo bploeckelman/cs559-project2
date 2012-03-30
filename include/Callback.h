@@ -17,3 +17,9 @@ void delPointButtonCallback(Fl_Widget *widget, MainWindow *window);
 void curveTypeChoiceCallback(Fl_Widget *widget, MainWindow *window);
 
 void paramButtonCallback(Fl_Widget *widget, MainWindow *window);
+
+void forwardButtonCallback(Fl_Widget *widget, MainWindow *window);
+
+void backwardButtonCallback(Fl_Widget *widget, MainWindow *window);
+
+void speedSliderCallback(Fl_Widget *widget, MainWindow *window);

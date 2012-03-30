@@ -23,6 +23,8 @@
 #include <Fl/Fl_Button.h>
 #include <Fl/Fl_Output.h>
 #include <Fl/Fl_Choice.h>
+#include <Fl/Fl_Slider.h>
+#include <Fl/Fl_Value_Slider.h>
 #pragma warning(pop)
 
 #include <vector>
@@ -116,11 +118,16 @@ private:
 	Fl_Output  *textOutput;
 	Fl_Choice  *curveTypeChoice;
 	Fl_Button  *paramButton;
+	Fl_Button  *forwardButton;
+	Fl_Button  *backwardButton;
+	Fl_Value_Slider  *speedSlider;
 
 	Curve curve;
 
 	bool animating;
 	bool isArcLengthParam;
+	float rotationStep;
+	float speed;
 	float rotation;
 
 	void createWidgets();
@@ -143,5 +150,8 @@ public:
 	inline Curve& getCurve() { return curve; }
 	inline std::vector<CtrlPoint>& getPoints() { return curve.getControlPoints(); }
 	inline void toggleArcParam() { isArcLengthParam = !isArcLengthParam;}
+	inline float getRotationStep() { return rotationStep;}
+	inline void setSpeed(float spdAmt) { speed=spdAmt;}
+	inline float getSpeed() {return speed;}
 
 };
