@@ -16,7 +16,7 @@ CtrlPoint::CtrlPoint(const Vec3f& pos, const Vec3f& orient)
 	, _orient(normalize(orient))
 { }
 
-void CtrlPoint::draw() const
+void CtrlPoint::draw(bool isShadowed) const
 {
 	float size=2.0;
 
@@ -86,9 +86,13 @@ void CtrlPoint::draw() const
 			glVertex3f( size, size , size);
 		glEnd();
 
-		drawVector(Vec3f(0.f, 0.f, 0.f),
-				   Vec3f(0.f, 8.f, 0.f),
-				   Vec3f(0.f, 1.f, 0.f));
+		//error with shadows!
+		if(!isShadowed)
+		{
+			drawVector(Vec3f(0.f, 0.f, 0.f),
+					   Vec3f(0.f, 8.f, 0.f),
+					   Vec3f(0.f, 1.f, 0.f));
+		}
 	glPopMatrix();
 }
 

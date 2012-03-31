@@ -16,7 +16,7 @@ public:
 	CtrlPoint(const Vec3f& pos=Vec3f(), 
 			  const Vec3f& orient=Vec3f(0.f, 1.f, 0.f));
 
-	void draw() const;
+	void draw(bool isShadowed) const;
 
 	inline CtrlPoint& pos   (const Vec3f& p) { _pos = p;    return *this; }
 	inline CtrlPoint& orient(const Vec3f& o) { _orient = o; return *this; }

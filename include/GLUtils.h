@@ -78,7 +78,7 @@ inline void drawGroundPlane(float size, int numSquares=8)
 
 	float xp = minX;
 	float yp = minY;
-
+	//glPushMatrix();
 	glBegin(GL_QUADS);
 	for(int x = 0, i = 0; x < numSquares; ++x, xp += xd) 
 	{
@@ -94,4 +94,5 @@ inline void drawGroundPlane(float size, int numSquares=8)
 		}
 	}
 	glEnd();
+	//glPopMatrix();
 }

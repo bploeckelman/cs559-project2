@@ -17,7 +17,7 @@ private:
 	std::vector<CtrlPoint> controlPoints;
 	std::vector<CurveSegment*> segments;
 
-	void drawSegment(const int number);
+	void drawSegment(const int number, bool isShadowed);
 
 	void regenerateLineSegments();
 	void regenerateCatmullSegments();
@@ -31,10 +31,10 @@ public:
 	Curve(const CurveType& type=lines);
 
 	void regenerateSegments();
-	void draw();
-	void drawPoint(int index);
-	void drawPoints() const;
-	void drawSelectedSegment();
+	void draw(bool isShadowed);
+	void drawPoint(int index, bool isShadowed);
+	void drawPoints(bool isShadowed) const;
+	void drawSelectedSegment(bool isShadowed);
 
 	Vec3f getPosition(const float t);
 	Vec3f getDirection(const float t);

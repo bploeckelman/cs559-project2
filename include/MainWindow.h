@@ -87,10 +87,10 @@ private:
 
 	void updateTextWidget( const float t );
 	void openglFrameSetup();
-	void drawScenery();
-	void drawCurve( const float t );
-	void drawPathObject( const float t );
-	void drawSelectedControlPoint();
+	void drawScenery(bool doShadows);
+	void drawCurve( const float t, bool doShadows);
+	void drawPathObject( const float t, bool doShadows );
+	void drawSelectedControlPoint(bool doShadows);
 	void reparameterizing(Curve& curve);
 	
 
@@ -117,6 +117,7 @@ private:
 	Fl_Button  *delPointButton;
 	Fl_Output  *textOutput;
 	Fl_Choice  *curveTypeChoice;
+	Fl_Button  *shadowButton;
 	Fl_Button  *paramButton;
 	Fl_Button  *forwardButton;
 	Fl_Button  *backwardButton;
@@ -126,6 +127,7 @@ private:
 
 	bool animating;
 	bool isArcLengthParam;
+	bool shadows;
 	float rotationStep;
 	float speed;
 	float rotation;
@@ -144,13 +146,19 @@ public:
 
 	inline float getRotation() const  { return rotation; }
 	inline void  setRotation(float r) { rotation = r; }
+	inline float getRotationStep() { return rotationStep;}
 
 	inline const MainView& getView() const { return *view; }
 
 	inline Curve& getCurve() { return curve; }
 	inline std::vector<CtrlPoint>& getPoints() { return curve.getControlPoints(); }
+
 	inline void toggleArcParam() { isArcLengthParam = !isArcLengthParam;}
-	inline float getRotationStep() { return rotationStep;}
+	inline bool isArcParam() { return isArcLengthParam;}
+
+	inline void toggleShadows() { shadows = !shadows;}
+	inline bool isShadowed() { return shadows; }
+
 	inline void setSpeed(float spdAmt) { speed=spdAmt;}
 	inline float getSpeed() {return speed;}
 

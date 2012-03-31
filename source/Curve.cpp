@@ -27,7 +27,7 @@ Curve::Curve(const CurveType& type)
 	, selectedSegment(-1)
 { }
 
-void Curve::draw() 
+void Curve::draw(bool isShadowed) 
 {
 	if( controlPoints.empty() )
 		return;
@@ -38,19 +38,21 @@ void Curve::draw()
 	for each(auto segment in segments)
 	{
 		if( segment != nullptr )
-			segment->draw();
+			segment->draw(false,isShadowed);
+
+			
 	}
 }
 
-void Curve::drawPoint( int index )
+void Curve::drawPoint( int index, bool isShadowed )
 {
 	if( index < 0 || index >= (int)controlPoints.size() )
 		return;
 
-	controlPoints[index].draw();
+	controlPoints.at(index).draw(isShadowed);
 }
 
-void Curve::drawPoints() const
+void Curve::drawPoints(bool isShadowed) const
 {
 	// Note: visual studio 2010 implemented c++0x range-based for loops 
 	// in this non-standard way apparently, see: 
@@ -58,16 +60,17 @@ void Curve::drawPoints() const
 
 	for each(const auto& p in controlPoints)
 	{
-		p.draw();			
+		p.draw(isShadowed);			
 	}
 }
 
-void Curve::drawSelectedSegment()
+void Curve::drawSelectedSegment(bool isShadowed)
 {
 	if( selectedSegment < 0 || selectedSegment >= (int)segments.size() )
 		return;
 
-	segments[selectedSegment]->draw(true);
+		segments.at(selectedSegment)->draw(true, isShadowed);
+
 }
 
 Vec3f Curve::getPosition( const float t )
@@ -253,10 +256,10 @@ CtrlPoint& Curve::getPoint( int id )
 	}
 }
 
-void Curve::drawSegment( const int number )
+void Curve::drawSegment( const int number, bool isShadowed )
 {
 	try {
-		segments.at(number)->draw();
+		segments.at(number)->draw(false, isShadowed);
 	} catch(std::out_of_range&) {
 		stringstream ss;
 		ss << "Warning: no point on curve with index=" << number;

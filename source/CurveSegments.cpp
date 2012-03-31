@@ -38,12 +38,15 @@ CtrlPoint& CurveSegment::getControl2   () { return control2; }
  * LineSegment class
  * ==================================================================
  */
-void LineSegment::draw(bool drawPoints) 
+void LineSegment::draw(bool drawPoints, bool isShadowed) 
 {
 	const Vec3f& start(startPoint.pos());
 	const Vec3f& end(endPoint.pos());
 
-	glColor3ub(255, 255, 255);
+	if(!isShadowed)
+	{
+		glColor3ub(255, 255, 255);
+	}
 	glBegin(GL_LINES);
 		glVertex3f(start.x(), start.y(), start.z());
 		glVertex3f(end.x(), end.y(), end.z());
@@ -51,13 +54,19 @@ void LineSegment::draw(bool drawPoints)
 
 	if( drawPoints )
 	{
-		glColor3ub(255, 255, 255);
-		startPoint.draw();
-		endPoint.draw();
+		if(!isShadowed)
+		{
+			glColor3ub(255, 255, 255);
+		}
+		startPoint.draw(isShadowed);
+		endPoint.draw(isShadowed);
 
-		glColor3ub(128, 128, 128);
-		control1.draw();
-		control2.draw();
+		if(!isShadowed)
+		{
+			glColor3ub(128, 128, 128);
+		}
+		control1.draw(isShadowed);
+		control2.draw(isShadowed);
 	}
 }
 
@@ -76,7 +85,7 @@ Vec3f LineSegment::getDirection( float t )
  * CatmullRomSegment class
  * ==================================================================
  */
-void CatmullRomSegment::draw(bool drawPoints) 
+void CatmullRomSegment::draw(bool drawPoints, bool isShadowed) 
 {
 	static const int   lines = 25;
 	static const float step  = 1.f / lines;
@@ -92,13 +101,19 @@ void CatmullRomSegment::draw(bool drawPoints)
 
 	if( drawPoints )
 	{
-		glColor4ub(255, 255, 255, 255);
-		startPoint.draw();
-		endPoint.draw();
+		if(!isShadowed)
+		{
+			glColor4ub(255, 255, 255, 255);
+		}
+		startPoint.draw(isShadowed);
+		endPoint.draw(isShadowed);
 
-		glColor4ub(128, 128, 128, 128);
-		control1.draw();
-		control2.draw();
+		if(!isShadowed)
+		{
+			glColor4ub(128, 128, 128, 128);
+		}
+		control1.draw(isShadowed);
+		control2.draw(isShadowed);
 	}
 }
 

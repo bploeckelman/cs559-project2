@@ -92,12 +92,15 @@ void MainView::draw()
 {
 	const float t = window->getRotation();
 	const Curve& curve(window->getCurve());
+	bool doShadows = false;
 
 	updateTextWidget(t);
 
 	openglFrameSetup();
-	drawScenery();
-	drawCurve(t);
+
+	drawScenery(doShadows);
+	drawCurve(t, doShadows);
+	
 	//printf("t is %f \n", t);
 
 	float tt = t + 0.2f;
@@ -109,7 +112,7 @@ void MainView::draw()
 	{
 		tt += curve.numSegments();
 	}
-	drawPathObject(tt);
+	drawPathObject(tt, doShadows);
 
 	tt = t + 0.1f;
 	if( tt >= curve.numSegments() )
@@ -120,14 +123,14 @@ void MainView::draw()
 	{
 		tt += curve.numSegments();
 	}
-	drawPathObject(tt);
+	drawPathObject(tt, doShadows);
 
 	tt = t;
 	if(tt < 0)
 	{
 		tt += curve.numSegments();
 	}
-	drawPathObject(tt);
+	drawPathObject(tt, doShadows);
 
 /* Note: this works for drawing them front to back
    but we have to do some rather ugly adjustments 
@@ -146,7 +149,57 @@ void MainView::draw()
 		tt = curve.numSegments() + (tt - 0.0001f);
 	drawPathObject(tt);
 //*/
-	drawSelectedControlPoint();
+	drawSelectedControlPoint(doShadows);
+
+	if(window->isShadowed())
+	{
+		glPushMatrix();
+			glTranslatef(0.f, -20.f, 0.f);//translate shadows to ground plane
+
+			setupShadows();
+		
+			doShadows = true;
+
+			drawScenery(doShadows);
+			drawCurve(t, doShadows);
+	
+			//printf("t is %f \n", t);
+
+			//float tt = t + 0.2f;
+			tt = t + 0.2f;
+			if( tt >= curve.numSegments() )
+			{
+				tt -= curve.numSegments();
+			}
+			else if(tt < 0)
+			{
+				tt += curve.numSegments();
+			}
+			drawPathObject(tt, doShadows);
+
+			tt = t + 0.1f;
+			if( tt >= curve.numSegments() )
+			{
+				tt -= curve.numSegments();
+			}
+			else if(tt < 0)
+			{
+				tt += curve.numSegments();
+			}
+			drawPathObject(tt, doShadows);
+
+			tt = t;
+			if(tt < 0)
+			{
+				tt += curve.numSegments();
+			}
+			drawPathObject(tt, doShadows);
+
+			drawSelectedControlPoint(doShadows);
+			unsetupShadows();
+		glPopMatrix();
+	}
+
 }
 
 /* handle() - Handles user input --------------------------------- */
@@ -212,8 +265,10 @@ int MainView::handle(int event)
 		//* Note : use this format to process keyboard input
 		int k  = Fl::event_key();
 		int ks = Fl::event_state();
-		if( k == ' ' ) toggleUseArcball(); // ...
-		//*/
+		if( k == ' ' )
+		{
+			toggleUseArcball();
+		}
 		break;
 	}
 
@@ -253,7 +308,7 @@ void MainView::pick()
 	for(int i = 0; it != end; ++it, ++i)
 	{
 		glLoadName((GLuint)(i + 1));
-		it->draw();
+		it->draw(false); //dont draw shadows for the hit object, let mainView->Draw() do that
 	}
 
 	// See how picking did back in drawing mode
@@ -279,12 +334,19 @@ void MainView::pick()
 /* setupProject() - Sets up projection & modelview matrices ------ */
 void MainView::setupProjection()
 {
+
 	if( useArcball )
 	{
 		arcballCam.setProjection(false);
 		return;
 	}
 
+	//the rest of this code is for birds eye view right?
+	/*if( window->isShadowed() )
+	{
+		window->toggleShadows();
+		//disable shadow lights
+	}*/
 	const float aspect = static_cast<float>(w()) / static_cast<float>(h());
 	const float width  = (aspect >= 1) ? 110 : 110 * aspect;
 	const float height = (aspect >= 1) ? 110 / aspect : 110;
@@ -316,61 +378,107 @@ void MainView::updateTextWidget( const float t )
 /* openglFrameSetup() - Clears framebuffers and sets projection -- */
 void MainView::openglFrameSetup()
 {
-	// TODO: call these once only, not every frame
-	glEnable(GL_LIGHTING);
-	GLfloat gAmbient[] = { 0.2f, 0.2f, 0.2f, 1.f };
-	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, gAmbient);
-
-	GLfloat ambient[] = { 0.5f, 0.5f, 0.5f, 1.f };
-	GLfloat diffuse[] = { 0.7f, 0.7f, 0.7f, 1.f };
-	GLfloat specular[] = { 1.f, 1.f, 1.f, 1.f };
-	GLfloat position[] = { 0.f, 200.f, 0.f, 1.f };
-
-	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
-	glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
-	glLightfv(GL_LIGHT0, GL_POSITION, position);
-	glEnable(GL_LIGHT0);
-
-	glShadeModel(GL_SMOOTH);
-	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-	glEnable(GL_COLOR_MATERIAL);
-
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
-	glLineWidth(5.f);
-	// -------------------------------------------
-
 	glClearColor(0.f, 0.f, 0.2f, 1.f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearStencil(0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glEnable(GL_DEPTH);
+
+	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	setupProjection();
+	// TODO: call these once only, not every frame
+
+	glEnable(GL_COLOR_MATERIAL);
+	glDepthFunc(GL_LEQUAL);
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+
+	if (!useArcball) {
+		glDisable(GL_LIGHT1);
+		glDisable(GL_LIGHT2);
+	} else {
+		glEnable(GL_LIGHT1);
+		glEnable(GL_LIGHT2);
+	}
+
+	glShadeModel(GL_SMOOTH);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	
+	
+	glLineWidth(5.f);
+
+	GLfloat gAmbient[] = { 0.2f, 0.2f, 0.2f, 1.f };
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, gAmbient);
+
+	GLfloat ambient[] = { 0.5f, 0.5f, 0.5f, 1.f };
+	GLfloat diffuse[] = {.3f, .3f, .3f, 1.f }; //diffuse is gray
+	GLfloat specular[] = { 1.f, 1.f, 1.f, 1.f };
+	GLfloat position1[] = { 0.f, 200.f, 0.f, 1.f }; //{0, 1, 1, 0};
+
+	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
+	glLightfv(GL_LIGHT0, GL_POSITION, position1);
+
+	GLfloat lightPosition2[] = {50.f, 200.f, 50.f, 1.f}; // {0, 1, 1, 0};
+	GLfloat lightPosition3[] = {200.f, 0.f, 0.f, 1.f}; // {1, 0, 0, 0}
+	GLfloat yellowLight[] = {0.5f, 0.5f, .1f, 1.f};
+	GLfloat whiteLight[] = {1.0f, 1.0f, 1.0f, 1.f};
+
+	glLightfv(GL_LIGHT1, GL_POSITION, lightPosition2);
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, whiteLight);
+
+	glLightfv(GL_LIGHT2, GL_POSITION, lightPosition3);
+	glLightfv(GL_LIGHT2, GL_DIFFUSE, yellowLight);
+
+	// -------------------------------------------
+
+	glPushMatrix();
+		//glColor4ub(255, 255, 255, 255);
+		glTranslatef(0.f, -20.f, 0.f);
+		setupFloor();
+		glDisable(GL_LIGHTING);
+		drawGroundPlane(400.f);
+		glEnable(GL_LIGHTING);
+		setupObjects();
+	glPopMatrix();
+
+
 }
 
 /* drawFloor() - Draws the floor plane and assorted scenery ------ */ 
-void MainView::drawScenery()
+void MainView::drawScenery(bool doShadows)
 {
-	glDisable(GL_BLEND);
+	if(!doShadows)
+	{
+		glDisable(GL_BLEND);
+	}
+	
 
 	glPushMatrix();
-		glColor4ub(255, 255, 255, 255);
+		
 		glTranslatef(0.f, -20.f, 0.f);
-		drawGroundPlane(400.f);
 
-		glColor4ub(255, 255, 255, 255);
-		glTranslatef(0.f, 0.2f, 0.f);
-		drawBasis(Vec3f(20.f, 0.f, 0.f), 
+		if(!doShadows)
+		{
+			glColor4ub(255, 255, 255, 255);
+			glTranslatef(0.f, 0.2f, 0.f);
+			drawBasis(Vec3f(20.f, 0.f, 0.f), 
 				  Vec3f(0.f, 20.f, 0.f), 
 				  Vec3f(0.f, 0.f, 20.f));
+		}
 
 		glLineWidth(1.f);
 		glPushMatrix();
-			glColor4ub(0, 0, 255, 255);
+			if(!doShadows)
+			{
+				glColor4ub(0, 0, 255, 255);
+			}
 			glTranslatef(-50.f, 10.f, 50.f);
 			glRotatef(-90.f, 1.f, 0.f, 0.f);
 			static const GLushort pattern = 0x00ff;
@@ -379,23 +487,34 @@ void MainView::drawScenery()
 			glutWireSphere(10.f, 20, 20);
 			glDisable(GL_LINE_STIPPLE);
 		glPopMatrix();
+
 		glPushMatrix();
-			glColor4ub(200, 50, 200, 255);
+			if(!doShadows)
+			{
+				glColor4ub(200, 50, 200, 255);
+			}
 			glTranslatef(-50.f, 6.f, -50.f);
 			glRotatef(-45.f, 0.f, 1.f, 0.f);
 			glutSolidTeapot(8.f);
 		glPopMatrix();
+		
 		glLineWidth(5.f);
 
 		glPushMatrix();
-			glColor4ub(0, 255, 0, 255);
+			if(!doShadows)
+			{
+				glColor4ub(0, 255, 0, 255);
+			}
 			glPushMatrix();
 				glTranslatef(50.f, 5.f, 50.f);
 				glRotatef(-90.f, 1.f, 0.f, 0.f);
 				glutSolidCone(10.f, 20.f, 10, 10);
 			glPopMatrix();
 			
-			glColor4ub(139, 69, 19, 255);
+			if(!doShadows)
+			{
+				glColor4ub(139, 69, 19, 255);
+			}
 			glPushMatrix();
 				glTranslatef(50.f, 2.5f, 50.f);
 				glutSolidCube(5.f);
@@ -403,7 +522,10 @@ void MainView::drawScenery()
 		glPopMatrix();
 
 		glPushMatrix();
-			glColor4ub(255, 255, 10, 255);
+			if( !doShadows)
+			{
+				glColor4ub(255, 255, 10, 255);
+			}
 			glTranslatef(50.f, 8.1f, -50.f);
 			glScalef(5.f, 5.f, 5.f);
 			glutWireDodecahedron();
@@ -411,30 +533,48 @@ void MainView::drawScenery()
 
 	glPopMatrix();
 
-	glEnable(GL_BLEND);
+	if(!doShadows)
+	{
+		glEnable(GL_BLEND);
+	}
 }
 
 /* drawCurve() - Draws the window's curve object ----------------- */
-void MainView::drawCurve( const float t )
+void MainView::drawCurve( const float t, bool doShadows )
 {
 	Curve& curve(window->getCurve());
 	curve.selectedSegment = static_cast<int>(std::floor(t));
 
-	glColor4ub(255, 255, 255, 255);
-	curve.draw();
+	if(!doShadows)
+	{
+		glColor4ub(255, 255, 255, 255);
+	}
+	curve.draw(doShadows);
 
-	glColor4ub(255, 0, 0, 255);
-	curve.drawSelectedSegment();
+	if(!doShadows)
+	{
+		glColor4ub(255, 0, 0, 255);
+	}
+	curve.drawSelectedSegment(doShadows);
 }
 
 /* drawPathObject() - Draws the object that travels along the path */
-void MainView::drawPathObject( const float t )
+void MainView::drawPathObject( const float t, bool doShadows )
 {
 	Curve& curve(window->getCurve());
 	const Vec3f p(curve.getPosition(t));	// position  @ t
 	const Vec3f d(curve.getDirection(t));	// direction @ t (non-normalized)
 
-	glColor4ub(20, 250, 20, 255);
+	if(!doShadows)
+	{
+		glColor4ub(20, 250, 20, 255);
+	}
+	/*else
+	{
+		//glPushMatrix();
+		//glTranslatef(0.f, -20.f, 0.f);
+	}*/
+
 	glPushMatrix();
 		glTranslatef(p.x(), p.y() + 1.5f, p.z());
 		applyBasisFromTangent(normalize(d));
@@ -448,20 +588,32 @@ void MainView::drawPathObject( const float t )
 				  Vec3f(0.f, 5.f, 0.f),
 				  Vec3f(0.f, 0.f, 5.f));
 		*/
-		drawVector(Vec3f(0.f, 0.f, 0.f), 
-				   Vec3f(0.f, 0.f, 5.f),
-				   Vec3f(1.f, 0.f, 1.f));
+		if(!doShadows)
+		{	
+			drawVector(Vec3f(0.f, 0.f, 0.f), 
+					 Vec3f(0.f, 0.f, 5.f),
+					 Vec3f(1.f, 0.f, 1.f));
+		}
+
 	glPopMatrix();
+
+	/*if(!window->isShadowed())
+	{
+		//glPopMatrix();
+	}*/
 }
 
 /* drawSelectedControlPoint() - Draws the selected point highlighted */
-void MainView::drawSelectedControlPoint()
+void MainView::drawSelectedControlPoint(bool doShadows)
 {
 	auto points = window->getPoints();
 	if( selectedPoint >= 0 && selectedPoint < (signed)points.size() )
 	{
-		glColor4ub(250, 20, 20, 255);
-		points[selectedPoint].draw();
+		if(!doShadows)
+		{
+			glColor4ub(250, 20, 20, 255);
+		}
+		points[selectedPoint].draw(doShadows);
 	}
 }
 
@@ -559,6 +711,7 @@ MainWindow::MainWindow(const int x, const int y)
 	, delPointButton(nullptr)
 	, textOutput(nullptr)
 	, curveTypeChoice(nullptr)
+	, shadowButton(false)
 	, paramButton(false)
 	, forwardButton(nullptr)
 	, backwardButton(nullptr)
@@ -568,6 +721,7 @@ MainWindow::MainWindow(const int x, const int y)
 	, rotation(0.f)
 	, rotationStep(0.01f)
 	, speed(2.f)
+	, shadows(false)
 {
 	createWidgets();
 	createPoints();
@@ -599,7 +753,7 @@ void MainWindow::createWidgets()
 		view = new MainView(5, 5, 590, 590);
 		view->setWindow(this);
 		view->setSelectedPoint(0);
-//		this->resizable(view);
+		//this->resizable(view);
 
 		// Group widgets to help ease resizing
 		widgets = new Fl_Group(600, 5, 190, 590); // x,y,w,h
@@ -635,6 +789,13 @@ void MainWindow::createWidgets()
 		curveTypeChoice->callback((Fl_Callback*)curveTypeChoiceCallback, this);
 
 		//create arc length parameterization button
+		shadowButton = new Fl_Button(700, 30, 90, 20, "Shadows");
+		shadowButton->type(FL_TOGGLE_BUTTON);
+		shadowButton->value(0);
+		shadowButton->selection_color((Fl_Color)3); // yellow when pressed
+		shadowButton->callback((Fl_Callback*)shadowButtonCallback, this);
+
+		//create arc length parameterization button
 		paramButton = new Fl_Button(605, 55, 120, 20, "Arclength Param");
 		paramButton->type(FL_TOGGLE_BUTTON);
 		paramButton->value(0);
@@ -653,6 +814,7 @@ void MainWindow::createWidgets()
 		forwardButton->selection_color((Fl_Color)3); // yellow when pressed
 		forwardButton->callback((Fl_Callback*)forwardButtonCallback, this);
 
+		//create a speed slider
 		speedSlider = new Fl_Value_Slider(645,80,140,20,"Speed");
 		speedSlider->range(0,10);
 		speedSlider->value(2);
@@ -664,8 +826,8 @@ void MainWindow::createWidgets()
 		textOutput = new Fl_Output(605, 105, 90, 20);
 
 		// Create a phantom widget to help resize things
-//		Fl_Box *resizeBox = new Fl_Box(600, 595, 200, 5);
-//		widgets->resizable(resizeBox);
+		//Fl_Box *resizeBox = new Fl_Box(600, 595, 200, 5);
+		//widgets->resizable(resizeBox);
 
 		widgets->end();
 	}
