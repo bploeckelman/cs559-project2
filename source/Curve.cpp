@@ -267,3 +267,12 @@ void Curve::drawSegment( const int number, bool isShadowed )
 //		throw NoSuchPoint(ss.str());
 	}
 }
+
+//ONLY CALL THIS IF YOU ARE IMMEDIATELY going to fill up the control points of the curve!
+void Curve::clearPoints()
+{
+	controlPoints.clear();
+	regenerateSegments();
+
+}
+

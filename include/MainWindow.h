@@ -25,6 +25,7 @@
 #include <Fl/Fl_Choice.h>
 #include <Fl/Fl_Slider.h>
 #include <Fl/Fl_Value_Slider.h>
+#include <FL/fl_ask.h>
 #pragma warning(pop)
 
 #include <vector>
@@ -123,6 +124,7 @@ private:
 	Fl_Button  *backwardButton;
 	Fl_Value_Slider  *speedSlider;
 
+
 	Curve curve;
 
 	bool animating;
@@ -133,7 +135,7 @@ private:
 	float rotation;
 
 	void createWidgets();
-	void createPoints();
+	void readPoints(const char* filename);
 
 public:
 	MainWindow(const int x=100, const int y=50);
@@ -161,5 +163,42 @@ public:
 
 	inline void setSpeed(float spdAmt) { speed=spdAmt;}
 	inline float getSpeed() {return speed;}
+
+	void createPoints(const char* filename);
+	void writePoints(const char* filename);
+
+	inline void breakString(char* str, std::vector<const char*>& words) {
+	// start with no words
+	words.clear();
+
+	// scan through the string, starting at the beginning
+	char* p = str;
+
+	// stop when we hit the end of the string
+	while(*p) {
+		// skip over leading whitespace - stop at the first character or end of string
+		while (*p && *p<=' ') p++;
+
+		// now we're pointing at the first thing after the spaces
+		// make sure its not a comment, and that we're not at the end of the string
+		// (that's actually the same thing)
+		if (! (*p) || *p == '#')
+		break;
+
+		// so we're pointing at a word! add it to the word list
+		words.push_back(p);
+
+		// now find the end of the word
+		while(*p > ' ') p++;	// stop at space or end of string
+
+		// if its the end of the string, we're done
+		if (! *p) break;
+
+		// otherwise, turn this space into and end of string (to end the word)
+		// and keep going
+		*p = 0;
+		p++;
+	}
+}
 
 };

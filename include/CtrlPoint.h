@@ -13,8 +13,12 @@ private:
 
 public:
 
-	CtrlPoint(const Vec3f& pos=Vec3f(), 
-			  const Vec3f& orient=Vec3f(0.f, 1.f, 0.f));
+	CtrlPoint();
+
+	CtrlPoint(const Vec3f& pos);
+
+	CtrlPoint(const Vec3f& pos, 
+			  const Vec3f& orient);
 
 	void draw(bool isShadowed) const;
 

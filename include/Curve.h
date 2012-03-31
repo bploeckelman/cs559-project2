@@ -53,4 +53,5 @@ public:
 
 	CtrlPoint& getPoint(int id);
 	class NoSuchPoint : public std::runtime_error { public: NoSuchPoint(const std::string& what_arg) : std::runtime_error(what_arg) { } };
+	void clearPoints();
 };

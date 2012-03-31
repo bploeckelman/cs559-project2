@@ -27,6 +27,7 @@
 #pragma warning(disable:4312)
 #pragma warning(disable:4311)
 #pragma warning(disable:4099)
+#pragma warning(disable:4996)
 #include <Fl/fl.h>
 #include <Fl/Fl_Double_Window.h>
 #include <Fl/Fl_Gl_Window.h>
@@ -37,6 +38,7 @@
 #include <Fl/Fl_Choice.h>
 #include <Fl/Fl_Slider.h>
 #include <Fl/Fl_Value_Slider.h>
+#include <FL/fl_ask.h>
 #include <Fl/glut.h>		// for primitive drawing
 #pragma warning(pop)
 
@@ -724,7 +726,7 @@ MainWindow::MainWindow(const int x, const int y)
 	, shadows(false)
 {
 	createWidgets();
-	createPoints();
+	createPoints(nullptr);
 
 	Fl::add_idle(idleCallback, this); 
 }
@@ -789,18 +791,18 @@ void MainWindow::createWidgets()
 		curveTypeChoice->callback((Fl_Callback*)curveTypeChoiceCallback, this);
 
 		//create arc length parameterization button
-		shadowButton = new Fl_Button(700, 30, 90, 20, "Shadows");
-		shadowButton->type(FL_TOGGLE_BUTTON);
-		shadowButton->value(0);
-		shadowButton->selection_color((Fl_Color)3); // yellow when pressed
-		shadowButton->callback((Fl_Callback*)shadowButtonCallback, this);
-
-		//create arc length parameterization button
 		paramButton = new Fl_Button(605, 55, 120, 20, "Arclength Param");
 		paramButton->type(FL_TOGGLE_BUTTON);
 		paramButton->value(0);
 		paramButton->selection_color((Fl_Color)3); // yellow when pressed
 		paramButton->callback((Fl_Callback*)paramButtonCallback, this);
+
+		//create arc length parameterization button
+		shadowButton = new Fl_Button(700, 30, 90, 20, "Shadows");
+		shadowButton->type(FL_TOGGLE_BUTTON);
+		shadowButton->value(0);
+		shadowButton->selection_color((Fl_Color)3); // yellow when pressed
+		shadowButton->callback((Fl_Callback*)shadowButtonCallback, this);
 
 		// Create the manual backwards button
 		backwardButton = new Fl_Button(730, 55, 30, 20, "<<");
@@ -822,8 +824,15 @@ void MainWindow::createWidgets()
 		speedSlider->type(FL_HORIZONTAL);
 		speedSlider->callback((Fl_Callback*)speedSliderCallback, this);
 
+
 		// Create text display
 		textOutput = new Fl_Output(605, 105, 90, 20);
+
+		// Create file write button
+		/*writeButton = new Fl_Button(700, 105, 70, 20, "File Write");
+		writeButton->type(FL_TOGGLE_BUTTON);
+		writeButton->selection_color((Fl_Color)3); // yellow when pressed
+		writeButton->callback((Fl_Callback*)writeButtonCallback, this);*/
 
 		// Create a phantom widget to help resize things
 		//Fl_Box *resizeBox = new Fl_Box(600, 595, 200, 5);
@@ -835,15 +844,94 @@ void MainWindow::createWidgets()
 }
 
 /* createPoints() - Called on construction to create initial points */
-void MainWindow::createPoints()
+void MainWindow::createPoints(const char* filename)
 {
 	// Add initial points
-	const float step = TWO_PI / 5.f;
-	const float radius = 30.f;
-	for(float i = 0.f; i < TWO_PI; i += step)
+	if(filename == nullptr)
 	{
-		const Vec3f     pos(cosf(i), 0.f, sinf(i));
-		const CtrlPoint point(pos * radius);
-		curve.addControlPoint(point);
+		const float step = TWO_PI / 5.f;
+		const float radius = 30.f;
+		for(float i = 0.f; i < TWO_PI; i += step)
+		{
+			const Vec3f     pos(cosf(i), 0.f, sinf(i));
+			const CtrlPoint point(pos * radius);
+			curve.addControlPoint(point);
+		}
+	}
+	else
+	{
+		readPoints(filename);
+	}
+}
+
+// the file format is simple
+// first line: an integer with the number of control points
+// other lines: one line per control point
+// either 3 (X,Y,Z) numbers on the line, or 6 numbers (X,Y,Z, orientation)
+void MainWindow::readPoints(const char* filename)
+{
+	FILE* fp = fopen(filename,"r");
+	if (!fp) {
+		fl_alert("Can't Open File!\n");
+	} else {
+		char buf[512];
+
+		// first line = number of points
+		fgets(buf,512,fp);
+		int npts = atoi(buf);
+
+		if( (npts<4) || (npts>65535)) {
+			fl_alert("Illegal Number of Points Specified in File");
+		} else {
+			curve.clearPoints();
+			// get lines until EOF or we have enough points
+			while( (curve.numControlPoints() <= npts) && fgets(buf,512,fp) ) {
+				Vec3f pos,orient;
+				vector<const char*> words;
+				breakString(buf,words);
+				if (words.size() >= 3) {
+					pos.set((float) strtod(words[0],0), (float) strtod(words[1],0), (float) strtod(words[2],0));
+				} else {
+					pos.set(0.f, 0.f, 0.f);
+				}
+				if (words.size() >= 6) {
+					orient.set( (float) strtod(words[3],0), (float) strtod(words[4],0), (float) strtod(words[5],0));
+				} else {
+					orient.set(0.f, 0.f, 0.f);
+				}
+				//orient.normalize();
+				const CtrlPoint point(pos,orient);
+				curve.addControlPoint(point);
+			}
+		}
+		fclose(fp);
+	}
+}
+
+// write the control points to our simple format
+void MainWindow::writePoints(const char* filename)
+{
+	CtrlPoint point;
+	//printf("The filename is %s \n", filename);
+	if(filename != nullptr)
+	{
+		FILE* fp = fopen(filename,"w");
+		if (!fp) {
+			fl_alert("Can't open file for writing");
+		} else {
+			fprintf(fp,"%d\n",curve.numControlPoints());
+			for(int i=0; i<curve.numControlPoints(); ++i)
+			{
+
+				point = curve.getPoint(i);
+				Vec3f pos = point.pos();
+				Vec3f orient = point.orient();
+
+				fprintf(fp,"%g %g %g %g %g %g\n",
+					pos.x(), pos.y(), pos.z(), 
+					orient.x(), orient.y(), orient.z());
+			}
+			fclose(fp);
+		}
 	}
 }

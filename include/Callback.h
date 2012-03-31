@@ -25,3 +25,5 @@ void forwardButtonCallback(Fl_Widget *widget, MainWindow *window);
 void backwardButtonCallback(Fl_Widget *widget, MainWindow *window);
 
 void speedSliderCallback(Fl_Widget *widget, MainWindow *window);
+
+

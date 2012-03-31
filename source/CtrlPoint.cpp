@@ -10,6 +10,15 @@
 
 #include <GL/GL.h>
 
+CtrlPoint::CtrlPoint()
+	 : _pos(0,0,0)
+	 , _orient(0,1,0)
+{}
+
+CtrlPoint::CtrlPoint(const Vec3f& pos)
+	: _pos(pos)
+	, _orient(0,1,0)
+{ }
 
 CtrlPoint::CtrlPoint(const Vec3f& pos, const Vec3f& orient)
 	: _pos(pos)
