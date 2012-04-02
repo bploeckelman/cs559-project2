@@ -129,8 +129,8 @@ void Curve::regenerateSegments()
 
 	//this may need to take in a t value? for arc length parametrization
 
-	// Can't create segments without control points
-	if( controlPoints.empty() )
+	// Can't create segments without control points or with 1 control point
+	if( controlPoints.empty())
 		return;
 
 	// Create new segments using control points and curve type
@@ -139,6 +139,11 @@ void Curve::regenerateSegments()
 	case lines:   regenerateLineSegments();    break;
 	case catmull: regenerateCatmullSegments(); break;
 	case bspline: regenerateBSplineSegments(); break;
+	}
+
+	if(controlPoints.size() > 1)
+	{
+		BuildParameterTable(100); //TODO: set to 25 samples (same as the catmull rom drawing) but we should get a sample variable here
 	}
 
 }
@@ -208,6 +213,7 @@ int Curve::addControlPoint( const CtrlPoint& point )
 {
 	// Add the new point
 	controlPoints.push_back(point);
+	//printf("control points size in addControlPoint is %d \n", controlPoints.size());
 	// Rebuild segments
 	regenerateSegments();
 	// Return the index of the newly added point
@@ -274,5 +280,59 @@ void Curve::clearPoints()
 	controlPoints.clear();
 	regenerateSegments();
 
+}
+
+/* parameter table building- this table keeps track of values as defined in the parameter_table struct for every point on the curve (ctrl and sample points)*/
+/*the size of the paramer_table once fully built should be 1+num_segments()*number_of_samples*/
+void Curve::BuildParameterTable(int number_of_samples)
+{
+	//clear any previous table as we are going to build a new one
+	parameter_table.clear();
+
+	//put in the first element of the new table which will always start with control pt 0's position
+	std::vector<CtrlPoint> ctrlpts = getControlPoints();
+	Vec3f previous_point = ctrlpts.at(0).pos();
+	ParameterTable p;
+	p.segment_number = 0;
+	p.accumulated_length = 0;
+	p.fraction_of_accumulated_length = 0;
+	p.local_t = 0;
+	parameter_table.push_back(p);
+
+	for (int i = 0; i < numSegments(); i++)
+	{
+		for (int j = 1; j < number_of_samples; j++)
+		{
+			
+			p.segment_number = i;
+			p.local_t = ((double) j) / ((double) number_of_samples - 1);
+			//printf(" number_of_samples is %d, i is %d, j is %d, local_t is %f \n", number_of_samples, i, j, p.local_t);
+			Vec3f v;
+
+			//if we are at the end of a segment, use the ctrl points position
+			if(std::floor(p.local_t-1) == 0)
+			{
+				//printf(" in if \n");
+				//printf(" ctrlpts.size() is %d \n", ctrlpts.size());
+				v= ctrlpts.at(i).pos();
+
+			}
+			else//use local position based on the number of samples we want for the segment
+			{
+				//printf(" in else \n");
+				v= getPosition((float)p.local_t+i); //may not work
+			}
+			p.accumulated_length = (double)((previous_point - v).Magnitude()) + parameter_table[parameter_table.size() - 1].accumulated_length;
+			parameter_table.push_back(p);
+			previous_point = v;
+		}
+	}
+
+	double total_length = parameter_table[parameter_table.size() - 1].accumulated_length;
+	//set each elements fraction_of_accum_length field based off of each elements accum_length and the total_length
+	for (size_t i = 0; i < parameter_table.size(); i++)
+	{
+		parameter_table[i].fraction_of_accumulated_length = parameter_table[i].accumulated_length / total_length;
+	}
 }
 

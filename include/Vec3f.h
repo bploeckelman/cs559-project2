@@ -125,6 +125,7 @@ public:
 			<< ") ";
 	}
 
+	// returns the magnitude of the vector's components
 	inline float Magnitude()
 	{
 		return sqrt(_x * _x + _y * _y + _z * _z);

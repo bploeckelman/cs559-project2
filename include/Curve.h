@@ -17,6 +17,8 @@ private:
 	std::vector<CtrlPoint> controlPoints;
 	std::vector<CurveSegment*> segments;
 
+	
+
 	void drawSegment(const int number, bool isShadowed);
 
 	void regenerateLineSegments();
@@ -25,6 +27,19 @@ private:
 	void regenerateBSplineSegments();
 
 public:
+	//new structure stored per curve, made it public so I didnt need to add all the get/set methods when it's called in mainwindow.cpp
+	//I kept the double types to allow for more precision when calculating length values for the table, float types also work (but with less precsion)
+	struct ParameterTable
+	{
+		double local_t;
+		double accumulated_length;
+		double fraction_of_accumulated_length;
+		int segment_number;
+	};
+	//new vector for storing everything about a curve
+	/*the size of the paramer_table once fully built should be 1+num_segments()*number_of_samples*/
+	std::vector<ParameterTable> parameter_table;
+
 	int selectedPoint;
 	int selectedSegment;
 
@@ -52,6 +67,9 @@ public:
 	std::vector<CtrlPoint>& getControlPoints(); 
 
 	CtrlPoint& getPoint(int id);
-	class NoSuchPoint : public std::runtime_error { public: NoSuchPoint(const std::string& what_arg) : std::runtime_error(what_arg) { } };
 	void clearPoints();
+
+	class NoSuchPoint : public std::runtime_error { public: NoSuchPoint(const std::string& what_arg) : std::runtime_error(what_arg) { } };
+
+	void BuildParameterTable(int number_of_samples);
 };

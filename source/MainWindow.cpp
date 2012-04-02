@@ -38,7 +38,7 @@
 #include <Fl/Fl_Choice.h>
 #include <Fl/Fl_Slider.h>
 #include <Fl/Fl_Value_Slider.h>
-#include <FL/fl_ask.h>
+#include <Fl/Fl_ask.h>
 #include <Fl/glut.h>		// for primitive drawing
 #pragma warning(pop)
 
@@ -66,33 +66,12 @@ MainView::MainView(int x, int y, int w, int h, const char *l)
 {
 	mode( FL_RGB | FL_ALPHA | FL_DEPTH | FL_DOUBLE );
 	resetArcball();
-
-	/*GLfloat da[] = {0.4f, 1.0f, 1.0f, 1.0f};
-
-	GLuint arc_length_display_list = GL_INVALID_VALUE;
-	GLUquadric * q = gluNewQuadric();
-
-	double s = 3.0 / sqrt(3.0) * 0.1;
-
-	arc_length_display_list = glGenLists(1);
-	glNewList(arc_length_display_list, GL_COMPILE);
-	glColor4fv(da);
-	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, da);
-	s *= 3;
-	glPushMatrix();
-	glScaled(s, s, s);
-	glutSolidIcosahedron();
-	glPopMatrix();
-	glEndList();
-	gluDeleteQuadric(q);*/
-
-	time_mode_started = (float)hpTime.TotalTime();
 }
 
 /* draw() - Draws to the screen ---------------------------------- */
 void MainView::draw()
 {
-	const float t = window->getRotation();
+	float t = window->getRotation();
 	const Curve& curve(window->getCurve());
 	bool doShadows = false;
 
@@ -101,7 +80,20 @@ void MainView::draw()
 	openglFrameSetup();
 
 	drawScenery(doShadows);
+
 	drawCurve(t, doShadows);
+
+	//attempted to do arclength stuff here before going to the way it was setup in trainWindow.cpp
+	/*if(window->isArcParam())
+	{
+		int segment = 0;
+		float temp_t= 0.f;
+		temp_t = t;
+		t= t-std::floor(temp_t);
+		t= t/std::floor(temp_t+1.f);
+		t= std::floor(temp_t)+ arcLengthInterpolation(t, segment);
+		printf("segment is %d \n", segment);
+	}*/
 	
 	//printf("t is %f \n", t);
 
@@ -441,7 +433,7 @@ void MainView::openglFrameSetup()
 	// -------------------------------------------
 
 	glPushMatrix();
-		//glColor4ub(255, 255, 255, 255);
+		//glColor4ub(255, 255, 255, 255); //this color setting originally did nothing
 		glTranslatef(0.f, -20.f, 0.f);
 		setupFloor();
 		glDisable(GL_LIGHTING);
@@ -585,8 +577,8 @@ void MainView::drawPathObject( const float t, bool doShadows )
 		/* TODO: drawing the basis shows that sometimes the local 
 		coordinate system flips over, this will need to be 
 		fixed before the final version so the train doesn't 
-		go upside down
-		drawBasis(Vec3f(5.f, 0.f, 0.f),
+		go upside down (FIXED)
+		/*drawBasis(Vec3f(5.f, 0.f, 0.f),
 				  Vec3f(0.f, 5.f, 0.f),
 				  Vec3f(0.f, 0.f, 5.f));
 		*/
@@ -619,7 +611,8 @@ void MainView::drawSelectedControlPoint(bool doShadows)
 	}
 }
 
-void MainView::reparameterizing(Curve& curve)
+//TODO if not used please delete, MAB did not use as of 3/28/12, not used with current arclength param attempt
+/*void MainView::reparameterizing(Curve& curve, float big_t, bool doShadows)
 {
 	float seconds_per_sample = 1;
 	float flight_time = seconds_per_sample * curve.numSegments(); // This should actually be decoupled.
@@ -633,71 +626,49 @@ void MainView::reparameterizing(Curve& curve)
 	float lil_t = arcLengthInterpolation(big_t, segment);
 	//printf("dmod %f segment %d big_t %f lil_t %f time_now %f\n", dmod, segment, big_t, lil_t, time_now);
 
-	std::vector<CtrlPoint> ctrlpts = curve.getControlPoints();//bezier_segments[segment].EvaluateAt(lil_t);
-	Vec3f p = ctrlpts.at(segment).pos();//fix this using lil_t
+//bezier_segments[segment].EvaluateAt(lil_t);
+	CurveSegment* curr_segment = curve.getSegment(segment);
+	Vec3f p = curr_segment->getPosition(lil_t);//fix this using lil_t
 	glPushMatrix();
 	glTranslatef(p.x(), p.y(), p.z());
-	//call draw curve?
-	//glCallList(arc_length_display_list);
+
 	glPopMatrix();
-}
+}*/
 
-float MainView::arcLengthInterpolation(float big_t, int& segment_number)
-{
-	//double epsilon = 0.0000001;
-	float epsilon = 0.0001f;
-	if (abs(big_t) < epsilon)
-		return 0;
-	if (abs(big_t - 1) < epsilon)
-		return 1;
+//float MainView::arcLengthInterpolation(float big_t, int& segment_number)
+float MainView::arcLengthInterpolation(double big_t, int& segment_number)
+	{
+		Curve curve= window->getCurve();
+		double epsilon = 0.0000001;
+		printf("big_t in the function call is %f \n", big_t);
+		//double epsilon = 0.000;
+		if (abs(big_t) < epsilon)
+			return 0;
+		if (abs(big_t - 1) < epsilon)
+			return 1;
 	
-	size_t index;
-	for (index = 1; index < parameter_table.size(); index++)
-	{
-		if (big_t < parameter_table[index].fraction_of_accumulated_length)
-			break;
-	}
-	if (index >= parameter_table.size())
-		throw "big_t not found.";
-	float lower_fraction = parameter_table[index - 1].fraction_of_accumulated_length;
-	float upper_fraction = parameter_table[index].fraction_of_accumulated_length;
-	float lower_local_t = ((parameter_table[index - 1].segment_number != parameter_table[index].segment_number) ? 0 : parameter_table[index - 1].local_t);
-	float upper_local_t = parameter_table[index].local_t;
-	float result = lower_local_t + (big_t - lower_fraction) / (upper_fraction - lower_fraction) * (upper_local_t - lower_local_t);
-	segment_number = parameter_table[index].segment_number;
-	//printf("big_t: %f lil_t: %f lower fraction: %f upper_fraction: %f lower_t: %f upper_t: %f\n", big_t, result, lower_fraction, upper_fraction, lower_local_t, upper_local_t);
-	return result;
-}
-
-void MainView::BuildParameterTable(int number_of_samples, Curve& curve)
-{
-	std::vector<CtrlPoint> ctrlpts = curve.getControlPoints();
-	Vec3f previous_point = ctrlpts.at(0).pos();
-	ParameterTable p;
-	p.segment_number = 0;
-	p.accumulated_length = 0;
-	p.fraction_of_accumulated_length = 0;
-	p.local_t = 0;
-	parameter_table.push_back(p);
-
-	for (int i = 0; i < curve.numSegments(); i++)
-	{
-		for (int j = 1; j < number_of_samples; j++)
+		size_t index;
+		for (index = 1; index < curve.parameter_table.size(); index++)
 		{
-			p.segment_number = i;
-			p.local_t = ((float) j) / ((float) number_of_samples - 1);
-			Vec3f v = ctrlpts.at(i).pos();//bezier_segments[i].EvaluateAt(p.local_t); //fix this? use p.local_t
-			p.accumulated_length = (previous_point - v).Magnitude() + parameter_table[parameter_table.size() - 1].accumulated_length;
-			parameter_table.push_back(p);
-			previous_point = v;
+			if (big_t < curve.parameter_table[index].fraction_of_accumulated_length)
+				break;
 		}
+		if (index >= curve.parameter_table.size())
+			throw "big_t not found.";
+
+		printf("the index found is %d \n", index);
+		/*the size of the paramer_table once fully built should be 1+num_segments()*number_of_samples*/
+		printf("curve.parameter_table.size() is %d \n", curve.parameter_table.size());
+
+		double lower_fraction = curve.parameter_table[index - 1].fraction_of_accumulated_length;
+		double upper_fraction = curve.parameter_table[index].fraction_of_accumulated_length;
+		double lower_local_t = ((curve.parameter_table[index - 1].segment_number != curve.parameter_table[index].segment_number) ? 0 : curve.parameter_table[index - 1].local_t);
+		double upper_local_t = curve.parameter_table[index].local_t;
+		float result = (float)(lower_local_t + (big_t - lower_fraction) / (upper_fraction - lower_fraction) * (upper_local_t - lower_local_t));
+		//segment_number = curve.parameter_table[index].segment_number;
+		printf("big_t: %f lil_t: %f lower fraction: %f upper_fraction: %f lower_t: %f upper_t: %f\n", big_t, result, lower_fraction, upper_fraction, lower_local_t, upper_local_t);
+		return result;
 	}
-	float total_length = parameter_table[parameter_table.size() - 1].accumulated_length;
-	for (size_t i = 0; i < parameter_table.size(); i++)
-	{
-		parameter_table[i].fraction_of_accumulated_length = parameter_table[i].accumulated_length / total_length;
-	}
-}
 
 /* ==================================================================
  * MainWindow class
@@ -724,6 +695,8 @@ MainWindow::MainWindow(const int x, const int y)
 	, rotationStep(0.01f)
 	, speed(2.f)
 	, shadows(false)
+	, isArcLengthParam(false)
+	//, time_mode_started(hpTime.TotalTime()) //only use if using the HpTime to set up the big_t for arclength param
 {
 	createWidgets();
 	createPoints(nullptr);
@@ -818,7 +791,7 @@ void MainWindow::createWidgets()
 
 		//create a speed slider
 		speedSlider = new Fl_Value_Slider(645,80,140,20,"Speed");
-		speedSlider->range(0,10);
+		speedSlider->range(-10,10);
 		speedSlider->value(2);
 		speedSlider->align(FL_ALIGN_LEFT);
 		speedSlider->type(FL_HORIZONTAL);
@@ -835,6 +808,8 @@ void MainWindow::createWidgets()
 		writeButton->callback((Fl_Callback*)writeButtonCallback, this);*/
 
 		// Create a phantom widget to help resize things
+		//this works with the train project because they have a World view as well as our trainview(mainview) view
+		//TODO: fix?
 		//Fl_Box *resizeBox = new Fl_Box(600, 595, 200, 5);
 		//widgets->resizable(resizeBox);
 
@@ -934,4 +909,67 @@ void MainWindow::writePoints(const char* filename)
 			fclose(fp);
 		}
 	}
+}
+
+void MainWindow::advanceTrain(int dir)
+{
+		
+		int segment = 0;
+		float newRotationStep = 0.0;
+
+		if( isAnimating() )
+		{
+			if(isArcParam())
+			{
+				//MAIN DIFFERENCE BETWEEN PERRY's CODE AND THE TRAIN DEMO CODE:
+				//in the sample project they use arclength param to figure out the step applied to the current rotation value
+
+				//in perry's code he uses arclength param to directly translate the thing being arclength param'd
+
+				//the following code computes the step amount (big_t) to be interpolated with in regards to a high precision timer: hpTime
+				/*double seconds_per_sample = 1;
+				double flight_time = seconds_per_sample * curve.numSegments();
+				double time_now = hpTime.TotalTime() - time_mode_started;
+				printf("time_now is %f and time_mode started is %f \n", time_now, time_mode_started);
+				double dmod = fmod(time_now, flight_time);
+				printf("dmod is %f \n", dmod);
+				double big_t = dmod / (flight_time);
+				printf("big_t is %f \n", big_t);*/
+				//newRotationStep = view->arcLengthInterpolation(big_t, segment); //actual arclengthparam function call here set up like in TrainWindow.cpp
+				//newRotationStep = rotationStep*(speed*0.5f); //my attempt at fixes
+				//newRotationStep = newRotationStep/curve.numSegments(); //my attempt at fixes
+				//newRotationStep = newRotationStep/rotation;  //my attempt at fixes
+				newRotationStep = rotationStep*speed*0.5f;
+
+				if(dir > 0)
+					rotation = rotation + newRotationStep;
+				else if(dir < 0)
+					rotation = rotation - newRotationStep; //eventually allow for going in the opposite direction
+				else
+					rotation = rotation;
+
+				//TODO: would need to add more conditionals here to eventually allow for going in the opposite direction
+				if( rotation >= getCurve().numSegments() )
+					rotation = 0.f;
+				else if(rotation < 0.f)//assumes this condition is reached when we are still going in a pos dir (only reached when speed is negative)
+					rotation= getCurve().numSegments()+ newRotationStep;
+			}
+			else
+			{
+				newRotationStep = rotationStep*speed*0.5f;
+				if(dir > 0)
+					rotation = rotation + newRotationStep;
+				else if(dir < 0)
+					rotation = rotation - newRotationStep; //eventually allow for going in the opposite direction
+				else
+					rotation = rotation;
+
+				//TODO: would need to add more conditionals here to eventually allow for going in the opposite direction
+				if( rotation >= getCurve().numSegments() )
+					rotation = 0.f;
+				else if(rotation < 0.f)//assumes this condition is reached when we are still going in a pos dir (only reached when speed is negative)
+					rotation= getCurve().numSegments()+ newRotationStep;
+			}
+			
+		}
 }

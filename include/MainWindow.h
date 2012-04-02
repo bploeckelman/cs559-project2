@@ -50,19 +50,6 @@ private:
 	ArcBallCam arcballCam;
 	bool useArcball;
 
-	//GLuint arc_length_display_list;
-	HighPrecisionTime hpTime;
-	float time_mode_started;
-
-	struct ParameterTable
-	{
-		float local_t;
-		float accumulated_length;
-		float fraction_of_accumulated_length;
-		int segment_number;
-	};
-
-	std::vector<ParameterTable> parameter_table;
 
 public:
 	MainView(int x, int y, int w, int h, const char *l=0);
@@ -79,8 +66,7 @@ public:
 	inline MainWindow* getWindow() const { return window; }
 
 	inline void toggleUseArcball() { useArcball = !useArcball; }
-	float arcLengthInterpolation(float big_t, int& segment_number);
-	void BuildParameterTable(int number_of_samples, Curve& curve);
+	float arcLengthInterpolation(double big_t, int& segment_number);
 
 private:
 	void resetArcball();
@@ -92,7 +78,7 @@ private:
 	void drawCurve( const float t, bool doShadows);
 	void drawPathObject( const float t, bool doShadows );
 	void drawSelectedControlPoint(bool doShadows);
-	void reparameterizing(Curve& curve);
+	//void reparameterizing(Curve& curve, float big_t, bool doShadows);
 	
 
 };
@@ -137,6 +123,10 @@ private:
 	void createWidgets();
 	void readPoints(const char* filename);
 
+	//only use if using the HpTime to set up the big_t for arclength param
+	//HighPrecisionTime hpTime;
+	//double time_mode_started;
+
 public:
 	MainWindow(const int x=100, const int y=50);
 
@@ -166,6 +156,8 @@ public:
 
 	void createPoints(const char* filename);
 	void writePoints(const char* filename);
+
+	void MainWindow::advanceTrain(int dir);
 
 	inline void breakString(char* str, std::vector<const char*>& words) {
 	// start with no words

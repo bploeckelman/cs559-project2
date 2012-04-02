@@ -33,24 +33,42 @@ void idleCallback(void *pData)
 		return;
 	}
 	MainWindow *window = reinterpret_cast<MainWindow*>(pData);
+	int segment = 0;
 
 	const unsigned long delta = clock() - lastRedraw;
 	if( delta > interval ) 
 	{
 		lastRedraw = clock();
 
-		//need rotationStep here
-		const float rotation = window->getRotation();
+		//the lower code here was put into mainwindow to bring it mor in line with the sample project
+
+		//MAIN DIFFERENCE BETWEEN PERRY's CODE AND THE TRAIN DEMO CODE:
+		//in the sample project they use arclength param to figure out the step applied to the current rotation value
+
+		//in perry's code he uses arclength param to directly translate the thing being arclength param'd
+
+		/*const float rotation = window->getRotation();
 		const float rotationStep = window->getRotationStep();
 		const float speed = window->getSpeed();
 
 		if( window->isAnimating() )
 		{
-			window->setRotation(rotation + (rotationStep*speed*0.5f));
+			if(window->isArcParam())
+			{
+				float newRotationStep = window->getView().arcLengthInterpolation(rotation +speed*0.5f, segment);    //.arcLengthInterpolation((rotation + speed*0.5f), segment);
+				window->setRotation(rotation+ newRotationStep);
+			}
+			else
+			{
+				window->setRotation(rotation + (rotationStep*speed*0.5f));
+			}
+			
 			if( window->getRotation() > window->getCurve().numSegments() )
 				window->setRotation(0.f);
-		}
+		}*/
+		const int direction = 1;//new code, may be used for a future update where we can toggle a direction change
 
+		window->advanceTrain(direction);//new code, may be used for a future update where we can toggle a direction change
 		window->damageMe();
 	}
 }
