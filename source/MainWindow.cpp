@@ -74,125 +74,31 @@ MainView::MainView(int x, int y, int w, int h, const char *l)
 /* draw() - Draws to the screen ---------------------------------- */
 void MainView::draw()
 {
-	float t = window->getRotation();
-	const Curve& curve(window->getCurve());
-	bool doShadows = false;
+	const float t = window->getRotation();
 
 	updateTextWidget(t);
-
 	openglFrameSetup();
 
-	drawScenery(doShadows);
+	// Draw everything once without shadows
+	drawScenery();
+	drawCurve(t);
+	drawPathObjects(t);
+	drawSelectedControlPoint();
 
-	drawCurve(t, doShadows);
-
-	//attempted to do arclength stuff here before going to the way it was setup in trainWindow.cpp
-	/*if(window->isArcParam())
-	{
-		int segment = 0;
-		float temp_t= 0.f;
-		temp_t = t;
-		t= t-std::floor(temp_t);
-		t= t/std::floor(temp_t+1.f);
-		t= std::floor(temp_t)+ arcLengthInterpolation(t, segment);
-		printf("segment is %d \n", segment);
-	}*/
-	
-	//printf("t is %f \n", t);
-
-	float tt = t + 0.2f;
-	if( tt >= curve.numSegments() )
-	{
-		tt -= curve.numSegments();
-	}
-	else if(tt < 0)
-	{
-		tt += curve.numSegments();
-	}
-	drawPathObject(tt, doShadows);
-
-	tt = t + 0.1f;
-	if( tt >= curve.numSegments() )
-	{
-		tt -= curve.numSegments();
-	}
-	else if(tt < 0)
-	{
-		tt += curve.numSegments();
-	}
-	drawPathObject(tt, doShadows);
-
-	tt = t;
-	if(tt < 0)
-	{
-		tt += curve.numSegments();
-	}
-	drawPathObject(tt, doShadows);
-
-/* Note: this works for drawing them front to back
-   but we have to do some rather ugly adjustments 
-   to avoid trying to index a non-existent segment 
-   due to floating point rounding...
-   -----------------------------------------------
-	drawPathObject(t);
-
-	float tt = t - 0.1f;
-	if( tt <= 0.f )
-		tt = curve.numSegments() + (tt - 0.0001f);
-	drawPathObject(tt);
-
-	tt = t - 0.2f;
-	if( tt <= 0.f )
-		tt = curve.numSegments() + (tt - 0.0001f);
-	drawPathObject(tt);
-//*/
-	drawSelectedControlPoint(doShadows);
-
+	// Draw everything again with shadows if they are enabled
 	if(window->isShadowed())
 	{
 		glPushMatrix();
-			glTranslatef(0.f, -20.f, 0.f);//translate shadows to ground plane
+			// Translate down to the ground plane
+			glTranslatef(0.f, -20.f, 0.f); 
 
 			setupShadows();
 		
-			doShadows = true;
+			drawScenery(true);
+			drawCurve(t, true);
+			drawPathObjects(t, true);
+			drawSelectedControlPoint(true);
 
-			drawScenery(doShadows);
-			drawCurve(t, doShadows);
-	
-			//printf("t is %f \n", t);
-
-			//float tt = t + 0.2f;
-			tt = t + 0.2f;
-			if( tt >= curve.numSegments() )
-			{
-				tt -= curve.numSegments();
-			}
-			else if(tt < 0)
-			{
-				tt += curve.numSegments();
-			}
-			drawPathObject(tt, doShadows);
-
-			tt = t + 0.1f;
-			if( tt >= curve.numSegments() )
-			{
-				tt -= curve.numSegments();
-			}
-			else if(tt < 0)
-			{
-				tt += curve.numSegments();
-			}
-			drawPathObject(tt, doShadows);
-
-			tt = t;
-			if(tt < 0)
-			{
-				tt += curve.numSegments();
-			}
-			drawPathObject(tt, doShadows);
-
-			drawSelectedControlPoint(doShadows);
 			unsetupShadows();
 		glPopMatrix();
 	}
@@ -443,8 +349,6 @@ void MainView::openglFrameSetup()
 		glEnable(GL_LIGHTING);
 		setupObjects();
 	glPopMatrix();
-
-
 }
 
 /* drawFloor() - Draws the floor plane and assorted scenery ------ */ 
@@ -534,7 +438,7 @@ void MainView::drawScenery(bool doShadows)
 }
 
 /* drawCurve() - Draws the window's curve object ----------------- */
-void MainView::drawCurve( const float t, bool doShadows )
+void MainView::drawCurve(const float t, bool doShadows)
 {
 	Curve& curve(window->getCurve());
 	curve.selectedSegment = static_cast<int>(std::floor(t));
@@ -553,7 +457,7 @@ void MainView::drawCurve( const float t, bool doShadows )
 }
 
 /* drawPathObject() - Draws the object that travels along the path */
-void MainView::drawPathObject( const float t, bool doShadows )
+void MainView::drawPathObject(const float t, bool doShadows)
 {
 	Curve& curve(window->getCurve());
 	const Vec3f p(curve.getPosition(t));	// position  @ t
@@ -595,6 +499,40 @@ void MainView::drawPathObject( const float t, bool doShadows )
 	{
 		//glPopMatrix();
 	}*/
+}
+
+void MainView::drawPathObjects(const float t, const bool doShadows)
+{
+	const Curve& curve(window->getCurve());
+
+	float tt = t + 0.2f;
+	if( tt >= curve.numSegments() )
+	{
+		tt -= curve.numSegments();
+	}
+	else if(tt < 0)
+	{
+		tt += curve.numSegments();
+	}
+	drawPathObject(tt, doShadows);
+
+	tt = t + 0.1f;
+	if( tt >= curve.numSegments() )
+	{
+		tt -= curve.numSegments();
+	}
+	else if(tt < 0)
+	{
+		tt += curve.numSegments();
+	}
+	drawPathObject(tt, doShadows);
+
+	tt = t;
+	if(tt < 0)
+	{
+		tt += curve.numSegments();
+	}
+	drawPathObject(tt, doShadows);
 }
 
 /* drawSelectedControlPoint() - Draws the selected point highlighted */
@@ -877,18 +815,15 @@ void MainWindow::savePoints(const string& filename)
 		// Save number of points
 		file << curve.numControlPoints();
 
-		// Save points
-		for each(auto point in curve.getControlPoints())
+		// Save each point's position and orientation
+		for each(const auto& point in curve.getControlPoints())
 		{
+			const Vec3f& p(point.pos());
+			const Vec3f& o(point.orient());
+
 			file << endl;
-			// Save position
-			file << point.pos().x() << " "
-			     << point.pos().y() << " "
-			     << point.pos().z() << " ";
-			// Save orientation
-			file << point.orient().x() << " "
-			     << point.orient().y() << " "
-			     << point.orient().z() << " ";
+			file << p.x() << " " << p.y() << " " << p.z() << " ";
+			file << o.x() << " " << o.y() << " " << o.z() << " ";
 		}
 	}
 	else // file didn't open...

@@ -47,7 +47,7 @@ void Curve::drawPoint( int index, bool isShadowed )
 	if( index < 0 || index >= (int)controlPoints.size() )
 		return;
 
-	controlPoints.at(index).draw(isShadowed);
+	controlPoints[index].draw(isShadowed);
 }
 
 void Curve::drawPoints(bool isShadowed) const
@@ -64,11 +64,10 @@ void Curve::drawPoints(bool isShadowed) const
 
 void Curve::drawSelectedSegment(bool isShadowed)
 {
-	if( selectedSegment < 0 || selectedSegment >= (int)segments.size() )
+	if( selectedSegment < 0 || selectedSegment >= numSegments() ) 
 		return;
 
-		segments.at(selectedSegment)->draw(true, isShadowed);
-
+	segments[selectedSegment]->draw(true, isShadowed);
 }
 
 Vec3f Curve::getPosition( const float t )
@@ -108,12 +107,10 @@ Vec3f Curve::getDirection( const float t )
 
 CurveSegment* Curve::getSegment( const int number )
 {
-	try {
-		return segments.at(number);
-	} catch(std::out_of_range&) {
-		cout << "Warning: Curve::getSegment out of range: " << number << endl;
+	if( number < 0 || number >= numSegments() )
 		return nullptr;
-	}
+
+	return segments[number];
 }
 
 void Curve::regenerateSegments()
@@ -261,14 +258,10 @@ CtrlPoint& Curve::getPoint( int id )
 
 void Curve::drawSegment( const int number, bool isShadowed )
 {
-	try {
-		segments.at(number)->draw(false, isShadowed);
-	} catch(std::out_of_range&) {
-		stringstream ss;
-		ss << "Warning: no point on curve with index=" << number;
-		cout << ss.str() << endl;
-//		throw NoSuchPoint(ss.str());
-	}
+	if( number < 0 || number >= numSegments() )
+		return;
+
+	segments[number]->draw(false, isShadowed);
 }
 
 //ONLY CALL THIS IF YOU ARE IMMEDIATELY going to fill up the control points of the curve!
@@ -276,7 +269,6 @@ void Curve::clearPoints()
 {
 	controlPoints.clear();
 	regenerateSegments();
-
 }
 
 /* parameter table building- this table keeps track of values as defined in the parameter_table struct for every point on the curve (ctrl and sample points)*/
@@ -300,7 +292,6 @@ void Curve::BuildParameterTable(int number_of_samples)
 	{
 		for (int j = 1; j < number_of_samples; j++)
 		{
-			
 			p.segment_number = i;
 			p.local_t = ((double) j) / ((double) number_of_samples - 1);
 			//printf(" number_of_samples is %d, i is %d, j is %d, local_t is %f \n", number_of_samples, i, j, p.local_t);
@@ -332,4 +323,3 @@ void Curve::BuildParameterTable(int number_of_samples)
 		parameter_table[i].fraction_of_accumulated_length = parameter_table[i].accumulated_length / total_length;
 	}
 }
-

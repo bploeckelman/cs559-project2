@@ -128,7 +128,6 @@
   <ItemGroup>
     <None Include="tracks\figure8.txt" />
     <None Include="tracks\loop0.txt" />
-    <None Include="tracks\reset-save.txt" />
     <None Include="tracks\reset.txt" />
     <None Include="tracks\spiral.txt" />
     <None Include="tracks\sqiggle.txt" />

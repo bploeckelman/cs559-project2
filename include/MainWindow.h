@@ -54,9 +54,9 @@ public:
 	MainView(int x, int y, int w, int h, const char *l=0);
 
 	virtual void draw();
-	virtual int handle(int event);
 
 	void pick();
+	virtual int handle(int event);
 
 	inline void setSelectedPoint(const int p) { selectedPoint = p; }
 	inline int  getSelectedPoint() const      { return selectedPoint; }
@@ -73,10 +73,11 @@ private:
 
 	void updateTextWidget( const float t );
 	void openglFrameSetup();
-	void drawScenery(bool doShadows);
-	void drawCurve( const float t, bool doShadows);
-	void drawPathObject( const float t, bool doShadows );
-	void drawSelectedControlPoint(bool doShadows);
+	void drawScenery(bool doShadows=false);
+	void drawCurve(const float t, bool doShadows=false);
+	void drawPathObject(const float t, bool doShadows=false);
+	void drawPathObjects(const float t, const bool doShadows=false);
+	void drawSelectedControlPoint(bool doShadows=false);
 	//void reparameterizing(Curve& curve, float big_t, bool doShadows);
 };
 

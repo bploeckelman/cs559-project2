@@ -148,9 +148,6 @@
     <None Include="tracks\reset.txt">
       <Filter>tracks</Filter>
     </None>
-    <None Include="tracks\reset-save.txt">
-      <Filter>tracks</Filter>
-    </None>
     <None Include="tracks\spiral.txt">
       <Filter>tracks</Filter>
     </None>
