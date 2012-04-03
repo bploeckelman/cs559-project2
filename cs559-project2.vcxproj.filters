@@ -55,6 +55,9 @@
     <ClCompile Include="source\highprecisiontime.cpp">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="source\MainView.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework\TrainFiles\Utilities\3DUtils.h">
@@ -115,6 +118,9 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\highprecisiontime.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MainView.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
