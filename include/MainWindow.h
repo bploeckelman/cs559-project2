@@ -44,6 +44,7 @@ private:
 	Fl_Button  *delPointButton;
 	Fl_Output  *textOutput;
 	Fl_Choice  *curveTypeChoice;
+	Fl_Choice  *viewTypeChoice;
 	Fl_Button  *shadowButton;
 	Fl_Button  *paramButton;
 	Fl_Button  *forwardButton;
@@ -69,6 +70,7 @@ private:
 public:
 	MainWindow(const int x=100, const int y=50);
 
+	MainView& getView();
 	const MainView& getView() const;
 
 	float getSpeed()          const;
@@ -99,6 +101,7 @@ public:
 	void setDebugText(const std::string& text);
 };
 
+inline MainView& MainWindow::getView()             { return *view; }
 inline const MainView& MainWindow::getView() const { return *view; }
 inline float MainWindow::getSpeed()          const { return speed ; }
 inline float MainWindow::getRotation()       const { return rotation; }

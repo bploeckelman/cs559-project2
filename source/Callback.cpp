@@ -117,9 +117,21 @@ void curveTypeChoiceCallback( Fl_Widget *widget, MainWindow *window )
 	assert(window != nullptr && widget != nullptr);
 
 	Fl_Choice *curveTypeChoice = dynamic_cast<Fl_Choice*>(widget);
-	CurveType curveType = static_cast<CurveType>(curveTypeChoice->value());
+	CurveType  curveType = static_cast<CurveType>(curveTypeChoice->value());
 
 	window->getCurve().setCurveType(curveType);
+
+	window->damageMe();
+}
+
+void viewTypeChoiceCallback( Fl_Widget *widget, MainWindow *window )
+{
+	assert(window != nullptr && widget != nullptr);
+
+	Fl_Choice *viewTypeChoice = dynamic_cast<Fl_Choice*>(widget);
+	ViewType   viewType = static_cast<ViewType>(viewTypeChoice->value());
+
+	window->getView().viewType = viewType;
 
 	window->damageMe();
 }

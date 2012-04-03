@@ -33,7 +33,7 @@ Curve::Curve(const CurveType& type)
 { }
 
 /* draw() - Draws all the segments of this curve ----------------- */
-void Curve::draw(bool isShadowed) 
+void Curve::draw(bool drawPoints, bool isShadowed)
 {
 	if( controlPoints.empty() )
 		return;
@@ -44,7 +44,7 @@ void Curve::draw(bool isShadowed)
 	for each(auto segment in segments)
 	{
 		assert(segment != nullptr);
-		segment->draw(false,isShadowed);
+		segment->draw(drawPoints, isShadowed);
 	}
 }
 
@@ -67,12 +67,12 @@ void Curve::drawPoints(bool isShadowed) const
 }
 
 /* drawSelectedSegment() - Draws the selected segment ------------ */
-void Curve::drawSelectedSegment(bool isShadowed)
+void Curve::drawSelectedSegment(bool drawPoints, bool isShadowed)
 {
 	if( selectedSegment < 0 || selectedSegment >= numSegments() ) 
 		return;
 
-	segments[selectedSegment]->draw(true, isShadowed);
+	segments[selectedSegment]->draw(drawPoints, isShadowed);
 }
 
 /* setCurveType() - Sets the type of curve used to evaluate the control points */

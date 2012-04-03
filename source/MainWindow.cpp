@@ -60,6 +60,7 @@ MainWindow::MainWindow(const int x, const int y)
 	, delPointButton  (nullptr)
 	, textOutput      (nullptr)
 	, curveTypeChoice (nullptr)
+	, viewTypeChoice  (nullptr)
 	, shadowButton    (nullptr)
 	, paramButton     (nullptr)
 	, forwardButton   (nullptr)
@@ -133,8 +134,17 @@ void MainWindow::createWidgets()
 		curveTypeChoice->value(1);
 		curveTypeChoice->callback((Fl_Callback*)curveTypeChoiceCallback, this);
 
+		// Create view type browser (drop down)
+		viewTypeChoice = new Fl_Choice(645, 55, 90, 20, "View");
+		viewTypeChoice->clear();
+		viewTypeChoice->add((ViewTypeNames[arcball]).c_str());
+		viewTypeChoice->add((ViewTypeNames[train]).c_str());
+		viewTypeChoice->add((ViewTypeNames[overhead]).c_str());
+		viewTypeChoice->value(0);
+		viewTypeChoice->callback((Fl_Callback*)viewTypeChoiceCallback, this);
+
 		//create arc length parameterization button
-		paramButton = new Fl_Button(605, 55, 120, 20, "Arclength Param");
+		paramButton = new Fl_Button(605, 105, 120, 20, "Arclength Param");
 		paramButton->type(FL_TOGGLE_BUTTON);
 		paramButton->value(0);
 		paramButton->selection_color((Fl_Color)3); // yellow when pressed
@@ -148,13 +158,13 @@ void MainWindow::createWidgets()
 		shadowButton->callback((Fl_Callback*)shadowButtonCallback, this);
 
 		// Create the manual backwards button
-		backwardButton = new Fl_Button(730, 55, 30, 20, "<<");
+		backwardButton = new Fl_Button(730, 105, 30, 20, "<<");
 		backwardButton->type(FL_NORMAL_BUTTON);
 		backwardButton->selection_color((Fl_Color)3); // yellow when pressed
 		backwardButton->callback((Fl_Callback*)backwardButtonCallback, this);
 
 		// Create the manual forwards button
-		forwardButton = new Fl_Button(765, 55, 30, 20, ">>");
+		forwardButton = new Fl_Button(765, 105, 30, 20, ">>");
 		forwardButton->type(FL_NORMAL_BUTTON);
 		forwardButton->selection_color((Fl_Color)3); // yellow when pressed
 		forwardButton->callback((Fl_Callback*)forwardButtonCallback, this);
@@ -169,7 +179,7 @@ void MainWindow::createWidgets()
 
 
 		// Create text display
-		textOutput = new Fl_Output(605, 105, 90, 20);
+		textOutput = new Fl_Output(605, 130, 80, 20);
 
 		// Create file write button
 		/*writeButton = new Fl_Button(700, 105, 70, 20, "File Write");

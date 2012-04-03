@@ -43,6 +43,8 @@ using std::vector;
 using std::cout;
 using std::endl;
 
+string ViewTypeNames[] = { "Arcball", "Train", "Overhead" };
+
 
 /* ==================================================================
  * MainView class
@@ -52,6 +54,8 @@ using std::endl;
 MainView::MainView(int x, int y, int w, int h, const char *l)
 	: Fl_Gl_Window(x,y,w,h,l)
 	, arcballCam()
+	, selectedPoint(-1)
+	, viewType(arcball)
 {
 	mode( FL_RGB | FL_ALPHA | FL_DEPTH | FL_DOUBLE );
 	resetArcball();
@@ -67,9 +71,14 @@ void MainView::draw()
 
 	// Draw everything once without shadows
 	drawScenery();
-	drawCurve(t);
-	drawPathObjects(t);
-	drawSelectedControlPoint();
+	if( viewType == train )
+		drawCurve(t);
+	else
+	{
+		drawCurve(t, true);
+		drawPathObjects(t);
+		drawSelectedControlPoint();
+	}
 
 	// Draw everything again with shadows if they are enabled
 	if(window->isShadowed())
@@ -81,7 +90,7 @@ void MainView::draw()
 			setupShadows();
 
 			drawScenery(true);
-			drawCurve(t, true);
+			drawCurve(t, false, true);
 			drawPathObjects(t, true);
 			drawSelectedControlPoint(true);
 
@@ -93,7 +102,7 @@ void MainView::draw()
 /* handle() - Handles user input --------------------------------- */
 int MainView::handle(int event)
 {
-	if( useArcball )
+	if( viewType == arcball )
 	{
 		if( arcballCam.handle(event) )
 			return 1;
@@ -153,10 +162,9 @@ int MainView::handle(int event)
 		//* Note : use this format to process keyboard input
 		int k  = Fl::event_key();
 		int ks = Fl::event_state();
-		if( k == ' ' )
-		{
-			toggleUseArcball();
-		}
+		if( k == 'a' ) viewType = arcball;
+		if( k == 't' ) viewType = train;
+		if( k == 'o' ) viewType = overhead;
 		break;
 	}
 
@@ -166,6 +174,10 @@ int MainView::handle(int event)
 /* pick() - Performs OpenGL picking ------------------------------ */
 void MainView::pick()
 {
+	// Don't pick if in train view
+	if( viewType == train )
+		return;
+
 	// Make sure we're current so we can use OpenGL
 	make_current();
 
@@ -263,30 +275,43 @@ void MainView::resetArcball()
 /* setupProject() - Sets up projection & modelview matrices ------ */
 void MainView::setupProjection()
 {
-
-	if( useArcball )
-	{
-		arcballCam.setProjection(false);
-		return;
-	}
-
-	//the rest of this code is for birds eye view right?
-	/*if( window->isShadowed() )
-	{
-		window->toggleShadows();
-		//disable shadow lights
-	}*/
 	const float aspect = static_cast<float>(w()) / static_cast<float>(h());
 	const float width  = (aspect >= 1) ? 110 : 110 * aspect;
 	const float height = (aspect >= 1) ? 110 / aspect : 110;
 
-	glMatrixMode(GL_PROJECTION);
-	// Note: no glLoadIdentity() here, caller clears projection (for picking)
-	glOrtho(-width, width, -height, height, 200, -200);
+	switch(viewType)
+	{
+		case arcball: arcballCam.setProjection(false); break;
+		case train:
+		{
+			glMatrixMode(GL_PROJECTION);
+			glLoadIdentity();
+			gluPerspective(90.0, aspect, 0.1, 1000.0);
 
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glRotatef(-90.f, 1.f, 0.f, 0.f);
+			glMatrixMode(GL_MODELVIEW);
+			glLoadIdentity();
+
+			const float t = window->getRotation();
+			Curve& curve(window->getCurve());
+			const Vec3f& p(-1.f * curve.getPosition(t));
+			const Vec3f& d(-1.f * curve.getDirection(t));
+
+			applyBasisFromTangent(normalize(d));
+			glTranslatef(p.x(), p.y() - 3.f, p.z());
+		}
+		break;
+		case overhead:
+		{
+			glMatrixMode(GL_PROJECTION);
+			// Note: no glLoadIdentity() here, caller clears projection (for picking)
+			glOrtho(-width, width, -height, height, 200, -200);
+
+			glMatrixMode(GL_MODELVIEW);
+			glLoadIdentity();
+			glRotatef(-90.f, 1.f, 0.f, 0.f);
+		}
+		break;
+	};
 
 	glViewport(0, 0, w(), h());
 }
@@ -319,7 +344,7 @@ void MainView::openglFrameSetup()
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
 
-	if (!useArcball) {
+	if (viewType != arcball) {
 		glDisable(GL_LIGHT1);
 		glDisable(GL_LIGHT2);
 	} else {
@@ -459,22 +484,16 @@ void MainView::drawScenery(bool doShadows)
 }
 
 /* drawCurve() - Draws the window's curve object ----------------- */
-void MainView::drawCurve(const float t, bool doShadows)
+void MainView::drawCurve(const float t, bool drawPoints, bool doShadows)
 {
 	Curve& curve(window->getCurve());
 	curve.selectedSegment = static_cast<int>(std::floor(t));
 
-	if(!doShadows)
-	{
-		glColor4ub(255, 255, 255, 255);
-	}
-	curve.draw(doShadows);
+	if(!doShadows) glColor4ub(255, 255, 255, 255);
+	curve.draw(drawPoints, doShadows);
 
-	if(!doShadows)
-	{
-		glColor4ub(255, 0, 0, 255);
-	}
-	curve.drawSelectedSegment(doShadows);
+	if(!doShadows) glColor4ub(255, 0, 0, 255);
+	curve.drawSelectedSegment(false, doShadows);
 }
 
 /* drawPathObject() - Draws the object that travels along the path */

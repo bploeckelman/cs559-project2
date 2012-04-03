@@ -50,10 +50,10 @@ public:
 
 	void regenerateSegments();
 
-	void draw(bool isShadowed);
+	void draw(bool drawPoints, bool isShadowed);
 	void drawPoint(int index, bool isShadowed);
 	void drawPoints(bool isShadowed) const;
-	void drawSelectedSegment(bool isShadowed);
+	void drawSelectedSegment(bool drawPoints, bool isShadowed);
 
 	void setCurveType(const CurveType& curveType);
 

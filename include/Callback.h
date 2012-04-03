@@ -16,6 +16,8 @@ void delPointButtonCallback(Fl_Widget *widget, MainWindow *window);
 
 void curveTypeChoiceCallback(Fl_Widget *widget, MainWindow *window);
 
+void viewTypeChoiceCallback(Fl_Widget *widget, MainWindow *window);
+
 void shadowButtonCallback( Fl_Widget *widget, MainWindow *window );
 
 void paramButtonCallback(Fl_Widget *widget, MainWindow *window);

@@ -15,7 +15,12 @@
 #include <Fl/Fl_Gl_Window.h>
 #pragma warning(pop)
 
+#include <string>
+
 class MainWindow;
+
+enum ViewType { arcball, train, overhead };
+extern std::string ViewTypeNames[];
 
 
 /* ==================================================================
@@ -29,13 +34,14 @@ class MainWindow;
 class MainView : public Fl_Gl_Window
 {
 private:
-	MainWindow *window;
-	int selectedPoint;
+	MainWindow    *window;
+	ArcBallCam    arcballCam;
 
-	ArcBallCam arcballCam;
-	bool useArcball;
+	int selectedPoint;	// TODO: only use the value in window->curve
 
 public:
+	ViewType viewType;
+
 	MainView(int x, int y, int w, int h, const char *l=0);
 
 	virtual void draw();
@@ -43,12 +49,11 @@ public:
 
 	void pick();
 
-	void toggleUseArcball();
-	void setSelectedPoint(const int p);
 	void setWindow(MainWindow *w);
+	void setSelectedPoint(const int p);
 
-	int  getSelectedPoint() const;
 	MainWindow* getWindow() const;
+	int  getSelectedPoint() const;
 
 	float arcLengthInterpolation(double big_t, int& segment_number);
 
@@ -60,7 +65,7 @@ private:
 	void openglFrameSetup();
 
 	void drawScenery(bool doShadows=false);
-	void drawCurve(const float t, bool doShadows=false);
+	void drawCurve(const float t, bool drawPoints=false, bool doShadows=false);
 	void drawPathObject(const float t, bool doShadows=false);
 	void drawPathObjects(const float t, const bool doShadows=false);
 	void drawSelectedControlPoint(bool doShadows=false);
@@ -68,8 +73,7 @@ private:
 	//void reparameterizing(Curve& curve, float big_t, bool doShadows);
 };
 
-inline void MainView::toggleUseArcball()       { useArcball = !useArcball; }
-inline void MainView::setSelectedPoint(int p)  { selectedPoint = p; }
 inline void MainView::setWindow(MainWindow *w) { window = w; }
-inline int  MainView::getSelectedPoint() const { return selectedPoint; }
+inline void MainView::setSelectedPoint(int p)  { selectedPoint = p; }
 inline MainWindow* MainView::getWindow() const { return window; }
+inline int  MainView::getSelectedPoint() const { return selectedPoint; }
