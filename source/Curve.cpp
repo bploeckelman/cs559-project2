@@ -19,6 +19,10 @@ using std::cout;
 using std::endl;
 
 
+/************************************************************************/
+/* Curve class                                                          */
+/************************************************************************/
+
 Curve::Curve(const CurveType& type)
 	: type(type)
 	, controlPoints()
@@ -27,6 +31,7 @@ Curve::Curve(const CurveType& type)
 	, selectedSegment(-1)
 { }
 
+/* draw() - Draws all the segments of this curve ----------------- */
 void Curve::draw(bool isShadowed) 
 {
 	if( controlPoints.empty() )
@@ -42,6 +47,7 @@ void Curve::draw(bool isShadowed)
 	}
 }
 
+/* drawPoint() - Draws the control point at the specified index, if it exists */
 void Curve::drawPoint( int index, bool isShadowed )
 {
 	if( index < 0 || index >= (int)controlPoints.size() )
@@ -50,18 +56,16 @@ void Curve::drawPoint( int index, bool isShadowed )
 	controlPoints[index].draw(isShadowed);
 }
 
+/* drawPoints() - Draws all the control points for this curve ---- */
 void Curve::drawPoints(bool isShadowed) const
 {
-	// Note: visual studio 2010 implemented c++0x range-based for loops 
-	// in this non-standard way apparently, see: 
-	// http://blogs.msdn.com/b/vcblog/archive/2009/07/13/intellisense-and-browsing-with-c-0x.aspx
-
 	for each(const auto& p in controlPoints)
 	{
 		p.draw(isShadowed);			
 	}
 }
 
+/* drawSelectedSegment() - Draws the selected segment ------------ */
 void Curve::drawSelectedSegment(bool isShadowed)
 {
 	if( selectedSegment < 0 || selectedSegment >= numSegments() ) 
@@ -70,6 +74,54 @@ void Curve::drawSelectedSegment(bool isShadowed)
 	segments[selectedSegment]->draw(true, isShadowed);
 }
 
+/* setCurveType() - Sets the type of curve used to evaluate the control points */
+void Curve::setCurveType( const CurveType& curveType ) 
+{ 
+	type = curveType; 
+	regenerateSegments();
+}
+
+/* addControlPoint() - Add the specified control point to the curve */
+int Curve::addControlPoint( const CtrlPoint& point )
+{
+	// Add the new point
+	controlPoints.push_back(point);
+	// Rebuild segments
+	regenerateSegments();
+	// Return the index of the newly added point
+	return controlPoints.size() - 1;
+}
+
+/* clearPoints() - Clears all the control points ----------------- */
+//ONLY CALL THIS IF YOU ARE IMMEDIATELY going to fill up the control points of the curve!
+void Curve::clearPoints()
+{
+	controlPoints.clear();
+	regenerateSegments();
+}
+
+/* delControlPoint() - Tries to delete the point at the specified index */
+/* Throws NoSuchPoint exception on bad point index --------------- */
+void Curve::delControlPoint( const int id ) 
+{
+	try {
+		// Make sure it is a good index,
+		// throwing an exception if it isn't
+		controlPoints.at(id);
+		// Erase the point at that index
+		controlPoints.erase(controlPoints.begin() + id);
+		// Rebuild segments
+		regenerateSegments();
+	}
+	catch(std::out_of_range&) {
+		stringstream ss;
+		ss << "Warning: no such point on curve with id=" << id;
+		throw NoSuchPoint(ss.str());
+	}
+}
+
+/* getPosition() - Lerp across curve segments to find position --- */
+/* Throws NoSuchPoint exception on bad segment index ------------- */
 Vec3f Curve::getPosition( const float t )
 {
 	const int segmentNumber = static_cast<int>(std::floor(t));
@@ -88,6 +140,8 @@ Vec3f Curve::getPosition( const float t )
 	}
 }
 
+/* getDirection() - Lerp across curve segments to find direction - */
+/* Throws NoSuchPoint exception on bad segment index ------------- */
 Vec3f Curve::getDirection( const float t )
 {
 	const int segmentNumber = static_cast<int>(std::floor(t));
@@ -105,6 +159,22 @@ Vec3f Curve::getDirection( const float t )
 	}
 }
 
+/* getPoint() - Returns the specified point, if it exists -------- */
+/* Throws NoSuchPoint exception on bad point index --------------- */
+CtrlPoint& Curve::getPoint( int id )
+{
+	try {
+		auto& p = controlPoints.at(id);
+		return p;
+	} catch(std::out_of_range&) {
+		stringstream ss;
+		ss << "Warning: no point on curve with id=" << id;
+		throw NoSuchPoint(ss.str());
+	}
+}
+
+/* getSegment() - Returns the specified segment, if it exists ---- */
+/* Returns nullptr if segment doesn't exist ---------------------- */
 CurveSegment* Curve::getSegment( const int number )
 {
 	if( number < 0 || number >= numSegments() )
@@ -113,6 +183,7 @@ CurveSegment* Curve::getSegment( const int number )
 	return segments[number];
 }
 
+/* regenerateSegments() - Regenerates segments based on control points and curve type */
 void Curve::regenerateSegments()
 {
 	// Clean up old segments
@@ -138,10 +209,11 @@ void Curve::regenerateSegments()
 
 	if(controlPoints.size() > 1)
 	{
-		BuildParameterTable(100); //TODO: set to 25 samples (same as the catmull rom drawing) but we should get a sample variable here
+		buildParameterTable(100); //TODO: set to 25 samples (same as the catmull rom drawing) but we should get a sample variable here
 	}
 }
 
+/* regenerateLineSegments() - Regenerates segments as lines ------ */
 void Curve::regenerateLineSegments()
 {
 	auto it  = controlPoints.begin();
@@ -157,6 +229,7 @@ void Curve::regenerateLineSegments()
 	}
 }
 
+/* regenerateCatmullSegments() - Regenerates segments as catmull-rom splines */
 void Curve::regenerateCatmullSegments()
 {
 	auto it  = controlPoints.begin();
@@ -193,69 +266,19 @@ void Curve::regenerateCatmullSegments()
 	}
 }
 
+/* regenerateHermiteSegments() - Regenerates segments as hermite splines */
 void Curve::regenerateHermiteSegments()
 {
 	throw std::exception("The method or operation is not implemented.");
 }
 
+/* regenerateBSplineSegments() - Regenerates segments as bsplines */
 void Curve::regenerateBSplineSegments()
 {
 	throw std::exception("The method or operation is not implemented.");
 }
 
-int Curve::addControlPoint( const CtrlPoint& point )
-{
-	// Add the new point
-	controlPoints.push_back(point);
-	//printf("control points size in addControlPoint is %d \n", controlPoints.size());
-	// Rebuild segments
-	regenerateSegments();
-	// Return the index of the newly added point
-	return controlPoints.size() - 1;
-}
-
-void Curve::delControlPoint( const int id ) 
-{
-	try {
-		// Make sure it is a good index,
-		// throwing an exception if it isn't
-		controlPoints.at(id);
-		// Erase the point at that index
-		controlPoints.erase(controlPoints.begin() + id);
-		// Rebuild segments
-		regenerateSegments();
-	}
-	catch(std::out_of_range&) {
-		stringstream ss;
-		ss << "Warning: no such point on curve with id=" << id;
-		throw NoSuchPoint(ss.str());
-	}
-}
-
-void Curve::setCurveType( const CurveType& curveType ) 
-{ 
-	type = curveType; 
-	regenerateSegments();
-}
-
-CurveType Curve::getCurveType() const { return type; }
-int Curve::numControlPoints  () const { return controlPoints.size(); }
-int Curve::numSegments       () const { return segments.size(); }
-
-vector<CtrlPoint>& Curve::getControlPoints() { return controlPoints; }
-
-CtrlPoint& Curve::getPoint( int id )
-{
-	try {
-		auto& p = controlPoints.at(id);
-		return p;
-	} catch(std::out_of_range&) {
-		stringstream ss;
-		ss << "Warning: no point on curve with id=" << id;
-		throw NoSuchPoint(ss.str());
-	}
-}
-
+/* drawSegment() - Draws the specified segment ------------------- */
 void Curve::drawSegment( const int number, bool isShadowed )
 {
 	if( number < 0 || number >= numSegments() )
@@ -264,16 +287,10 @@ void Curve::drawSegment( const int number, bool isShadowed )
 	segments[number]->draw(false, isShadowed);
 }
 
-//ONLY CALL THIS IF YOU ARE IMMEDIATELY going to fill up the control points of the curve!
-void Curve::clearPoints()
-{
-	controlPoints.clear();
-	regenerateSegments();
-}
-
+/* buildParameterTable() - Builds a table for arc-length parameterization */
 /* parameter table building- this table keeps track of values as defined in the parameter_table struct for every point on the curve (ctrl and sample points)*/
 /*the size of the paramer_table once fully built should be 1+num_segments()*number_of_samples*/
-void Curve::BuildParameterTable(int number_of_samples)
+void Curve::buildParameterTable(int number_of_samples)
 {
 	//clear any previous table as we are going to build a new one
 	parameter_table.clear();
