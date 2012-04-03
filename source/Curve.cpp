@@ -11,6 +11,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
+#include <cassert>
 #include <vector>
 
 using std::stringstream;
@@ -42,8 +43,8 @@ void Curve::draw(bool isShadowed)
 
 	for each(auto segment in segments)
 	{
-		if( segment != nullptr )
-			segment->draw(false,isShadowed);
+		assert(segment != nullptr);
+		segment->draw(false,isShadowed);
 	}
 }
 
@@ -84,11 +85,8 @@ void Curve::setCurveType( const CurveType& curveType )
 /* addControlPoint() - Add the specified control point to the curve */
 int Curve::addControlPoint( const CtrlPoint& point )
 {
-	// Add the new point
 	controlPoints.push_back(point);
-	// Rebuild segments
 	regenerateSegments();
-	// Return the index of the newly added point
 	return controlPoints.size() - 1;
 }
 
@@ -209,7 +207,7 @@ void Curve::regenerateSegments()
 
 	if(controlPoints.size() > 1)
 	{
-		buildParameterTable(100); //TODO: set to 25 samples (same as the catmull rom drawing) but we should get a sample variable here
+		buildParameterTable(25); //TODO: we should get a sample variable here
 	}
 }
 

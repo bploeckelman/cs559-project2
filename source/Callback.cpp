@@ -14,6 +14,7 @@
 #pragma warning(pop)
 
 #include <iostream>
+#include <cassert>
 #include <cstdlib>
 #include <ctime>
 
@@ -27,11 +28,8 @@ void idleCallback(void *pData)
 	static const unsigned long interval = CLOCKS_PER_SEC / 30;
 	static unsigned long lastRedraw = 0;
 
-	if( pData == nullptr ) 
-	{ 
-		cout << "Error: idleCallback - null pointer passed." << endl;
-		return;
-	}
+	assert(pData != nullptr);
+
 	MainWindow *window = reinterpret_cast<MainWindow*>(pData);
 	int segment = 0;
 
@@ -75,30 +73,21 @@ void idleCallback(void *pData)
 
 void animateButtonCallback(Fl_Widget *widget, MainWindow *window)
 {
-	if( window == nullptr || widget == nullptr )
-	{
-		cout << "Error: damageCallback - null pointer passed." << endl;
-		return;
-	}
-
+	assert(window != nullptr && widget != nullptr);
 	window->toggleAnimating();
-
 	window->damageMe();
 }
 
 void addPointButtonCallback( Fl_Widget *widget, MainWindow *window )
 {
-	if( window == nullptr || widget == nullptr )
-	{
-		cout << "Error: damageCallback - null pointer passed." << endl;
-		return;
-	}
+	assert(window != nullptr && widget != nullptr);
 
 	const float x = static_cast<float>((rand() % 150) - 75);
 	const float y = static_cast<float>((rand() % 50));
 	const float z = static_cast<float>((rand() % 150) - 75);
 
 	window->getCurve().addControlPoint(CtrlPoint(Vec3f(x,y,z)));
+
 	// Reset t so we don't try to access out of bounds
 	window->setRotation(0.f);
 
@@ -107,11 +96,7 @@ void addPointButtonCallback( Fl_Widget *widget, MainWindow *window )
 
 void delPointButtonCallback( Fl_Widget *widget, MainWindow *window )
 {
-	if( window == nullptr || widget == nullptr )
-	{
-		cout << "Error: damageCallback - null pointer passed." << endl;
-		return;
-	}
+	assert(window != nullptr && widget != nullptr);
 
 	// Don't allow deletion of points if we are down to just 2
 	if( window->getCurve().numControlPoints() <= 2 )
@@ -129,11 +114,7 @@ void delPointButtonCallback( Fl_Widget *widget, MainWindow *window )
 
 void curveTypeChoiceCallback( Fl_Widget *widget, MainWindow *window )
 {
-	if( window == nullptr || widget == nullptr )
-	{
-		cout << "Error: curveTypeBrowserCallback - null pointer passed." << endl;
-		return;
-	}
+	assert(window != nullptr && widget != nullptr);
 
 	Fl_Choice *curveTypeChoice = dynamic_cast<Fl_Choice*>(widget);
 	CurveType curveType = static_cast<CurveType>(curveTypeChoice->value());
@@ -145,37 +126,21 @@ void curveTypeChoiceCallback( Fl_Widget *widget, MainWindow *window )
 
 void shadowButtonCallback( Fl_Widget *widget, MainWindow *window )
 {
-	if( window == nullptr || widget == nullptr )
-	{
-		cout << "Error: curveTypeBrowserCallback - null pointer passed." << endl;
-		return;
-	}
-
+	assert(window != nullptr && widget != nullptr);
 	window->toggleShadows();
-
 	window->damageMe();
 }
 
 void paramButtonCallback( Fl_Widget *widget, MainWindow *window )
 {
-	if( window == nullptr || widget == nullptr )
-	{
-		cout << "Error: curveTypeBrowserCallback - null pointer passed." << endl;
-		return;
-	}
-
+	assert(window != nullptr && widget != nullptr);
 	window->toggleArcParam();
-
 	window->damageMe();
 }
 
 void forwardButtonCallback(Fl_Widget *widget, MainWindow *window)
 {
-	if( window == nullptr || widget == nullptr )
-	{
-		cout << "Error: damageCallback - null pointer passed." << endl;
-		return;
-	}
+	assert(window != nullptr && widget != nullptr);
 
 	const float rotation = window->getRotation();
 	const float rotationStep = window->getRotationStep();
@@ -191,11 +156,7 @@ void forwardButtonCallback(Fl_Widget *widget, MainWindow *window)
 
 void backwardButtonCallback(Fl_Widget *widget, MainWindow *window)
 {
-	if( window == nullptr || widget == nullptr )
-	{
-		cout << "Error: damageCallback - null pointer passed." << endl;
-		return;
-	}
+	assert(window != nullptr && widget != nullptr);
 
 	const float rotation = window->getRotation();
 	const float rotationStep = window->getRotationStep();
@@ -211,11 +172,7 @@ void backwardButtonCallback(Fl_Widget *widget, MainWindow *window)
 
 void speedSliderCallback(Fl_Widget *widget, MainWindow *window)
 {
-	if( window == nullptr || widget == nullptr )
-	{
-		cout << "Error: damageCallback - null pointer passed." << endl;
-		return;
-	}
+	assert(window != nullptr && widget != nullptr);
 
 	Fl_Value_Slider *speedSlider = dynamic_cast<Fl_Value_Slider*>(widget);
 	window->setSpeed((float)speedSlider->value());

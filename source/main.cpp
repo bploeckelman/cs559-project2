@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
 	using std::cout;
 	using std::endl;
 
-	cout << "CS559 - Project 2 - Phase 6" << endl;
+	cout << "CS559 - Project 2 - Train on a track" << endl;
 	if( argc > 3 )
 	{
 		cout << "Invalid number of arguments." << endl

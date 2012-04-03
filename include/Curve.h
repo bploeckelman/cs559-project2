@@ -32,8 +32,6 @@ private:
 	CurveSegmentVector segments;
 
 public:
-	//new structure stored per curve, made it public so I didnt need to add all the get/set methods when it's called in mainwindow.cpp
-	//I kept the double types to allow for more precision when calculating length values for the table, float types also work (but with less precsion)
 	struct ParameterTable
 	{
 		double local_t;
@@ -41,8 +39,7 @@ public:
 		double fraction_of_accumulated_length;
 		int segment_number;
 	};
-	//new vector for storing everything about a curve
-	/*the size of the paramer_table once fully built should be 1+num_segments()*number_of_samples*/
+	// Size should be 1 + numSegments() * number_of_samples 
 	std::vector<ParameterTable> parameter_table;
 
 	int selectedPoint;

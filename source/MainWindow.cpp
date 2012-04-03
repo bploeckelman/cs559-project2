@@ -238,7 +238,6 @@ void MainWindow::loadPoints(const string& filename)
 	}
 }
 
-// write the control points to our simple format
 void MainWindow::savePoints(const string& filename)
 {
 	ofstream file(filename);
@@ -274,6 +273,7 @@ void MainWindow::advanceTrain(int dir)
 
 	if( isAnimating() )
 	{
+		// Both branches of this if do the same thing right now?
 		if(isArcParam())
 		{
 			//MAIN DIFFERENCE BETWEEN PERRY's CODE AND THE TRAIN DEMO CODE:
@@ -294,36 +294,34 @@ void MainWindow::advanceTrain(int dir)
 			//newRotationStep = rotationStep*(speed*0.5f); //my attempt at fixes
 			//newRotationStep = newRotationStep/curve.numSegments(); //my attempt at fixes
 			//newRotationStep = newRotationStep/rotation;  //my attempt at fixes
-			newRotationStep = rotationStep*speed*0.5f;
+
+			newRotationStep = rotationStep * speed * 0.5f;
 
 			if(dir > 0)
-				rotation = rotation + newRotationStep;
+				rotation += newRotationStep;
 			else if(dir < 0)
-				rotation = rotation - newRotationStep; //eventually allow for going in the opposite direction
-			else
-				rotation = rotation;
+				rotation -= newRotationStep; //eventually allow for going in the opposite direction
 
 			//TODO: would need to add more conditionals here to eventually allow for going in the opposite direction
 			if( rotation >= getCurve().numSegments() )
 				rotation = 0.f;
 			else if(rotation < 0.f)//assumes this condition is reached when we are still going in a pos dir (only reached when speed is negative)
-				rotation= getCurve().numSegments()+ newRotationStep;
+				rotation= getCurve().numSegments() + newRotationStep;
 		}
 		else
 		{
-			newRotationStep = rotationStep*speed*0.5f;
+			newRotationStep = rotationStep * speed * 0.5f;
+
 			if(dir > 0)
-				rotation = rotation + newRotationStep;
+				rotation += newRotationStep;
 			else if(dir < 0)
-				rotation = rotation - newRotationStep; //eventually allow for going in the opposite direction
-			else
-				rotation = rotation;
+				rotation -= newRotationStep; //eventually allow for going in the opposite direction
 
 			//TODO: would need to add more conditionals here to eventually allow for going in the opposite direction
 			if( rotation >= getCurve().numSegments() )
 				rotation = 0.f;
 			else if(rotation < 0.f)//assumes this condition is reached when we are still going in a pos dir (only reached when speed is negative)
-				rotation= getCurve().numSegments()+ newRotationStep;
+				rotation = getCurve().numSegments() + newRotationStep;
 		}
 	}
 }
