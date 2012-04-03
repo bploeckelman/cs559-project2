@@ -127,7 +127,7 @@ int MainView::handle(int event)
 		lastPush = 0;
 		return 1;
 	case FL_DRAG:
-		if ((lastPush == 1) && (selectedPoint >=0))
+		if ( lastPush == 1 && selectedPoint >=0 && viewType != train )
 		{
 			try {
 				CtrlPoint& cp = window->getPoints().at(selectedPoint);
