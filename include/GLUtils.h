@@ -28,7 +28,7 @@ inline void applyBasisFromTangent(const Vec3f& tangent)
 	glMultMatrixf(m);
 }
 
-inline void drawVector(const Vec3f& pos, const Vec3f& vec, const Vec3f& color)
+inline void drawVector(const Vec3f& pos, const Vec3f& vec, const Vec3f& color=(1.f, 1.f, 1.f))
 {
 	glColor4f(color.x(), color.y(), color.z(), 1.f);
 
