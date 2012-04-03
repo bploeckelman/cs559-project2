@@ -84,13 +84,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="framework\TrainFiles\TrackFiles\figure8.txt" />
-    <None Include="framework\TrainFiles\TrackFiles\loop0.txt" />
-    <None Include="framework\TrainFiles\TrackFiles\reset.txt" />
-    <None Include="framework\TrainFiles\TrackFiles\spiral.txt" />
-    <None Include="framework\TrainFiles\TrackFiles\sqiggle.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="framework\TrainFiles\CallBacks.cpp" />
     <ClCompile Include="framework\TrainFiles\ControlPoint.cpp" />
     <ClCompile Include="framework\TrainFiles\Train.cpp" />
@@ -131,6 +124,14 @@
     <ClInclude Include="include\MathUtils.h" />
     <ClInclude Include="include\MainWindow.h" />
     <ClInclude Include="include\Vec3f.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="tracks\figure8.txt" />
+    <None Include="tracks\loop0.txt" />
+    <None Include="tracks\reset-save.txt" />
+    <None Include="tracks\reset.txt" />
+    <None Include="tracks\spiral.txt" />
+    <None Include="tracks\sqiggle.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

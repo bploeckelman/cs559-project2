@@ -39,8 +39,6 @@ void Curve::draw(bool isShadowed)
 	{
 		if( segment != nullptr )
 			segment->draw(false,isShadowed);
-
-			
 	}
 }
 
@@ -145,7 +143,6 @@ void Curve::regenerateSegments()
 	{
 		BuildParameterTable(100); //TODO: set to 25 samples (same as the catmull rom drawing) but we should get a sample variable here
 	}
-
 }
 
 void Curve::regenerateLineSegments()

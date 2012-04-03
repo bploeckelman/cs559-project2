@@ -43,11 +43,14 @@
 #pragma warning(pop)
 
 #include <iostream>
+#include <fstream>
 #include <cassert>
 #include <sstream>
 #include <string>
 #include <vector>
 
+using std::ifstream;
+using std::ofstream;
 using std::stringstream;
 using std::string;
 using std::vector;
@@ -193,7 +196,6 @@ void MainView::draw()
 			unsetupShadows();
 		glPopMatrix();
 	}
-
 }
 
 /* handle() - Handles user input --------------------------------- */
@@ -452,19 +454,17 @@ void MainView::drawScenery(bool doShadows)
 	{
 		glDisable(GL_BLEND);
 	}
-	
 
 	glPushMatrix();
-		
 		glTranslatef(0.f, -20.f, 0.f);
 
 		if(!doShadows)
 		{
 			glColor4ub(255, 255, 255, 255);
 			glTranslatef(0.f, 0.2f, 0.f);
-			drawBasis(Vec3f(20.f, 0.f, 0.f), 
-				  Vec3f(0.f, 20.f, 0.f), 
-				  Vec3f(0.f, 0.f, 20.f));
+			drawBasis(Vec3f(20.f, 0.f, 0.f),
+			          Vec3f(0.f, 20.f, 0.f),
+			          Vec3f(0.f, 0.f, 20.f));
 		}
 
 		glLineWidth(1.f);
@@ -516,7 +516,7 @@ void MainView::drawScenery(bool doShadows)
 		glPopMatrix();
 
 		glPushMatrix();
-			if( !doShadows)
+			if(!doShadows)
 			{
 				glColor4ub(255, 255, 10, 255);
 			}
@@ -578,15 +578,15 @@ void MainView::drawPathObject( const float t, bool doShadows )
 		coordinate system flips over, this will need to be 
 		fixed before the final version so the train doesn't 
 		go upside down (FIXED)
-		/*drawBasis(Vec3f(5.f, 0.f, 0.f),
+		drawBasis(Vec3f(5.f, 0.f, 0.f),
 				  Vec3f(0.f, 5.f, 0.f),
 				  Vec3f(0.f, 0.f, 5.f));
 		*/
 		if(!doShadows)
 		{	
 			drawVector(Vec3f(0.f, 0.f, 0.f), 
-					 Vec3f(0.f, 0.f, 5.f),
-					 Vec3f(1.f, 0.f, 1.f));
+			           Vec3f(0.f, 0.f, 5.f),
+			           Vec3f(1.f, 0.f, 1.f));
 		}
 
 	glPopMatrix();
@@ -684,8 +684,8 @@ MainWindow::MainWindow(const int x, const int y)
 	, delPointButton(nullptr)
 	, textOutput(nullptr)
 	, curveTypeChoice(nullptr)
-	, shadowButton(false)
-	, paramButton(false)
+	, shadowButton(nullptr)
+	, paramButton(nullptr)
 	, forwardButton(nullptr)
 	, backwardButton(nullptr)
 	, speedSlider(nullptr)
@@ -694,12 +694,12 @@ MainWindow::MainWindow(const int x, const int y)
 	, rotation(0.f)
 	, rotationStep(0.01f)
 	, speed(2.f)
-	, shadows(false)
+	, shadows(true)
 	, isArcLengthParam(false)
 	//, time_mode_started(hpTime.TotalTime()) //only use if using the HpTime to set up the big_t for arclength param
 {
 	createWidgets();
-	createPoints(nullptr);
+	resetPoints();
 
 	Fl::add_idle(idleCallback, this); 
 }
@@ -773,7 +773,7 @@ void MainWindow::createWidgets()
 		//create arc length parameterization button
 		shadowButton = new Fl_Button(700, 30, 90, 20, "Shadows");
 		shadowButton->type(FL_TOGGLE_BUTTON);
-		shadowButton->value(0);
+		shadowButton->value(1);
 		shadowButton->selection_color((Fl_Color)3); // yellow when pressed
 		shadowButton->callback((Fl_Callback*)shadowButtonCallback, this);
 
@@ -818,24 +818,18 @@ void MainWindow::createWidgets()
 	end();
 }
 
-/* createPoints() - Called on construction to create initial points */
-void MainWindow::createPoints(const char* filename)
+/* resetPoints() - Called to reset control points to a standard configuration */
+void MainWindow::resetPoints()
 {
-	// Add initial points
-	if(filename == nullptr)
+	curve.clearPoints();
+
+	const float step = TWO_PI / 5.f;
+	const float radius = 30.f;
+	for(float i = 0.f; i < TWO_PI; i += step)
 	{
-		const float step = TWO_PI / 5.f;
-		const float radius = 30.f;
-		for(float i = 0.f; i < TWO_PI; i += step)
-		{
-			const Vec3f     pos(cosf(i), 0.f, sinf(i));
-			const CtrlPoint point(pos * radius);
-			curve.addControlPoint(point);
-		}
-	}
-	else
-	{
-		readPoints(filename);
+		const Vec3f     pos(cosf(i), 0.f, sinf(i));
+		const CtrlPoint point(pos * radius);
+		curve.addControlPoint(point);
 	}
 }
 
@@ -843,133 +837,126 @@ void MainWindow::createPoints(const char* filename)
 // first line: an integer with the number of control points
 // other lines: one line per control point
 // either 3 (X,Y,Z) numbers on the line, or 6 numbers (X,Y,Z, orientation)
-void MainWindow::readPoints(const char* filename)
+void MainWindow::loadPoints(const string& filename)
 {
-	FILE* fp = fopen(filename,"r");
-	if (!fp) {
-		fl_alert("Can't Open File!\n");
-	} else {
-		char buf[512];
+	ifstream file(filename);
+	if( file.is_open() )
+	{
+		// Get the number of points but don't worry about validating it,
+		// since its not used and could be a lie anyways...
+		int numPoints = 0;
+		file >> numPoints;
 
-		// first line = number of points
-		fgets(buf,512,fp);
-		int npts = atoi(buf);
-
-		if( (npts<4) || (npts>65535)) {
-			fl_alert("Illegal Number of Points Specified in File");
-		} else {
-			curve.clearPoints();
-			// get lines until EOF or we have enough points
-			while( (curve.numControlPoints() <= npts) && fgets(buf,512,fp) ) {
-				Vec3f pos,orient;
-				vector<const char*> words;
-				breakString(buf,words);
-				if (words.size() >= 3) {
-					pos.set((float) strtod(words[0],0), (float) strtod(words[1],0), (float) strtod(words[2],0));
-				} else {
-					pos.set(0.f, 0.f, 0.f);
-				}
-				if (words.size() >= 6) {
-					orient.set( (float) strtod(words[3],0), (float) strtod(words[4],0), (float) strtod(words[5],0));
-				} else {
-					orient.set(0.f, 0.f, 0.f);
-				}
-				//orient.normalize();
-				const CtrlPoint point(pos,orient);
-				curve.addControlPoint(point);
-			}
+		// Get the points
+		curve.clearPoints();
+		float px, py, pz;	// position
+		float ox, oy, oz;	// orientation
+		while( file >> px >> py >> pz >> ox >> oy >> oz )
+		{
+			const Vec3f position(px, py, pz);
+			const Vec3f orientation(ox, oy, oz);
+			curve.addControlPoint(CtrlPoint(position, orientation));
 		}
-		fclose(fp);
+	}
+	else // file didn't open...
+	{
+		stringstream ss;
+		ss << "Error - failed to open file: " << filename << endl
+			<< "Using default control points instead." << endl;
+		fl_alert(ss.str().c_str());
+		resetPoints();
 	}
 }
 
 // write the control points to our simple format
-void MainWindow::writePoints(const char* filename)
+void MainWindow::savePoints(const string& filename)
 {
-	CtrlPoint point;
-	//printf("The filename is %s \n", filename);
-	if(filename != nullptr)
+	ofstream file(filename);
+	if( file.is_open() )
 	{
-		FILE* fp = fopen(filename,"w");
-		if (!fp) {
-			fl_alert("Can't open file for writing");
-		} else {
-			fprintf(fp,"%d\n",curve.numControlPoints());
-			for(int i=0; i<curve.numControlPoints(); ++i)
-			{
+		// Save number of points
+		file << curve.numControlPoints();
 
-				point = curve.getPoint(i);
-				Vec3f pos = point.pos();
-				Vec3f orient = point.orient();
-
-				fprintf(fp,"%g %g %g %g %g %g\n",
-					pos.x(), pos.y(), pos.z(), 
-					orient.x(), orient.y(), orient.z());
-			}
-			fclose(fp);
+		// Save points
+		for each(auto point in curve.getControlPoints())
+		{
+			file << endl;
+			// Save position
+			file << point.pos().x() << " "
+			     << point.pos().y() << " "
+			     << point.pos().z() << " ";
+			// Save orientation
+			file << point.orient().x() << " "
+			     << point.orient().y() << " "
+			     << point.orient().z() << " ";
 		}
+	}
+	else // file didn't open...
+	{
+		stringstream ss;
+		ss << "Error - failed to open file \"" << filename
+			<< "\" for writing." << endl;
+		fl_alert(ss.str().c_str());
 	}
 }
 
 void MainWindow::advanceTrain(int dir)
 {
-		
-		int segment = 0;
-		float newRotationStep = 0.0;
+	int segment = 0;
+	float newRotationStep = 0.0;
 
-		if( isAnimating() )
+	if( isAnimating() )
+	{
+		if(isArcParam())
 		{
-			if(isArcParam())
-			{
-				//MAIN DIFFERENCE BETWEEN PERRY's CODE AND THE TRAIN DEMO CODE:
-				//in the sample project they use arclength param to figure out the step applied to the current rotation value
+			//MAIN DIFFERENCE BETWEEN PERRY's CODE AND THE TRAIN DEMO CODE:
+			//in the sample project they use arclength param to figure out the step applied to the current rotation value
 
-				//in perry's code he uses arclength param to directly translate the thing being arclength param'd
+			//in perry's code he uses arclength param to directly translate the thing being arclength param'd
 
-				//the following code computes the step amount (big_t) to be interpolated with in regards to a high precision timer: hpTime
-				/*double seconds_per_sample = 1;
-				double flight_time = seconds_per_sample * curve.numSegments();
-				double time_now = hpTime.TotalTime() - time_mode_started;
-				printf("time_now is %f and time_mode started is %f \n", time_now, time_mode_started);
-				double dmod = fmod(time_now, flight_time);
-				printf("dmod is %f \n", dmod);
-				double big_t = dmod / (flight_time);
-				printf("big_t is %f \n", big_t);*/
-				//newRotationStep = view->arcLengthInterpolation(big_t, segment); //actual arclengthparam function call here set up like in TrainWindow.cpp
-				//newRotationStep = rotationStep*(speed*0.5f); //my attempt at fixes
-				//newRotationStep = newRotationStep/curve.numSegments(); //my attempt at fixes
-				//newRotationStep = newRotationStep/rotation;  //my attempt at fixes
-				newRotationStep = rotationStep*speed*0.5f;
+			//the following code computes the step amount (big_t) to be interpolated with in regards to a high precision timer: hpTime
+			/*double seconds_per_sample = 1;
+			double flight_time = seconds_per_sample * curve.numSegments();
+			double time_now = hpTime.TotalTime() - time_mode_started;
+			printf("time_now is %f and time_mode started is %f \n", time_now, time_mode_started);
+			double dmod = fmod(time_now, flight_time);
+			printf("dmod is %f \n", dmod);
+			double big_t = dmod / (flight_time);
+			printf("big_t is %f \n", big_t);*/
+			//newRotationStep = view->arcLengthInterpolation(big_t, segment); //actual arclengthparam function call here set up like in TrainWindow.cpp
+			//newRotationStep = rotationStep*(speed*0.5f); //my attempt at fixes
+			//newRotationStep = newRotationStep/curve.numSegments(); //my attempt at fixes
+			//newRotationStep = newRotationStep/rotation;  //my attempt at fixes
+			newRotationStep = rotationStep*speed*0.5f;
 
-				if(dir > 0)
-					rotation = rotation + newRotationStep;
-				else if(dir < 0)
-					rotation = rotation - newRotationStep; //eventually allow for going in the opposite direction
-				else
-					rotation = rotation;
-
-				//TODO: would need to add more conditionals here to eventually allow for going in the opposite direction
-				if( rotation >= getCurve().numSegments() )
-					rotation = 0.f;
-				else if(rotation < 0.f)//assumes this condition is reached when we are still going in a pos dir (only reached when speed is negative)
-					rotation= getCurve().numSegments()+ newRotationStep;
-			}
+			if(dir > 0)
+				rotation = rotation + newRotationStep;
+			else if(dir < 0)
+				rotation = rotation - newRotationStep; //eventually allow for going in the opposite direction
 			else
-			{
-				newRotationStep = rotationStep*speed*0.5f;
-				if(dir > 0)
-					rotation = rotation + newRotationStep;
-				else if(dir < 0)
-					rotation = rotation - newRotationStep; //eventually allow for going in the opposite direction
-				else
-					rotation = rotation;
+				rotation = rotation;
 
-				//TODO: would need to add more conditionals here to eventually allow for going in the opposite direction
-				if( rotation >= getCurve().numSegments() )
-					rotation = 0.f;
-				else if(rotation < 0.f)//assumes this condition is reached when we are still going in a pos dir (only reached when speed is negative)
-					rotation= getCurve().numSegments()+ newRotationStep;
-			}
-			
+			//TODO: would need to add more conditionals here to eventually allow for going in the opposite direction
+			if( rotation >= getCurve().numSegments() )
+				rotation = 0.f;
+			else if(rotation < 0.f)//assumes this condition is reached when we are still going in a pos dir (only reached when speed is negative)
+				rotation= getCurve().numSegments()+ newRotationStep;
 		}
+		else
+		{
+			newRotationStep = rotationStep*speed*0.5f;
+			if(dir > 0)
+				rotation = rotation + newRotationStep;
+			else if(dir < 0)
+				rotation = rotation - newRotationStep; //eventually allow for going in the opposite direction
+			else
+				rotation = rotation;
+
+			//TODO: would need to add more conditionals here to eventually allow for going in the opposite direction
+			if( rotation >= getCurve().numSegments() )
+				rotation = 0.f;
+			else if(rotation < 0.f)//assumes this condition is reached when we are still going in a pos dir (only reached when speed is negative)
+				rotation= getCurve().numSegments()+ newRotationStep;
+		}
+	}
 }

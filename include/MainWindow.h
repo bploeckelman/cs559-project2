@@ -10,7 +10,7 @@
  */
 #include "Curve.h"
 #include "CtrlPoint.h"
-#include "highPrecisionTime.h"
+#include "highprecisiontime.h"
 
 #include "TrainFiles/Utilities/ArcBallCam.H"
 
@@ -50,7 +50,6 @@ private:
 	ArcBallCam arcballCam;
 	bool useArcball;
 
-
 public:
 	MainView(int x, int y, int w, int h, const char *l=0);
 
@@ -79,8 +78,6 @@ private:
 	void drawPathObject( const float t, bool doShadows );
 	void drawSelectedControlPoint(bool doShadows);
 	//void reparameterizing(Curve& curve, float big_t, bool doShadows);
-	
-
 };
 
 
@@ -95,7 +92,6 @@ private:
 class MainWindow : public Fl_Double_Window 
 {
 private:
-
 	MainView *view;
 
 	Fl_Group   *widgets;
@@ -110,7 +106,6 @@ private:
 	Fl_Button  *backwardButton;
 	Fl_Value_Slider  *speedSlider;
 
-
 	Curve curve;
 
 	bool animating;
@@ -120,12 +115,11 @@ private:
 	float speed;
 	float rotation;
 
-	void createWidgets();
-	void readPoints(const char* filename);
-
 	//only use if using the HpTime to set up the big_t for arclength param
 	//HighPrecisionTime hpTime;
 	//double time_mode_started;
+
+	void createWidgets();
 
 public:
 	MainWindow(const int x=100, const int y=50);
@@ -154,43 +148,9 @@ public:
 	inline void setSpeed(float spdAmt) { speed=spdAmt;}
 	inline float getSpeed() {return speed;}
 
-	void createPoints(const char* filename);
-	void writePoints(const char* filename);
+	void resetPoints();
+	void loadPoints(const std::string& filename);
+	void savePoints(const std::string& filename);
 
-	void MainWindow::advanceTrain(int dir);
-
-	inline void breakString(char* str, std::vector<const char*>& words) {
-	// start with no words
-	words.clear();
-
-	// scan through the string, starting at the beginning
-	char* p = str;
-
-	// stop when we hit the end of the string
-	while(*p) {
-		// skip over leading whitespace - stop at the first character or end of string
-		while (*p && *p<=' ') p++;
-
-		// now we're pointing at the first thing after the spaces
-		// make sure its not a comment, and that we're not at the end of the string
-		// (that's actually the same thing)
-		if (! (*p) || *p == '#')
-		break;
-
-		// so we're pointing at a word! add it to the word list
-		words.push_back(p);
-
-		// now find the end of the word
-		while(*p > ' ') p++;	// stop at space or end of string
-
-		// if its the end of the string, we're done
-		if (! *p) break;
-
-		// otherwise, turn this space into and end of string (to end the word)
-		// and keep going
-		*p = 0;
-		p++;
-	}
-}
-
+	void advanceTrain(int dir);
 };

@@ -119,31 +119,11 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="framework\TrainFiles\TrackFiles\loop0.txt">
-      <Filter>framework\TrainFiles\TrackFiles</Filter>
-    </None>
-    <None Include="framework\TrainFiles\TrackFiles\figure8.txt">
-      <Filter>framework\TrainFiles\TrackFiles</Filter>
-    </None>
-    <None Include="framework\TrainFiles\TrackFiles\reset.txt">
-      <Filter>framework\TrainFiles\TrackFiles</Filter>
-    </None>
-    <None Include="framework\TrainFiles\TrackFiles\spiral.txt">
-      <Filter>framework\TrainFiles\TrackFiles</Filter>
-    </None>
-    <None Include="framework\TrainFiles\TrackFiles\sqiggle.txt">
-      <Filter>framework\TrainFiles\TrackFiles</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <Filter Include="framework">
       <UniqueIdentifier>{a9efe99b-341a-4919-bf1d-0365d5016311}</UniqueIdentifier>
     </Filter>
     <Filter Include="framework\TrainFiles">
       <UniqueIdentifier>{ee082b59-a2c5-4e56-9e2c-8cd5769a03d5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="framework\TrainFiles\TrackFiles">
-      <UniqueIdentifier>{c9970798-c43f-4529-8c81-0d0422b6fa90}</UniqueIdentifier>
     </Filter>
     <Filter Include="framework\TrainFiles\Utilities">
       <UniqueIdentifier>{e0ebb966-0025-4dee-901b-4d21b67f8cdd}</UniqueIdentifier>
@@ -154,5 +134,28 @@
     <Filter Include="source">
       <UniqueIdentifier>{fda641e0-1727-431e-adf9-a88befd39e44}</UniqueIdentifier>
     </Filter>
+    <Filter Include="tracks">
+      <UniqueIdentifier>{47fa92c7-20f7-497e-9487-aa5f4f780c7c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="tracks\figure8.txt">
+      <Filter>tracks</Filter>
+    </None>
+    <None Include="tracks\loop0.txt">
+      <Filter>tracks</Filter>
+    </None>
+    <None Include="tracks\reset.txt">
+      <Filter>tracks</Filter>
+    </None>
+    <None Include="tracks\reset-save.txt">
+      <Filter>tracks</Filter>
+    </None>
+    <None Include="tracks\spiral.txt">
+      <Filter>tracks</Filter>
+    </None>
+    <None Include="tracks\sqiggle.txt">
+      <Filter>tracks</Filter>
+    </None>
   </ItemGroup>
 </Project>

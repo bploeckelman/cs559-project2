@@ -13,7 +13,6 @@
  */
 #include "MainWindow.h"
 
-
 #pragma warning(push)
 #pragma warning(disable:4312)
 #pragma warning(disable:4311)
@@ -22,45 +21,39 @@
 #pragma warning(pop)
 
 #include <iostream>
-#include<stdio.h>
-#include<string>
-#include<sstream>
+#include <string>
 
 
 int main(int argc, char* argv[])
 {
-	std::cout << "CS559 - Project 2 - Phase 6" << std::endl;
-	if(argc < 1 || argc > 3){
-		std::cout << "INCORRECT NUMBER OF ARGUMENTS!" << std::endl;
-		system ("PAUSE");
-		exit(0);
-	}
+	using std::cout;
+	using std::endl;
 
-	std::string input;
-	std::string output;
-
-	if(argc == 3)
+	cout << "CS559 - Project 2 - Phase 6" << endl;
+	if( argc > 3 )
 	{
-		input = argv[1];
-		output = argv[2];
-	}
-	else if (argc == 2)
-	{
-		input = argv[1];
+		cout << "Invalid number of arguments." << endl
+			 << "usage: cs559-project2 [input-trackfile [output-trackfile]]"
+			 << endl;
+		system("PAUSE");
+		return 0;
 	}
 
 	MainWindow window;
-	if(argc == 2 || argc == 3)
+
+	if( argc > 1 )
 	{
-		window.createPoints(input.c_str());
+		const std::string inputTrackFilename(argv[1]);
+		window.loadPoints(inputTrackFilename);
 	}
 
 	window.show();
 	Fl::run();
 
-	if(argc == 3)
+	if( argc == 3 )
 	{
-		window.writePoints(output.c_str());
+		const std::string outputTrackFilename(argv[2]);
+		window.savePoints(outputTrackFilename);
 	}
 
 	return 0;
