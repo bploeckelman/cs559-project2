@@ -467,40 +467,23 @@ void MainView::drawPathObject(const float t, bool doShadows)
 	{
 		glColor4ub(20, 250, 20, 255);
 	}
-	/*else
-	{
-		//glPushMatrix();
-		//glTranslatef(0.f, -20.f, 0.f);
-	}*/
 
 	glPushMatrix();
 		glTranslatef(p.x(), p.y() + 1.5f, p.z());
 		applyBasisFromTangent(normalize(d));
 
 		drawCube(0.f, 0.f, 0.f, 2.5f);
-		/* TODO: drawing the basis shows that sometimes the local 
-		coordinate system flips over, this will need to be 
-		fixed before the final version so the train doesn't 
-		go upside down (FIXED)
-		drawBasis(Vec3f(5.f, 0.f, 0.f),
-				  Vec3f(0.f, 5.f, 0.f),
-				  Vec3f(0.f, 0.f, 5.f));
-		*/
 		if(!doShadows)
 		{	
-			drawVector(Vec3f(0.f, 0.f, 0.f), 
-			           Vec3f(0.f, 0.f, 5.f),
-			           Vec3f(1.f, 0.f, 1.f));
+			drawBasis(Vec3f(5.f, 0.f, 0.f),
+					  Vec3f(0.f, 5.f, 0.f),
+					  Vec3f(0.f, 0.f, 5.f));
 		}
-
 	glPopMatrix();
 
-	/*if(!window->isShadowed())
-	{
-		//glPopMatrix();
-	}*/
 }
 
+/* drawPathObjects() - Draws several objects along the path ------ */
 void MainView::drawPathObjects(const float t, const bool doShadows)
 {
 	const Curve& curve(window->getCurve());

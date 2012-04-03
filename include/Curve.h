@@ -17,8 +17,6 @@ private:
 	std::vector<CtrlPoint> controlPoints;
 	std::vector<CurveSegment*> segments;
 
-	
-
 	void drawSegment(const int number, bool isShadowed);
 
 	void regenerateLineSegments();
