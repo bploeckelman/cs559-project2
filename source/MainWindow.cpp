@@ -233,6 +233,47 @@ void MainView::pick()
 	}
 }
 
+//float MainView::arcLengthInterpolation(float big_t, int& segment_number)
+float MainView::arcLengthInterpolation(double big_t, int& segment_number)
+	{
+		Curve curve= window->getCurve();
+		double epsilon = 0.0000001;
+		printf("big_t in the function call is %f \n", big_t);
+		//double epsilon = 0.000;
+		if (abs(big_t) < epsilon)
+			return 0;
+		if (abs(big_t - 1) < epsilon)
+			return 1;
+
+		size_t index;
+		for (index = 1; index < curve.parameter_table.size(); index++)
+		{
+			if (big_t < curve.parameter_table[index].fraction_of_accumulated_length)
+				break;
+		}
+		if (index >= curve.parameter_table.size())
+			throw "big_t not found.";
+
+		printf("the index found is %d \n", index);
+		/*the size of the paramer_table once fully built should be 1+num_segments()*number_of_samples*/
+		printf("curve.parameter_table.size() is %d \n", curve.parameter_table.size());
+
+		double lower_fraction = curve.parameter_table[index - 1].fraction_of_accumulated_length;
+		double upper_fraction = curve.parameter_table[index].fraction_of_accumulated_length;
+		double lower_local_t = ((curve.parameter_table[index - 1].segment_number != curve.parameter_table[index].segment_number) ? 0 : curve.parameter_table[index - 1].local_t);
+		double upper_local_t = curve.parameter_table[index].local_t;
+		float result = (float)(lower_local_t + (big_t - lower_fraction) / (upper_fraction - lower_fraction) * (upper_local_t - lower_local_t));
+		//segment_number = curve.parameter_table[index].segment_number;
+		printf("big_t: %f lil_t: %f lower fraction: %f upper_fraction: %f lower_t: %f upper_t: %f\n", big_t, result, lower_fraction, upper_fraction, lower_local_t, upper_local_t);
+		return result;
+	}
+
+/* resetArcball() - Resets the arcball camera orientation -------- */
+void MainView::resetArcball()
+{
+	arcballCam.setup(this, 40.f, 250.f, 0.2f, 0.4f, 0.f);
+}
+
 /* setupProject() - Sets up projection & modelview matrices ------ */
 void MainView::setupProjection()
 {
@@ -262,12 +303,6 @@ void MainView::setupProjection()
 	glRotatef(-90.f, 1.f, 0.f, 0.f);
 
 	glViewport(0, 0, w(), h());
-}
-
-/* resetArcball() - Resets the arcball camera orientation -------- */
-void MainView::resetArcball()
-{
-	arcballCam.setup(this, 40.f, 250.f, 0.2f, 0.4f, 0.f);
 }
 
 /* updateTextWidget() - Prints rotation amount to text widget ---- */
@@ -556,40 +591,7 @@ void MainView::drawSelectedControlPoint(bool doShadows)
 	glPopMatrix();
 }*/
 
-//float MainView::arcLengthInterpolation(float big_t, int& segment_number)
-float MainView::arcLengthInterpolation(double big_t, int& segment_number)
-	{
-		Curve curve= window->getCurve();
-		double epsilon = 0.0000001;
-		printf("big_t in the function call is %f \n", big_t);
-		//double epsilon = 0.000;
-		if (abs(big_t) < epsilon)
-			return 0;
-		if (abs(big_t - 1) < epsilon)
-			return 1;
-	
-		size_t index;
-		for (index = 1; index < curve.parameter_table.size(); index++)
-		{
-			if (big_t < curve.parameter_table[index].fraction_of_accumulated_length)
-				break;
-		}
-		if (index >= curve.parameter_table.size())
-			throw "big_t not found.";
 
-		printf("the index found is %d \n", index);
-		/*the size of the paramer_table once fully built should be 1+num_segments()*number_of_samples*/
-		printf("curve.parameter_table.size() is %d \n", curve.parameter_table.size());
-
-		double lower_fraction = curve.parameter_table[index - 1].fraction_of_accumulated_length;
-		double upper_fraction = curve.parameter_table[index].fraction_of_accumulated_length;
-		double lower_local_t = ((curve.parameter_table[index - 1].segment_number != curve.parameter_table[index].segment_number) ? 0 : curve.parameter_table[index - 1].local_t);
-		double upper_local_t = curve.parameter_table[index].local_t;
-		float result = (float)(lower_local_t + (big_t - lower_fraction) / (upper_fraction - lower_fraction) * (upper_local_t - lower_local_t));
-		//segment_number = curve.parameter_table[index].segment_number;
-		printf("big_t: %f lil_t: %f lower fraction: %f upper_fraction: %f lower_t: %f upper_t: %f\n", big_t, result, lower_fraction, upper_fraction, lower_local_t, upper_local_t);
-		return result;
-	}
 
 /* ==================================================================
  * MainWindow class
@@ -598,37 +600,31 @@ float MainView::arcLengthInterpolation(double big_t, int& segment_number)
 
 MainWindow::MainWindow(const int x, const int y) 
 	: Fl_Double_Window(x, y, 800, 600, "Train Project - Phase 2")
-	, view(nullptr)
-	, widgets(nullptr)
-	, animateButton(nullptr)
-	, addPointButton(nullptr)
-	, delPointButton(nullptr)
-	, textOutput(nullptr)
-	, curveTypeChoice(nullptr)
-	, shadowButton(nullptr)
-	, paramButton(nullptr)
-	, forwardButton(nullptr)
-	, backwardButton(nullptr)
-	, speedSlider(nullptr)
-	, curve(catmull)
-	, animating(false)
-	, rotation(0.f)
-	, rotationStep(0.01f)
-	, speed(2.f)
-	, shadows(true)
+	, view            (nullptr)
+	, widgets         (nullptr)
+	, animateButton   (nullptr)
+	, addPointButton  (nullptr)
+	, delPointButton  (nullptr)
+	, textOutput      (nullptr)
+	, curveTypeChoice (nullptr)
+	, shadowButton    (nullptr)
+	, paramButton     (nullptr)
+	, forwardButton   (nullptr)
+	, backwardButton  (nullptr)
+	, speedSlider     (nullptr)
+	, curve           (catmull)
+	, animating       (false)
 	, isArcLengthParam(false)
-	//, time_mode_started(hpTime.TotalTime()) //only use if using the HpTime to set up the big_t for arclength param
+	, shadows         (true)
+	, speed           (2.f)
+	, rotation        (0.f)
+	, rotationStep    (0.01f)
+//  , time_mode_started(hpTime.TotalTime()) //only use if using the HpTime to set up the big_t for arclength param
 {
 	createWidgets();
 	resetPoints();
 
 	Fl::add_idle(idleCallback, this); 
-}
-
-/* damageMe() - Called to force an update of the window ---------- */
-void MainWindow::damageMe()
-{
-	view->damage(1);
 }
 
 /* setDebugText() - Called to update fltk multiline output text -- */
@@ -877,4 +873,10 @@ void MainWindow::advanceTrain(int dir)
 				rotation= getCurve().numSegments()+ newRotationStep;
 		}
 	}
+}
+
+/* damageMe() - Called to force an update of the window ---------- */
+void MainWindow::damageMe()
+{
+	view->damage(1);
 }

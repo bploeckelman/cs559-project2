@@ -54,17 +54,17 @@ public:
 	MainView(int x, int y, int w, int h, const char *l=0);
 
 	virtual void draw();
-
-	void pick();
 	virtual int handle(int event);
 
-	inline void setSelectedPoint(const int p) { selectedPoint = p; }
-	inline int  getSelectedPoint() const      { return selectedPoint; }
+	void pick();
 
-	inline void setWindow(MainWindow *w) { window = w; }
-	inline MainWindow* getWindow() const { return window; }
+	void toggleUseArcball();
+	void setSelectedPoint(const int p);
+	void setWindow(MainWindow *w);
 
-	inline void toggleUseArcball() { useArcball = !useArcball; }
+	int  getSelectedPoint() const;
+	MainWindow* getWindow() const;
+
 	float arcLengthInterpolation(double big_t, int& segment_number);
 
 private:
@@ -73,13 +73,22 @@ private:
 
 	void updateTextWidget( const float t );
 	void openglFrameSetup();
+
 	void drawScenery(bool doShadows=false);
 	void drawCurve(const float t, bool doShadows=false);
 	void drawPathObject(const float t, bool doShadows=false);
 	void drawPathObjects(const float t, const bool doShadows=false);
 	void drawSelectedControlPoint(bool doShadows=false);
+
 	//void reparameterizing(Curve& curve, float big_t, bool doShadows);
 };
+
+inline void MainView::toggleUseArcball()       { useArcball = !useArcball; }
+inline void MainView::setSelectedPoint(int p)  { selectedPoint = p; }
+inline void MainView::setWindow(MainWindow *w) { window = w; }
+inline int  MainView::getSelectedPoint() const { return selectedPoint; }
+inline MainWindow* MainView::getWindow() const { return window; }
+
 
 
 /* ==================================================================
@@ -112,9 +121,10 @@ private:
 	bool animating;
 	bool isArcLengthParam;
 	bool shadows;
-	float rotationStep;
+
 	float speed;
 	float rotation;
+	float rotationStep;
 
 	//only use if using the HpTime to set up the big_t for arclength param
 	//HighPrecisionTime hpTime;
@@ -125,33 +135,47 @@ private:
 public:
 	MainWindow(const int x=100, const int y=50);
 
-	void damageMe();
-	void setDebugText(const std::string& text);
+	const MainView& getView() const;
 
-	inline bool isAnimating() const { return animating; }
-	inline void toggleAnimating()   { animating = !animating; }
+	float getSpeed()          const;
+	float getRotation()       const;
+	float getRotationStep()   const;
+	Curve& getCurve();
+	ControlPointVector& getPoints();
 
-	inline float getRotation() const  { return rotation; }
-	inline void  setRotation(float r) { rotation = r; }
-	inline float getRotationStep() { return rotationStep;}
+	void setSpeed(float spdAmt);
+	void setRotation(float r);
 
-	inline const MainView& getView() const { return *view; }
+	bool isAnimating() const;
+	bool isArcParam()  const;
+	bool isShadowed()  const;
 
-	inline Curve& getCurve() { return curve; }
-	inline std::vector<CtrlPoint>& getPoints() { return curve.getControlPoints(); }
-
-	inline void toggleArcParam() { isArcLengthParam = !isArcLengthParam;}
-	inline bool isArcParam() { return isArcLengthParam;}
-
-	inline void toggleShadows() { shadows = !shadows;}
-	inline bool isShadowed() { return shadows; }
-
-	inline void setSpeed(float spdAmt) { speed=spdAmt;}
-	inline float getSpeed() {return speed;}
+	void toggleAnimating();
+	void toggleArcParam();
+	void toggleShadows();
 
 	void resetPoints();
 	void loadPoints(const std::string& filename);
 	void savePoints(const std::string& filename);
 
 	void advanceTrain(int dir);
+
+	void damageMe();
+
+	void setDebugText(const std::string& text);
 };
+
+inline const MainView& MainWindow::getView() const { return *view; }
+inline float MainWindow::getSpeed()          const { return speed ; }
+inline float MainWindow::getRotation()       const { return rotation; }
+inline float MainWindow::getRotationStep()   const { return rotationStep; }
+inline Curve& MainWindow::getCurve()               { return curve; }
+inline ControlPointVector& MainWindow::getPoints() { return curve.getControlPoints(); }
+inline void MainWindow::setSpeed(float s)    { speed = s; }
+inline void MainWindow::setRotation(float r) { rotation = r; }
+inline bool MainWindow::isAnimating() const  { return animating; }
+inline bool MainWindow::isArcParam()  const  { return isArcLengthParam; }
+inline bool MainWindow::isShadowed()  const  { return shadows; }
+inline void MainWindow::toggleAnimating()    { animating = !animating; }
+inline void MainWindow::toggleArcParam()     { isArcLengthParam = !isArcLengthParam; }
+inline void MainWindow::toggleShadows()      { shadows = !shadows; }
