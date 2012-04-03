@@ -42,5 +42,5 @@ inline void generateBasis(const Vec3f& tangent, Vec3f& normal, Vec3f& binormal)
 	if( binormal == Vec3f(0.f, 0.f, 0.f) )
 		binormal = normalize(cross(tangent, worldRight));
 
-	normal = normalize(cross(tangent, binormal));
+	normal = normalize(cross(binormal, tangent));
 }
