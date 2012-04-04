@@ -49,6 +49,7 @@ private:
 	Fl_Button  *paramButton;
 	Fl_Button  *forwardButton;
 	Fl_Button  *backwardButton;
+	Fl_Button  *CurveCtrlHighlight;
 	Fl_Value_Slider  *speedSlider;
 
 	Curve curve;
@@ -56,6 +57,7 @@ private:
 	bool animating;
 	bool isArcLengthParam;
 	bool shadows;
+	bool highlightSegPts;
 
 	float speed;
 	float rotation;
@@ -81,14 +83,17 @@ public:
 
 	void setSpeed(float spdAmt);
 	void setRotation(float r);
+	void setViewType(int view);
 
 	bool isAnimating() const;
 	bool isArcParam()  const;
 	bool isShadowed()  const;
+	bool isHighlightedSegPts() const;
 
 	void toggleAnimating();
 	void toggleArcParam();
 	void toggleShadows();
+	void toggleHighlightSegPts();
 
 	void resetPoints();
 	void loadPoints(const std::string& filename);
@@ -113,6 +118,9 @@ inline void MainWindow::setRotation(float r) { rotation = r; }
 inline bool MainWindow::isAnimating() const  { return animating; }
 inline bool MainWindow::isArcParam()  const  { return isArcLengthParam; }
 inline bool MainWindow::isShadowed()  const  { return shadows; }
+inline bool MainWindow::isHighlightedSegPts() const { return highlightSegPts; }
 inline void MainWindow::toggleAnimating()    { animating = !animating; }
 inline void MainWindow::toggleArcParam()     { isArcLengthParam = !isArcLengthParam; }
 inline void MainWindow::toggleShadows()      { shadows = !shadows; }
+inline void MainWindow::toggleHighlightSegPts()     { highlightSegPts = !highlightSegPts; }
+inline void MainWindow::setViewType(int view) {viewTypeChoice->value(view);}

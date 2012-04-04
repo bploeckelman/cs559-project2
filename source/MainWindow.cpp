@@ -65,10 +65,12 @@ MainWindow::MainWindow(const int x, const int y)
 	, paramButton     (nullptr)
 	, forwardButton   (nullptr)
 	, backwardButton  (nullptr)
+	, CurveCtrlHighlight (nullptr)
 	, speedSlider     (nullptr)
 	, curve           (catmull)
 	, animating       (false)
 	, isArcLengthParam(false)
+	, highlightSegPts (true)
 	, shadows         (true)
 	, speed           (2.f)
 	, rotation        (0.f)
@@ -180,6 +182,13 @@ void MainWindow::createWidgets()
 
 		// Create text display
 		textOutput = new Fl_Output(605, 130, 80, 20);
+
+		//Create a button for highlighting the curve's current segment pts being used
+		CurveCtrlHighlight = new Fl_Button(605, 155, 175, 20, "Highlight Curr Seg Ctrl");
+		CurveCtrlHighlight->type(FL_TOGGLE_BUTTON);
+		CurveCtrlHighlight->value(1);                     // initially on
+		CurveCtrlHighlight->selection_color((Fl_Color)3); // yellow when pressed
+		CurveCtrlHighlight->callback((Fl_Callback*)CurveCtrlHighlightCallback, this);
 
 		// Create file write button
 		/*writeButton = new Fl_Button(700, 105, 70, 20, "File Write");

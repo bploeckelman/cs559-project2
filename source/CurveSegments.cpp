@@ -43,10 +43,6 @@ void LineSegment::draw(bool drawPoints, bool isShadowed)
 	const Vec3f& start(startPoint.pos());
 	const Vec3f& end(endPoint.pos());
 
-	if(!isShadowed)
-	{
-		glColor3ub(255, 255, 255);
-	}
 	glBegin(GL_LINES);
 		glVertex3f(start.x(), start.y(), start.z());
 		glVertex3f(end.x(), end.y(), end.z());
@@ -56,16 +52,25 @@ void LineSegment::draw(bool drawPoints, bool isShadowed)
 	{
 		if(!isShadowed)
 		{
-			glColor3ub(255, 255, 255);
+			glColor3ub(20, 20, 255);
 		}
 		startPoint.draw(isShadowed);
+		if(!isShadowed)
+		{
+			glColor3ub(20, 20, 255);
+		}
 		endPoint.draw(isShadowed);
+
 
 		if(!isShadowed)
 		{
-			glColor3ub(128, 128, 128);
+			glColor3ub(128, 0, 128);
 		}
 		control1.draw(isShadowed);
+		if(!isShadowed)
+		{
+			glColor3ub(128, 0, 128);
+		}
 		control2.draw(isShadowed);
 	}
 }
@@ -90,6 +95,7 @@ void CatmullRomSegment::draw(bool drawPoints, bool isShadowed)
 	static const int   lines = 25;
 	static const float step  = 1.f / lines;
 
+
 	glBegin(GL_LINE_STRIP);
 		float t = 0.f;
 		for(int i = 0; i <= lines; ++i, t += step)
@@ -103,17 +109,28 @@ void CatmullRomSegment::draw(bool drawPoints, bool isShadowed)
 	{
 		if(!isShadowed)
 		{
-			glColor4ub(255, 255, 255, 255);
+			glColor4ub(20, 20, 255, 255);
 		}
 		startPoint.draw(isShadowed);
-		endPoint.draw(isShadowed);
-
 		if(!isShadowed)
 		{
-			glColor4ub(128, 128, 128, 128);
+			glColor4ub(20, 20, 255, 255);
 		}
+		endPoint.draw(isShadowed);
+
+	
+		if(!isShadowed)
+		{
+			glColor4ub(128, 0, 128, 255);
+		}
+
 		control1.draw(isShadowed);
+		if(!isShadowed)
+		{
+			glColor4ub(128, 0, 128, 255);
+		}
 		control2.draw(isShadowed);
+
 	}
 }
 

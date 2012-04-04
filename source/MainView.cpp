@@ -72,16 +72,16 @@ void MainView::draw()
 	// Draw everything once without shadows
 	drawScenery();
 	if( viewType == train )
-		drawCurve(t);
+		drawCurve(t, false, false);
 	else
 	{
-		drawCurve(t, true);
+		drawCurve(t, true, false);
 		drawPathObjects(t);
-		drawSelectedControlPoint();
+		drawSelectedControlPoint(false);
 	}
 
 	// Draw everything again with shadows if they are enabled
-	if(window->isShadowed())
+	if(window->isShadowed() && viewType != overhead)
 	{
 		glPushMatrix();
 			// Translate down to the ground plane
@@ -90,9 +90,16 @@ void MainView::draw()
 			setupShadows();
 
 			drawScenery(true);
-			drawCurve(t, false, true);
-			drawPathObjects(t, true);
-			drawSelectedControlPoint(true);
+			if( viewType == train )
+			{
+				drawCurve(t, false, true);
+			}
+			else
+			{
+				drawCurve(t, true, true);
+				drawPathObjects(t, true);
+				drawSelectedControlPoint(true);
+			}
 
 			unsetupShadows();
 		glPopMatrix();
@@ -162,9 +169,22 @@ int MainView::handle(int event)
 		//* Note : use this format to process keyboard input
 		int k  = Fl::event_key();
 		int ks = Fl::event_state();
-		if( k == 'a' ) viewType = arcball;
-		if( k == 't' ) viewType = train;
-		if( k == 'o' ) viewType = overhead;
+		if( k == 'a' )
+		{
+			viewType = arcball;
+			window->setViewType(0); //update widget value
+		}
+		if( k == 't' )
+		{
+			viewType = train;
+			window->setViewType(1); //update widget value
+
+		}
+		if( k == 'o' )
+		{
+			viewType = overhead;
+			window->setViewType(2); //update widget value
+		}
 		break;
 	}
 
@@ -369,7 +389,7 @@ void MainView::openglFrameSetup()
 	GLfloat position1[] = { 0.f, 200.f, 0.f, 1.f }; //{0, 1, 1, 0};
 
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
+	//glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
 	glLightfv(GL_LIGHT0, GL_POSITION, position1);
 
@@ -489,11 +509,13 @@ void MainView::drawCurve(const float t, bool drawPoints, bool doShadows)
 	Curve& curve(window->getCurve());
 	curve.selectedSegment = static_cast<int>(std::floor(t));
 
-	if(!doShadows) glColor4ub(255, 255, 255, 255);
 	curve.draw(drawPoints, doShadows);
 
-	if(!doShadows) glColor4ub(255, 0, 0, 255);
-	curve.drawSelectedSegment(false, doShadows);
+	if(window->isHighlightedSegPts())
+	{
+		curve.drawSelectedSegment(drawPoints, doShadows);
+	}
+	
 }
 
 /* drawPathObject() - Draws the object that travels along the path */
