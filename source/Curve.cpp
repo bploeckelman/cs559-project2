@@ -44,38 +44,19 @@ void Curve::draw(bool drawPoints, bool isShadowed)
 	for each(auto segment in segments)
 	{
 		assert(segment != nullptr);
-		if(!isShadowed)
-		{
-			glColor4ub(255, 255, 255, 255);
-		}
-		segment->draw(false, isShadowed);
-		
+		if( !isShadowed ) glColor4ub(255, 255, 255, 255);
+		segment->draw(drawPoints, isShadowed);
 	}
 
-	if(drawPoints)//draw all the control points on the curve
-	{
-		int x= 0;
-
-		for each(auto controlPoint in controlPoints)
-		{
-			drawPoint(x, isShadowed);
-			x++;
-		}
-	}
+	if( drawPoints ) Curve::drawPoints(isShadowed);
 }
 
 /* drawPoint() - Draws the control point at the specified index, if it exists */
 void Curve::drawPoint( int index, bool isShadowed )
 {
 	if( index < 0 || index >= (int)controlPoints.size() )
-	{
-		printf("just returned\n");
 		return;
-	}
-	if(!isShadowed)
-	{
-			glColor4ub(255, 255, 255, 255);
-	}
+
 	controlPoints[index].draw(isShadowed);
 }
 
@@ -84,10 +65,7 @@ void Curve::drawPoints(bool isShadowed) const
 {
 	for each(const auto& p in controlPoints)
 	{
-		if(!isShadowed)
-		{
-			glColor4ub(255, 255, 255, 255);
-		}
+		if( !isShadowed ) glColor4ub(255, 255, 255, 255);
 		p.draw(isShadowed);			
 	}
 }
@@ -98,10 +76,7 @@ void Curve::drawSelectedSegment(bool drawPoints, bool isShadowed)
 	if( selectedSegment < 0 || selectedSegment >= numSegments() ) 
 		return;
 
-	if(!isShadowed)
-	{
-			glColor4ub(255, 20, 20, 255);
-	}
+	if( !isShadowed ) glColor4ub(255, 20, 20, 255);
 	segments[selectedSegment]->draw(drawPoints, isShadowed);
 }
 
@@ -312,10 +287,7 @@ void Curve::drawSegment( const int number, bool isShadowed )
 	if( number < 0 || number >= numSegments() )
 		return;
 
-	if(!isShadowed)
-	{
-			glColor4ub(255, 255, 255, 255);
-	}
+	if( !isShadowed ) glColor4ub(255, 255, 255, 255);
 	segments[number]->draw(false, isShadowed);
 }
 

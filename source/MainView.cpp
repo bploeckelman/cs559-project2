@@ -91,9 +91,7 @@ void MainView::draw()
 
 			drawScenery(true);
 			if( viewType == train )
-			{
 				drawCurve(t, false, true);
-			}
 			else
 			{
 				drawCurve(t, true, true);
@@ -420,15 +418,12 @@ void MainView::openglFrameSetup()
 /* drawFloor() - Draws the floor plane and assorted scenery ------ */
 void MainView::drawScenery(bool doShadows)
 {
-	if(!doShadows)
-	{
-		glDisable(GL_BLEND);
-	}
+	if( !doShadows ) glDisable(GL_BLEND);
 
 	glPushMatrix();
 		glTranslatef(0.f, -20.f, 0.f);
 
-		if(!doShadows)
+		if( !doShadows )
 		{
 			glColor4ub(255, 255, 255, 255);
 			glTranslatef(0.f, 0.2f, 0.f);
@@ -439,24 +434,14 @@ void MainView::drawScenery(bool doShadows)
 
 		glLineWidth(1.f);
 		glPushMatrix();
-			if(!doShadows)
-			{
-				glColor4ub(0, 0, 255, 255);
-			}
+			if( !doShadows ) glColor4ub(0, 0, 255, 255);
 			glTranslatef(-50.f, 10.f, 50.f);
 			glRotatef(-90.f, 1.f, 0.f, 0.f);
-			static const GLushort pattern = 0x00ff;
-			glLineStipple(1, pattern);
-			glEnable(GL_LINE_STIPPLE);
-			glutWireSphere(10.f, 20, 20);
-			glDisable(GL_LINE_STIPPLE);
+			glutSolidSphere(10.f, 20, 20);
 		glPopMatrix();
 
 		glPushMatrix();
-			if(!doShadows)
-			{
-				glColor4ub(200, 50, 200, 255);
-			}
+			if( !doShadows ) glColor4ub(200, 50, 200, 255);
 			glTranslatef(-50.f, 6.f, -50.f);
 			glRotatef(-45.f, 0.f, 1.f, 0.f);
 			glutSolidTeapot(8.f);
@@ -465,20 +450,14 @@ void MainView::drawScenery(bool doShadows)
 		glLineWidth(5.f);
 
 		glPushMatrix();
-			if(!doShadows)
-			{
-				glColor4ub(0, 255, 0, 255);
-			}
+			if( !doShadows ) glColor4ub(0, 255, 0, 255);
 			glPushMatrix();
 				glTranslatef(50.f, 5.f, 50.f);
 				glRotatef(-90.f, 1.f, 0.f, 0.f);
 				glutSolidCone(10.f, 20.f, 10, 10);
 			glPopMatrix();
 
-			if(!doShadows)
-			{
-				glColor4ub(139, 69, 19, 255);
-			}
+			if( !doShadows ) glColor4ub(139, 69, 19, 255);
 			glPushMatrix();
 				glTranslatef(50.f, 2.5f, 50.f);
 				glutSolidCube(5.f);
@@ -486,10 +465,7 @@ void MainView::drawScenery(bool doShadows)
 		glPopMatrix();
 
 		glPushMatrix();
-			if(!doShadows)
-			{
-				glColor4ub(255, 255, 10, 255);
-			}
+			if( !doShadows ) glColor4ub(255, 255, 10, 255);
 			glTranslatef(50.f, 8.1f, -50.f);
 			glScalef(5.f, 5.f, 5.f);
 			glutWireDodecahedron();
@@ -497,10 +473,7 @@ void MainView::drawScenery(bool doShadows)
 
 	glPopMatrix();
 
-	if(!doShadows)
-	{
-		glEnable(GL_BLEND);
-	}
+	if( !doShadows ) glEnable(GL_BLEND);
 }
 
 /* drawCurve() - Draws the window's curve object ----------------- */
@@ -515,7 +488,6 @@ void MainView::drawCurve(const float t, bool drawPoints, bool doShadows)
 	{
 		curve.drawSelectedSegment(drawPoints, doShadows);
 	}
-	
 }
 
 /* drawPathObject() - Draws the object that travels along the path */
@@ -525,17 +497,14 @@ void MainView::drawPathObject(const float t, bool doShadows)
 	const Vec3f p(curve.getPosition(t));	// position  @ t
 	const Vec3f d(curve.getDirection(t));	// direction @ t (non-normalized)
 
-	if(!doShadows)
-	{
-		glColor4ub(20, 250, 20, 255);
-	}
+	if( !doShadows ) glColor4ub(20, 250, 20, 255);
 
 	glPushMatrix();
 		glTranslatef(p.x(), p.y() + 1.5f, p.z());
 		applyBasisFromTangent(normalize(d));
 
 		drawCube(0.f, 0.f, 0.f, 2.5f);
-		if(!doShadows)
+		if( !doShadows )
 		{
 			drawBasis(Vec3f(5.f, 0.f, 0.f),
 					  Vec3f(0.f, 5.f, 0.f),
@@ -586,10 +555,7 @@ void MainView::drawSelectedControlPoint(bool doShadows)
 	auto points = window->getPoints();
 	if( selectedPoint >= 0 && selectedPoint < (signed)points.size() )
 	{
-		if(!doShadows)
-		{
-			glColor4ub(250, 20, 20, 255);
-		}
+		if( !doShadows ) glColor4ub(250, 20, 20, 255);
 		points[selectedPoint].draw(doShadows);
 	}
 }
