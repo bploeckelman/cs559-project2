@@ -66,7 +66,8 @@ private:
 
 	void drawScenery(bool doShadows=false);
 	void drawCurve(const float t, bool drawPoints=false, bool doShadows=false);
-	void drawPathObject(const float t, bool doShadows=false);
+	void drawTrainHeadCar(const float t, bool doShadows=false);
+	void drawTrainCar(const float t, bool doShadows=false);
 	void drawPathObjects(const float t, const bool doShadows=false);
 	void drawSelectedControlPoint(bool doShadows=false);
 

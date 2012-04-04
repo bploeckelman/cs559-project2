@@ -490,21 +490,274 @@ void MainView::drawCurve(const float t, bool drawPoints, bool doShadows)
 	}
 }
 
-/* drawPathObject() - Draws the object that travels along the path */
-void MainView::drawPathObject(const float t, bool doShadows)
+void MainView::drawTrainHeadCar(const float t, bool doShadows)
 {
 	Curve& curve(window->getCurve());
 	const Vec3f p(curve.getPosition(t));	// position  @ t
 	const Vec3f d(curve.getDirection(t));	// direction @ t (non-normalized)
 
-	if( !doShadows ) glColor4ub(20, 250, 20, 255);
+	if(!doShadows)
+	{
+		glColor4ub(20, 250, 20, 255);
+	}
 
 	glPushMatrix();
-		glTranslatef(p.x(), p.y() + 1.5f, p.z());
+		glTranslatef(p.x(), p.y() + 2.5f, p.z());
 		applyBasisFromTangent(normalize(d));
 
-		drawCube(0.f, 0.f, 0.f, 2.5f);
-		if( !doShadows )
+		float size = 1.5f;
+		//drawCube(0.f, 0.f, 0.f, 3.f);
+		//should be drawn as a rectangle
+		glBegin(GL_QUADS);
+			//front
+			/*glNormal3f( 0,0,1);
+			glVertex3f( size, size, size);
+			glVertex3f(-size, size, size);
+			glVertex3f(-size,-size, size);
+			glVertex3f( size,-size, size);*/
+
+			//back
+			glNormal3f( 0, 0, -1);
+			glVertex3f( size, size, -size);
+			glVertex3f( size,-size, -size);
+			glVertex3f(-size,-size, -size);
+			glVertex3f(-size, size, -size);
+
+			//top
+			glNormal3f( 0, 1, 0);
+			glVertex3f( size, size,  size);
+			glVertex3f(-size, size,  size);
+			glVertex3f(-size, size,  -size);
+			glVertex3f( size, size,  -size);
+
+			//bottom
+			glNormal3f( 0,-1,0);
+			glVertex3f( size,-size, size);
+			glVertex3f(-size,-size, size);
+			glVertex3f(-size,-size,-size);
+			glVertex3f( size,-size,-size);
+
+			//right side facing with x vector
+			glNormal3f( 1,0,0);
+			glVertex3f( size, size, size);
+			glVertex3f( size,-size, size);
+			glVertex3f( size,-size,-size);
+			glVertex3f( size, size,-size);
+
+			//left side
+			glNormal3f(-1,0,0);
+			glVertex3f(-size, size, size);
+			glVertex3f(-size, size,-size);
+			glVertex3f(-size,-size,-size);
+			glVertex3f(-size,-size, size);
+		glEnd();
+
+		//draw cow catcher on the front, needs to be fixed
+		//glPushMatrix();
+		//glRotatef(90.f, 1.f, 0.f, 0.f);
+		glBegin(GL_TRIANGLE_FAN);
+
+			/*glNormal3f( 0,0,1);
+			glVertex3f( size, size, size);
+			glVertex3f(-size, size, size);
+			glVertex3f(-size,-size, size);
+			glVertex3f( size,-size, size);*/
+
+			glNormal3f(0,0.f,1.f);
+			glVertex3f(0,0.f,3.0f*size);
+			glNormal3f( 1.0f, 0.0f , 1.0f);
+			glVertex3f( size, size , size);
+			glNormal3f(-1.0f, 0.0f , 1.0f);
+			glVertex3f(-size, size , size);
+			glNormal3f(-1.0f, 0.0f ,-1.0f);
+			glVertex3f(-size, size ,-size);
+			glNormal3f( 1.0f, 0.0f ,-1.0f);
+			glVertex3f( size, size ,-size);
+			glNormal3f( 1.0f, 0.0f , 1.0f);
+			glVertex3f( size, size , size);
+		glEnd();
+		//glPopMatrix();
+
+		glPushMatrix();
+			if(!doShadows)
+			{
+				glColor4ub(0, 0, 0, 255);
+			}
+			//void glRotatef(GLfloat  angle,  GLfloat  x,  GLfloat  y,  GLfloat  z);
+			//drawCube(1.8f, -1.5f, 1.8f, 1.0f);
+			glTranslatef(1.8f, -1.5f, 1.8f);
+			glRotatef(90.f,  0.f,  1.f,  0.f);
+			//glutSolidTorus(GLdouble innerRadius, GLdouble outerRadius, GLint sides, GLint rings)
+			glutSolidTorus(0.4f, 0.6f, 10, 12);
+			
+		glPopMatrix();
+
+		glPushMatrix();
+			if(!doShadows)
+			{
+				glColor4ub(0, 0, 0, 255);
+			}
+			//drawCube(-1.8f, -1.5f, 1.8f, 1.0f);
+			glTranslatef(-1.8f, -1.5f, 1.8f);
+			glRotatef(90.f,  0.f,  1.f,  0.f);
+			glutSolidTorus(0.4f, 0.6f, 10, 12);
+			
+		glPopMatrix();
+
+		glPushMatrix();
+			if(!doShadows)
+			{
+				glColor4ub(0, 0, 0, 255);
+			}
+			//drawCube(1.8f, -1.5f, -1.8f, 1.0f);
+			glTranslatef(1.8f, -1.5f, -1.8f);
+			glRotatef(90.f,  0.f,  1.f,  0.f);
+			glutSolidTorus(0.4f, 0.6f, 10, 12);
+			
+		glPopMatrix();
+
+		glPushMatrix();
+			if(!doShadows)
+			{
+				glColor4ub(0, 0, 0, 255);
+			}
+			//drawCube(-1.8f, -1.5f, -1.8f, 1.0f);
+			glTranslatef(-1.8f, -1.5f, -1.8f);
+			glRotatef(90.f,  0.f,  1.f,  0.f);
+			glutSolidTorus(0.4f, 0.6f, 10, 12);
+			
+		glPopMatrix();
+
+		if(window->isHighlightedSegPts()&&!doShadows)
+		{
+			drawBasis(Vec3f(5.f, 0.f, 0.f),
+					  Vec3f(0.f, 5.f, 0.f),
+					  Vec3f(0.f, 0.f, 5.f));
+		}
+	glPopMatrix();
+
+}
+
+/* drawPathObject() - Draws the object that travels along the path */
+void MainView::drawTrainCar(const float t, bool doShadows)
+{
+	Curve& curve(window->getCurve());
+	const Vec3f p(curve.getPosition(t));	// position  @ t
+	const Vec3f d(curve.getDirection(t));	// direction @ t (non-normalized)
+
+	if(!doShadows)
+	{
+		glColor4ub(20, 250, 20, 255);
+	}
+
+	glPushMatrix();
+		glTranslatef(p.x(), p.y() + 2.5f, p.z());
+		applyBasisFromTangent(normalize(d));
+
+		//drawCube(0.f, 0.f, 0.f, 3.f);
+		float size= 1.5f;
+		//float rand_coal_size = size- ((1.5f/99.f) * (float)(rand() % 100));
+		float rand_coal_size = size- 1.1f;
+		glBegin(GL_QUADS);
+			glNormal3f( 0,0,1);
+			glVertex3f( size, size, size);
+			glVertex3f(-size, size, size);
+			glVertex3f(-size,-size, size);
+			glVertex3f( size,-size, size);
+
+			glNormal3f( 0, 0, -1);
+			glVertex3f( size, size, -size);
+			glVertex3f( size,-size, -size);
+			glVertex3f(-size,-size, -size);
+			glVertex3f(-size, size, -size);
+
+			//draw coal for top of car
+			if(!doShadows)
+			{
+				glColor4ub(0, 0, 0, 255);
+			}
+
+			glNormal3f( 0, 1, 0);
+			glVertex3f( size, rand_coal_size,  size);
+			glVertex3f(-size, rand_coal_size,  size);
+			glVertex3f(-size, rand_coal_size,  -size);
+			glVertex3f( size, rand_coal_size,  -size);
+
+			if(!doShadows)
+			{
+				glColor4ub(20, 250, 20, 255);
+			}
+
+			glNormal3f( 0,-1,0);
+			glVertex3f( size,-size, size);
+			glVertex3f(-size,-size, size);
+			glVertex3f(-size,-size,-size);
+			glVertex3f( size,-size,-size);
+
+			glNormal3f( 1,0,0);
+			glVertex3f( size, size, size);
+			glVertex3f( size,-size, size);
+			glVertex3f( size,-size,-size);
+			glVertex3f( size, size,-size);
+
+			glNormal3f(-1,0,0);
+			glVertex3f(-size, size, size);
+			glVertex3f(-size, size,-size);
+			glVertex3f(-size,-size,-size);
+			glVertex3f(-size,-size, size);
+		glEnd();
+
+		glPushMatrix();
+			if(!doShadows)
+			{
+				glColor4ub(0, 0, 0, 255);
+			}
+			//void glRotatef(GLfloat  angle,  GLfloat  x,  GLfloat  y,  GLfloat  z);
+			//drawCube(1.8f, -1.5f, 1.8f, 1.0f);
+			glTranslatef(1.8f, -1.5f, 1.8f);
+			glRotatef(90.f,  0.f,  1.f,  0.f);
+			//glutSolidTorus(GLdouble innerRadius, GLdouble outerRadius, GLint sides, GLint rings)
+			glutSolidTorus(0.4f, 0.6f, 10, 12);
+			
+		glPopMatrix();
+
+		glPushMatrix();
+			if(!doShadows)
+			{
+				glColor4ub(0, 0, 0, 255);
+			}
+			//drawCube(-1.8f, -1.5f, 1.8f, 1.0f);
+			glTranslatef(-1.8f, -1.5f, 1.8f);
+			glRotatef(90.f,  0.f,  1.f,  0.f);
+			glutSolidTorus(0.4f, 0.6f, 10, 12);
+			
+		glPopMatrix();
+
+		glPushMatrix();
+			if(!doShadows)
+			{
+				glColor4ub(0, 0, 0, 255);
+			}
+			//drawCube(1.8f, -1.5f, -1.8f, 1.0f);
+			glTranslatef(1.8f, -1.5f, -1.8f);
+			glRotatef(90.f,  0.f,  1.f,  0.f);
+			glutSolidTorus(0.4f, 0.6f, 10, 12);
+			
+		glPopMatrix();
+
+		glPushMatrix();
+			if(!doShadows)
+			{
+				glColor4ub(0, 0, 0, 255);
+			}
+			//drawCube(-1.8f, -1.5f, -1.8f, 1.0f);
+			glTranslatef(-1.8f, -1.5f, -1.8f);
+			glRotatef(90.f,  0.f,  1.f,  0.f);
+			glutSolidTorus(0.4f, 0.6f, 10, 12);
+			
+		glPopMatrix();
+
+		if(window->isHighlightedSegPts()&&!doShadows)
 		{
 			drawBasis(Vec3f(5.f, 0.f, 0.f),
 					  Vec3f(0.f, 5.f, 0.f),
@@ -519,7 +772,7 @@ void MainView::drawPathObjects(const float t, const bool doShadows)
 {
 	const Curve& curve(window->getCurve());
 
-	float tt = t + 0.2f;
+	float tt = t + 0.4f;
 	if( tt >= curve.numSegments() )
 	{
 		tt -= curve.numSegments();
@@ -528,9 +781,9 @@ void MainView::drawPathObjects(const float t, const bool doShadows)
 	{
 		tt += curve.numSegments();
 	}
-	drawPathObject(tt, doShadows);
+	drawTrainHeadCar(tt, doShadows);
 
-	tt = t + 0.1f;
+	tt = t + 0.15f;
 	if( tt >= curve.numSegments() )
 	{
 		tt -= curve.numSegments();
@@ -539,14 +792,14 @@ void MainView::drawPathObjects(const float t, const bool doShadows)
 	{
 		tt += curve.numSegments();
 	}
-	drawPathObject(tt, doShadows);
+	drawTrainCar(tt, doShadows);
 
 	tt = t;
 	if(tt < 0)
 	{
 		tt += curve.numSegments();
 	}
-	drawPathObject(tt, doShadows);
+	drawTrainCar(tt, doShadows);
 }
 
 /* drawSelectedControlPoint() - Draws the selected point highlighted */
