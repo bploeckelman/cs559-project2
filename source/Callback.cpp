@@ -192,8 +192,7 @@ void speedSliderCallback(Fl_Widget *widget, MainWindow *window)
 	window->damageMe();
 }
 
-
-void CurveCtrlHighlightCallback(Fl_Widget *widget, MainWindow *window)
+void highlightButtonCallback(Fl_Widget *widget, MainWindow *window)
 {
 	assert(window != nullptr && widget != nullptr);
 	window->toggleHighlightSegPts();

@@ -28,6 +28,4 @@ void backwardButtonCallback(Fl_Widget *widget, MainWindow *window);
 
 void speedSliderCallback(Fl_Widget *widget, MainWindow *window);
 
-void CurveCtrlHighlightCallback(Fl_Widget *widget, MainWindow *window);
-
-
+void highlightButtonCallback(Fl_Widget *widget, MainWindow *window);

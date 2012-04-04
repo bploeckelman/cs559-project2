@@ -337,7 +337,7 @@ void MainView::setupProjection()
 /* updateTextWidget() - Prints rotation amount to text widget ---- */
 void MainView::updateTextWidget( const float t )
 {
-	stringstream ss; ss << "rot = " << t;
+	stringstream ss; ss << "t = " << t;
 	window->setDebugText(ss.str());
 }
 

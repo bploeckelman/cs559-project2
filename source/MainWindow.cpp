@@ -65,7 +65,7 @@ MainWindow::MainWindow(const int x, const int y)
 	, paramButton     (nullptr)
 	, forwardButton   (nullptr)
 	, backwardButton  (nullptr)
-	, CurveCtrlHighlight (nullptr)
+	, highlightButton (nullptr)
 	, speedSlider     (nullptr)
 	, curve           (catmull)
 	, animating       (false)
@@ -179,16 +179,15 @@ void MainWindow::createWidgets()
 		speedSlider->type(FL_HORIZONTAL);
 		speedSlider->callback((Fl_Callback*)speedSliderCallback, this);
 
-
 		// Create text display
-		textOutput = new Fl_Output(605, 130, 80, 20);
+		textOutput = new Fl_Output(605, 130, 90, 20);
 
 		//Create a button for highlighting the curve's current segment pts being used
-		CurveCtrlHighlight = new Fl_Button(605, 155, 175, 20, "Highlight Curr Seg Ctrl");
-		CurveCtrlHighlight->type(FL_TOGGLE_BUTTON);
-		CurveCtrlHighlight->value(1);                     // initially on
-		CurveCtrlHighlight->selection_color((Fl_Color)3); // yellow when pressed
-		CurveCtrlHighlight->callback((Fl_Callback*)CurveCtrlHighlightCallback, this);
+		highlightButton = new Fl_Button(605, 155, 180, 20, "Highlight Current Segment");
+		highlightButton->type(FL_TOGGLE_BUTTON);
+		highlightButton->value(1);                     // initially on
+		highlightButton->selection_color((Fl_Color)3); // yellow when pressed
+		highlightButton->callback((Fl_Callback*)highlightButtonCallback, this);
 
 		// Create file write button
 		/*writeButton = new Fl_Button(700, 105, 70, 20, "File Write");

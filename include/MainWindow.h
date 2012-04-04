@@ -49,7 +49,7 @@ private:
 	Fl_Button  *paramButton;
 	Fl_Button  *forwardButton;
 	Fl_Button  *backwardButton;
-	Fl_Button  *CurveCtrlHighlight;
+	Fl_Button  *highlightButton;
 	Fl_Value_Slider  *speedSlider;
 
 	Curve curve;
