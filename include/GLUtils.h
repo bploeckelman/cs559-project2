@@ -46,8 +46,8 @@ inline void drawVector(const Vec3f& pos, const Vec3f& vec, const Vec3f& color=(1
 
 	// Draw the line
 	glBegin(GL_LINES);
-		glVertex3f(pos.x(), pos.y(), pos.z());
-		glVertex3f(vec.x(), vec.y(), vec.z());
+		glVertex3fv(pos.v());
+		glVertex3fv(vec.v());
 	glEnd();
 
 	// Draw the arrow head
@@ -97,7 +97,7 @@ inline void drawGroundPlane(float size, int numSquares=8)
 		for(int y = 0, i = x; y < numSquares; ++y, ++i, yp += yd) 
 		{
 			glColor4fv((i % 2 == 0) ? color1 : color2);
-			glNormal3f(0, 1, 0); 
+			glNormal3f(0.f, 1.f, 0.f);
 			glVertex3d(xp,      0, yp);
 			glVertex3d(xp,      0, yp + yd);
 			glVertex3d(xp + xd, 0, yp + yd);

@@ -57,9 +57,9 @@ void LineSegment::draw(bool drawPoints, bool isShadowed)
 	glBegin(GL_LINES);
 	{
 		const Vec3f v1(start + radius * side);
-		glVertex3f(v1.x(), v1.y(), v1.z());
+		glVertex3fv(v1.v());
 		const Vec3f v2(end + radius * side);
-		glVertex3f(v2.x(), v2.y(), v2.z());
+		glVertex3fv(v2.v());
 	}
 	glEnd();
 
@@ -68,11 +68,11 @@ void LineSegment::draw(bool drawPoints, bool isShadowed)
 		const Vec3f v1(start.x() - radius * side.x()
 					,  start.y() + radius * side.y()
 					,  start.z() - radius * side.z());
-		glVertex3f(v1.x(), v1.y(), v1.z());
+		glVertex3fv(v1.v());
 		const Vec3f v2(end.x() - radius * side.x()
 					,  end.y() + radius * side.y()
 					,  end.z() - radius * side.z());
-		glVertex3f(v2.x(), v2.y(), v2.z());
+		glVertex3fv(v2.v());
 	}
 	glEnd();
 
@@ -120,7 +120,7 @@ void CatmullRomSegment::draw(bool drawPoints, bool isShadowed)
 			const Vec3f up(normalize(getOrientation(t)));
 			const Vec3f side(normalize(cross(up, dir)));
 			const Vec3f v(p + radius * side);
-			glVertex3f(v.x(), v.y(), v.z());	
+			glVertex3fv(v.v());
 		}
 	glEnd();
 
@@ -135,7 +135,7 @@ void CatmullRomSegment::draw(bool drawPoints, bool isShadowed)
 			const Vec3f v(p.x() - radius * side.x()
 						, p.y() + radius * side.y()
 						, p.z() - radius * side.z());
-			glVertex3f(v.x(), v.y(), v.z());	
+			glVertex3fv(v.v());
 		}
 	glEnd();
 

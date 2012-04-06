@@ -40,6 +40,9 @@ public:
 	inline const float y() const { return _y; }
 	inline const float z() const { return _z; }
 
+	// Pointer to float getter (for gl*fv())
+	inline const float* v() const { return &_x; }
+
 	// Dot product
 	inline float dot(const Vec3f& rhs) const
 	{
