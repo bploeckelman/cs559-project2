@@ -331,7 +331,7 @@ float MainWindow::arcLengthStep(const float vel)
 	const Vec3f nextPoint(curve.getPosition(next_t));
 	const Vec3f thisPoint(curve.getPosition(rotation));
 
-	const Vec3f distance(-1.f * thisPoint + nextPoint);
+	const Vec3f distance(nextPoint - thisPoint);
 
 	return (vel / distance.magnitude());
 }
