@@ -67,6 +67,9 @@ MainWindow::MainWindow(const int x, const int y)
 	, forwardButton   (nullptr)
 	, backwardButton  (nullptr)
 	, highlightButton (nullptr)
+	, resetPointButton(nullptr)
+	, loadPointsButton(nullptr)
+	, savePointsButton(nullptr)
 	, speedSlider     (nullptr)
 	, curve           (catmull)
 	, animating       (false)
@@ -197,6 +200,24 @@ void MainWindow::createWidgets()
 		highlightButton->selection_color((Fl_Color)3); // yellow when pressed
 		highlightButton->callback((Fl_Callback*)highlightButtonCallback, this);
 
+		// Create a button to reset the curve's control points
+		resetPointButton = new Fl_Button(605, 180, 50, 20, "Reset");
+		resetPointButton->type(FL_NORMAL_BUTTON);
+		resetPointButton->selection_color((Fl_Color)3);
+		resetPointButton->callback((Fl_Callback*)resetPointButtonCallback, this);
+
+		// Create a button to load control points from a file
+		loadPointsButton = new Fl_Button(660, 180, 50, 20, "Load");
+		loadPointsButton->type(FL_NORMAL_BUTTON);
+		loadPointsButton->selection_color((Fl_Color)3);
+		loadPointsButton->callback((Fl_Callback*)loadPointsButtonCallback, this);
+
+		// Create a button to save control points to a file
+		savePointsButton = new Fl_Button(715, 180, 50, 20, "Save");
+		savePointsButton->type(FL_NORMAL_BUTTON);
+		savePointsButton->selection_color((Fl_Color)3);
+		savePointsButton->callback((Fl_Callback*)savePointsButtonCallback, this);
+
 		// Create file write button
 		/*writeButton = new Fl_Button(700, 105, 70, 20, "File Write");
 		writeButton->type(FL_TOGGLE_BUTTON);
@@ -227,6 +248,8 @@ void MainWindow::resetPoints()
 		const CtrlPoint point(pos * radius);
 		curve.addControlPoint(point);
 	}
+
+	curve.regenerateSegments();
 }
 
 /* loadPoints() - Loads control points from a text file ---------- */

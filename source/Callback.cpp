@@ -11,6 +11,8 @@
 #pragma warning(disable:4312)
 #pragma warning(disable:4311)
 #include <Fl/Fl_Widget.h>
+#include <Fl/Fl_File_Chooser.h>
+#include <Fl/fl_ask.h>
 #pragma warning(pop)
 
 #include <iostream>
@@ -182,4 +184,41 @@ void highlightButtonCallback(Fl_Widget *widget, MainWindow *window)
 	assert(window != nullptr && widget != nullptr);
 	window->toggleHighlightSegPts();
 	window->damageMe();
+}
+
+/* resetPointButtonCallback() - Called by fltk when the reset button is pressed */
+void resetPointButtonCallback( Fl_Widget *widget, MainWindow *window )
+{
+	assert(window != nullptr && widget != nullptr);
+	window->resetPoints();
+	window->setRotation(0.f);
+	window->damageMe();
+}
+
+/* loadPointsButtonCallback() - Called by fltk when the load button is pressed */
+void loadPointsButtonCallback( Fl_Widget *widget, MainWindow *window )
+{
+	assert(window != nullptr && widget != nullptr);
+	const char *filename = fl_file_chooser("Pick a track file", "*.txt", "tracks/reset.txt");
+	if( filename != nullptr )
+	{
+		window->loadPoints(filename);
+		window->getCurve().regenerateSegments();
+		window->setRotation(0.f);
+		window->damageMe();
+	}
+}
+
+/* savePointsButtonCallback() - Called by fltk when the save button is pressed */
+void savePointsButtonCallback( Fl_Widget *widget, MainWindow *window )
+{
+	assert(window != nullptr && widget != nullptr);
+	const char *filename = fl_input("File name for save [*.txt]", "tracks/");
+	if( filename != nullptr )
+	{
+		window->savePoints(filename);
+		window->getCurve().regenerateSegments();
+		window->setRotation(0.f);
+		window->damageMe();
+	}
 }

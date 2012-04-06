@@ -29,3 +29,9 @@ void backwardButtonCallback(Fl_Widget *widget, MainWindow *window);
 void speedSliderCallback(Fl_Widget *widget, MainWindow *window);
 
 void highlightButtonCallback(Fl_Widget *widget, MainWindow *window);
+
+void resetPointButtonCallback(Fl_Widget *widget, MainWindow *window);
+
+void loadPointsButtonCallback(Fl_Widget *widget, MainWindow *window);
+
+void savePointsButtonCallback(Fl_Widget *widget, MainWindow *window);
