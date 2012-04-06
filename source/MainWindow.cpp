@@ -73,7 +73,7 @@ MainWindow::MainWindow(const int x, const int y)
 	, speedSlider     (nullptr)
 	, curve           (catmull)
 	, animating       (false)
-	, isArcLengthParam(false)
+	, isArcLengthParam(true)
 	, highlightSegPts (false)
 	, shadows         (true)
 	, speed           (2.f)
@@ -158,7 +158,7 @@ void MainWindow::createWidgets()
 		//create arc length parameterization button
 		paramButton = new Fl_Button(605, 105, 120, 20, "Arclength Param");
 		paramButton->type(FL_TOGGLE_BUTTON);
-		paramButton->value(0);
+		paramButton->value(1);
 		paramButton->selection_color((Fl_Color)3); // yellow when pressed
 		paramButton->callback((Fl_Callback*)paramButtonCallback, this);
 

@@ -287,6 +287,7 @@ void MainView::setupProjection()
 			normal = normalize(cross(normalize(d), binormal));
 
 			const Vec3f& z(normalize(d)), y(normal), x(binormal);
+			// Note: matrix is transpose of typical orientation
 			GLfloat m[] = {
 				x.x(), y.x(), z.x(), 0.f,
 				x.y(), y.y(), z.y(), 0.f,
