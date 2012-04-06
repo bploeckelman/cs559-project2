@@ -44,7 +44,7 @@ void Curve::draw(bool drawPoints, bool isShadowed)
 	for each(auto segment in segments)
 	{
 		assert(segment != nullptr);
-		if( !isShadowed ) glColor4ub(199, 97, 20, 255); //raw sienna for the track color
+		if( !isShadowed ) glColor4ub(164, 164, 164, 255); 
 		segment->draw(false, isShadowed);
 	}
 

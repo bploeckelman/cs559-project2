@@ -40,12 +40,35 @@ CtrlPoint& CurveSegment::getControl2   () { return control2; }
  */
 void LineSegment::draw(bool drawPoints, bool isShadowed) 
 {
+	static const Vec3f up(0.f, 1.f, 0.f); // TODO: extract this to Vec3f
+	static const float radius = 2.9f;	  // TODO: extract this to base class
+
 	const Vec3f& start(startPoint.pos());
 	const Vec3f& end(endPoint.pos());
 
+	const Vec3f dir(normalize(start- end));
+	const Vec3f side(normalize(cross(dir,up)));
+
 	glBegin(GL_LINES);
-		glVertex3f(start.x(), start.y(), start.z());
-		glVertex3f(end.x(), end.y(), end.z());
+	{
+		const Vec3f v1(start + radius * side);
+		glVertex3f(v1.x(), v1.y(), v1.z());
+		const Vec3f v2(end + radius * side);
+		glVertex3f(v2.x(), v2.y(), v2.z());
+	}
+	glEnd();
+
+	glBegin(GL_LINES);
+	{
+		const Vec3f v1(start.x() - radius * side.x()
+					,  start.y() + radius * side.y()
+					,  start.z() - radius * side.z());
+		glVertex3f(v1.x(), v1.y(), v1.z());
+		const Vec3f v2(end.x() - radius * side.x()
+					,  end.y() + radius * side.y()
+					,  end.z() - radius * side.z());
+		glVertex3f(v2.x(), v2.y(), v2.z());
+	}
 	glEnd();
 
 	if( drawPoints )
@@ -81,13 +104,34 @@ void CatmullRomSegment::draw(bool drawPoints, bool isShadowed)
 {
 	static const int   lines = 25;
 	static const float step  = 1.f / lines;
+	static const Vec3f up(0.f, 1.f, 0.f); // TODO: extract this to Vec3f
+	static const float radius = 2.9f;	  // TODO: extract this to base class
 
+	float t = 0.f;
+//	if( !isShadowed ) glColor4ub(255, 0, 0, 255);
 	glBegin(GL_LINE_STRIP);
-		float t = 0.f;
 		for(int i = 0; i <= lines; ++i, t += step)
 		{
 			const Vec3f p(getPosition(t));
-			glVertex3f(p.x(), p.y(), p.z());	
+			const Vec3f dir(normalize(getDirection(t)));
+			const Vec3f side(normalize(cross(dir,up)));
+			const Vec3f v(p + radius * side);
+			glVertex3f(v.x(), v.y(), v.z());	
+		}
+	glEnd();
+
+	t = 0.f;
+//	if( !isShadowed ) glColor4ub(0, 0, 255, 255);
+	glBegin(GL_LINE_STRIP);
+		for(int i = 0; i <= lines; ++i, t += step)
+		{
+			const Vec3f p(getPosition(t));
+			const Vec3f dir(normalize(getDirection(t)));
+			const Vec3f side(normalize(cross(dir,up)));
+			const Vec3f v(p.x() - radius * side.x()
+						, p.y() + radius * side.y()
+						, p.z() - radius * side.z());
+			glVertex3f(v.x(), v.y(), v.z());	
 		}
 	glEnd();
 
