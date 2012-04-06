@@ -162,6 +162,24 @@ Vec3f Curve::getDirection( const float t )
 	}
 }
 
+/* getOrientation() - Returns the interpolated orientation ------- */
+Vec3f Curve::getOrientation( const float t )
+{
+	const int segmentNumber = static_cast<int>(std::floor(t));
+	try {
+		CurveSegment *segment = segments.at(segmentNumber);
+		const float tUnit = t - segmentNumber;
+		return segment->getOrientation(tUnit);
+	} catch(std::out_of_range&) {
+		stringstream ss;
+		ss  << "Warning: Curve::getOrientation out of range: "
+			<< "t=" << t << "  seg#=" << segmentNumber << "  "
+			<< "#segs=" << segments.size() << endl;
+		cout << ss.str();
+		throw NoSuchPoint(ss.str());
+	}
+}
+
 /* getPoint() - Returns the specified point, if it exists -------- */
 /* Throws NoSuchPoint exception on bad point index --------------- */
 CtrlPoint& Curve::getPoint( int id )

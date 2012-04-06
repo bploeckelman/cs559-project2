@@ -465,11 +465,28 @@ void MainView::drawTrain( const float t, bool doingShadows )
 	const Vec3f& p(window->getCurve().getPosition(t));
 	const Vec3f& d(window->getCurve().getDirection(t));
 
+	Vec3f normal(window->getCurve().getOrientation(t));
+	Vec3f binormal;
+
 	glPushMatrix();
 
 	glTranslatef(p.x(), p.y(), p.z());
-	glRotatef(90.f, 0.f, 1.f, 0.f);
-	applyBasisFromTangent(normalize(d));
+
+	// Calculate and apply orientation matrix
+	binormal = normalize(cross(normal, normalize(d)));
+	normal   = normalize(cross(normalize(d), binormal));
+
+	const Vec3f& z(normalize(d)), y(normal), x(binormal);
+	GLfloat m[] = {
+		x.x(), x.y(), x.z(), 0.f,
+		y.x(), y.y(), y.z(), 0.f,
+		z.x(), z.y(), z.z(), 0.f,
+		0.f,   0.f,   0.f,   1.f
+	};
+	glMultMatrixf(m);
+
+	// Face forward
+	glRotatef(-90.f, 0.f, 1.f, 0.f);
 
 	if(!doingShadows) glColor3d(0.3, 0.5, 1.0);
 

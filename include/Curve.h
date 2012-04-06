@@ -57,6 +57,7 @@ public:
 
 	Vec3f getPosition (const float t);
 	Vec3f getDirection(const float t);
+	Vec3f getOrientation(const float t);
 	CtrlPoint& getPoint(int id);
 	CurveType  getCurveType() const;
 	CurveSegment* getSegment(const int number);

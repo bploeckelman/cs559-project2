@@ -25,6 +25,11 @@ std::string CurveTypeNames[] = {
  * CurveSegment base class
  * ==================================================================
  */
+Vec3f CurveSegment::getOrientation(float t)
+{
+	return lerp(-t, startPoint.orient(), endPoint.orient());
+}
+
 int       CurveSegment::getNumber    () const { return number; }
 CurveType CurveSegment::getCurveType () const { return curveType; }
 
@@ -40,14 +45,14 @@ CtrlPoint& CurveSegment::getControl2   () { return control2; }
  */
 void LineSegment::draw(bool drawPoints, bool isShadowed) 
 {
-	static const Vec3f up(0.f, 1.f, 0.f); // TODO: extract this to Vec3f
 	static const float radius = 2.9f;	  // TODO: extract this to base class
 
 	const Vec3f& start(startPoint.pos());
 	const Vec3f& end(endPoint.pos());
 
-	const Vec3f dir(normalize(start- end));
-	const Vec3f side(normalize(cross(dir,up)));
+	const Vec3f dir(normalize(start - end));
+	const Vec3f up(0.f, 1.f, 0.f); //normalize((start + end) * 0.5f));
+	const Vec3f side(normalize(cross(up, dir)));
 
 	glBegin(GL_LINES);
 	{
@@ -104,30 +109,29 @@ void CatmullRomSegment::draw(bool drawPoints, bool isShadowed)
 {
 	static const int   lines = 25;
 	static const float step  = 1.f / lines;
-	static const Vec3f up(0.f, 1.f, 0.f); // TODO: extract this to Vec3f
 	static const float radius = 2.9f;	  // TODO: extract this to base class
 
 	float t = 0.f;
-//	if( !isShadowed ) glColor4ub(255, 0, 0, 255);
 	glBegin(GL_LINE_STRIP);
 		for(int i = 0; i <= lines; ++i, t += step)
 		{
 			const Vec3f p(getPosition(t));
 			const Vec3f dir(normalize(getDirection(t)));
-			const Vec3f side(normalize(cross(dir,up)));
+			const Vec3f up(normalize(getOrientation(t)));
+			const Vec3f side(normalize(cross(up, dir)));
 			const Vec3f v(p + radius * side);
 			glVertex3f(v.x(), v.y(), v.z());	
 		}
 	glEnd();
 
 	t = 0.f;
-//	if( !isShadowed ) glColor4ub(0, 0, 255, 255);
 	glBegin(GL_LINE_STRIP);
 		for(int i = 0; i <= lines; ++i, t += step)
 		{
 			const Vec3f p(getPosition(t));
 			const Vec3f dir(normalize(getDirection(t)));
-			const Vec3f side(normalize(cross(dir,up)));
+			const Vec3f up(normalize(getOrientation(t)));
+			const Vec3f side(normalize(cross(up, dir)));
 			const Vec3f v(p.x() - radius * side.x()
 						, p.y() + radius * side.y()
 						, p.z() - radius * side.z());

@@ -43,6 +43,7 @@ public:
 
 	virtual Vec3f getPosition  (float t) = 0;
 	virtual Vec3f getDirection (float t) = 0;;
+	virtual Vec3f getOrientation(float t);
 
 	int	      getNumber    () const;
 	CurveType getCurveType () const;
