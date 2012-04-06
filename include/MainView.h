@@ -63,12 +63,9 @@ private:
 	void updateTextWidget( const float t );
 	void openglFrameSetup();
 
-	void drawScenery( bool doShadows=false);
+	void drawScenery(bool doShadows=false);
 	void drawCurve(const float t, bool drawPoints=false,  bool doShadows=false);
-	void drawTrainHeadCar(const float t,  bool doShadows=false);
-	void drawTrainCar(const float t,  bool doShadows=false);
-	void drawFancyTrain(const float t,  bool doShadows=false);
-	void drawPathObjects(const float t,  bool doingShadows=false);
+	void drawTrain(const float t,  bool doShadows=false);
 	void drawSelectedControlPoint(bool doShadows=false);
 };
 
