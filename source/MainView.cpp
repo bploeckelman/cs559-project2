@@ -274,13 +274,29 @@ void MainView::setupProjection()
 			glMatrixMode(GL_MODELVIEW);
 			glLoadIdentity();
 
-			const float t = window->getRotation();
 			Curve& curve(window->getCurve());
+			const float t = window->getRotation();
+
 			const Vec3f& p(-1.f * curve.getPosition(t));
 			const Vec3f& d(-1.f * curve.getDirection(t));
 
-			applyBasisFromTangent(normalize(d));
-			glTranslatef(p.x(), p.y() - 3.f, p.z());
+			// Calculate and apply the orientation matrix
+			Vec3f normal(curve.getOrientation(t));
+			Vec3f binormal(normalize(cross(normal, normalize(d))));
+
+			normal = normalize(cross(normalize(d), binormal));
+
+			const Vec3f& z(normalize(d)), y(normal), x(binormal);
+			GLfloat m[] = {
+				x.x(), y.x(), z.x(), 0.f,
+				x.y(), y.y(), z.y(), 0.f,
+				x.z(), y.z(), z.z(), 0.f,
+				0.f,   0.f,   0.f,   1.f
+			};
+			glMultMatrixf(m);
+
+			// Move to the correct position, offset on y to be on top of track
+			glTranslatef(p.x(), p.y() - 3.f * y.y(), p.z());
 		}
 		break;
 		case overhead:
