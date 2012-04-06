@@ -116,7 +116,7 @@ public:
 			 && this->_z == other._z);
 	}
 
-		//  InEquality operator
+	//  Inequality operator
 	inline bool operator!=(const Vec3f& other)
 	{
 		return (this->_x != other._x 
@@ -133,8 +133,8 @@ public:
 			<< ") ";
 	}
 
-	// returns the magnitude of the vector's components
-	inline float Magnitude()
+	// Returns the magnitude of the vector's components
+	inline float magnitude() const
 	{
 		return sqrt(_x * _x + _y * _y + _z * _z);
 	}
@@ -155,6 +155,11 @@ inline Vec3f normalize(const Vec3f& v)
 {
 	Vec3f result(v);
 	return result.normalize();
+}
+
+inline float magnitude(const Vec3f& v)
+{
+	return v.magnitude();
 }
 
 inline Vec3f operator+(const Vec3f& lhs, const Vec3f& rhs)

@@ -45,7 +45,7 @@ void Curve::draw(bool drawPoints, bool isShadowed)
 	{
 		assert(segment != nullptr);
 		if( !isShadowed ) glColor4ub(199, 97, 20, 255); //raw sienna for the track color
-		segment->draw(false, isShadowed);//dont draw the segments points when they are already being drawn right below this
+		segment->draw(false, isShadowed);
 	}
 
 	if( drawPoints ) Curve::drawPoints(isShadowed);
@@ -196,8 +196,6 @@ void Curve::regenerateSegments()
 	}
 	segments.clear();
 
-	//this may need to take in a t value? for arc length parametrization
-
 	// Can't create segments without control points or with 1 control point
 	if( controlPoints.empty())
 		return;
@@ -208,11 +206,6 @@ void Curve::regenerateSegments()
 	case lines:   regenerateLineSegments();    break;
 	case catmull: regenerateCatmullSegments(); break;
 	case bspline: regenerateBSplineSegments(); break;
-	}
-
-	if(controlPoints.size() > 1)
-	{
-		buildParameterTable(25); //TODO: we should get a sample variable here
 	}
 }
 
@@ -291,56 +284,63 @@ void Curve::drawSegment( const int number, bool isShadowed )
 	segments[number]->draw(false, isShadowed);
 }
 
-/* buildParameterTable() - Builds a table for arc-length parameterization */
-/* parameter table building- this table keeps track of values as defined in the parameter_table struct for every point on the curve (ctrl and sample points)*/
-/*the size of the paramer_table once fully built should be 1+num_segments()*number_of_samples*/
+/*
+ * buildParameterTable() - Builds a table for arc-length parameterization 
+ * parameter table building- this table keeps track of values as defined in the parameter_table struct for every point on the curve (ctrl and sample points)
+ * the size of the paramer_table once fully built should be 1+num_segments()*number_of_samples
+ *
+ * TODO: remove me
 void Curve::buildParameterTable(int number_of_samples)
 {
-	//clear any previous table as we are going to build a new one
-	parameter_table.clear();
+	segmentParameters.clear();
 
-	//put in the first element of the new table which will always start with control pt 0's position
-	std::vector<CtrlPoint> ctrlpts = getControlPoints();
-	Vec3f previous_point = ctrlpts.at(0).pos();
-	ParameterTable p;
-	p.segment_number = 0;
-	p.accumulated_length = 0;
-	p.fraction_of_accumulated_length = 0;
-	p.local_t = 0;
-	parameter_table.push_back(p);
+	if( controlPoints.empty() )
+		return;
 
-	for (int i = 0; i < numSegments(); i++)
+	// Create first element
+	Parameters p;
+	p.segment = 0;
+	p.local_t = 0.0;
+	p.accum_length = 0.0;
+	p.fraction_of_accum_length = 0.0;
+	segmentParameters.push_back(p);	
+
+	Vec3f prevPos(controlPoints[0].pos());
+	for(int i = 0; i < numSegments(); ++i)
 	{
-		for (int j = 1; j < number_of_samples; j++)
+		for(int j = 1; j < number_of_samples; ++j)
 		{
-			p.segment_number = i;
-			p.local_t = ((double) j) / ((double) number_of_samples - 1);
-			//printf(" number_of_samples is %d, i is %d, j is %d, local_t is %f \n", number_of_samples, i, j, p.local_t);
-			Vec3f v;
-
-			//if we are at the end of a segment, use the ctrl points position
-			if(std::floor(p.local_t-1) == 0)
+			p.segment = i;
+			p.local_t = static_cast<double>(j) / static_cast<double>(number_of_samples - 1);
+			
+			Vec3f pos;
+			// If at the end of a segment, use control point position
+			if( std::floor(p.local_t - 1) == 0 )
 			{
-				//printf(" in if \n");
-				//printf(" ctrlpts.size() is %d \n", ctrlpts.size());
-				v= ctrlpts.at(i).pos();
-
+				pos = controlPoints[i].pos();
 			}
-			else//use local position based on the number of samples we want for the segment
+			else // Use local pos based on number desired samples for this segment
 			{
-				//printf(" in else \n");
-				v= getPosition((float)p.local_t+i); //may not work
+				pos = getPosition(static_cast<float>(p.local_t + i)); //may not work
 			}
-			p.accumulated_length = (double)((previous_point - v).Magnitude()) + parameter_table[parameter_table.size() - 1].accumulated_length;
-			parameter_table.push_back(p);
-			previous_point = v;
+
+			const double magnitude   = (prevPos - pos).magnitude();
+			const double accumulated = (*(segmentParameters.end() - 1)).accum_length;
+			p.accum_length = magnitude + accumulated; 
+
+			segmentParameters.push_back(p);
+			prevPos = pos;
 		}
 	}
 
-	double total_length = parameter_table[parameter_table.size() - 1].accumulated_length;
-	//set each elements fraction_of_accum_length field based off of each elements accum_length and the total_length
-	for (size_t i = 0; i < parameter_table.size(); i++)
+	// Set fraction of accumulated length 
+	const double totalLength = (*(segmentParameters.end() - 1)).accum_length; 
+	ParametersVectorIter it  = segmentParameters.begin();
+	ParametersVectorIter end = segmentParameters.end();
+	for(; it != end; ++it)
 	{
-		parameter_table[i].fraction_of_accumulated_length = parameter_table[i].accumulated_length / total_length;
+		Parameters& parameters = *it;
+		parameters.fraction_of_accum_length = parameters.accum_length / totalLength;
 	}
 }
+*/

@@ -43,6 +43,7 @@ private:
 	Fl_Button  *addPointButton;
 	Fl_Button  *delPointButton;
 	Fl_Output  *textOutput;
+	Fl_Output  *textOutput1;
 	Fl_Choice  *curveTypeChoice;
 	Fl_Choice  *viewTypeChoice;
 	Fl_Button  *shadowButton;
@@ -63,13 +64,12 @@ private:
 	float rotation;
 	float rotationStep;
 
-	//only use if using the HpTime to set up the big_t for arclength param
-	//HighPrecisionTime hpTime;
-	//double time_mode_started;
-
 	void createWidgets();
+	float arcLengthStep(const float vel);
 
 public:
+	friend class MainView;
+
 	MainWindow(const int x=100, const int y=50);
 
 	MainView& getView();
@@ -99,11 +99,11 @@ public:
 	void loadPoints(const std::string& filename);
 	void savePoints(const std::string& filename);
 
-	void advanceTrain(int dir);
+	void advanceTrain(int dir=1);
 
 	void damageMe();
 
-	void setDebugText(const std::string& text);
+	void setDebugText(const std::string& text, const std::string& text1="");
 };
 
 inline MainView& MainWindow::getView()             { return *view; }

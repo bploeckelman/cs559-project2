@@ -64,7 +64,7 @@ MainView::MainView(int x, int y, int w, int h, const char *l)
 /* draw() - Draws to the screen ---------------------------------- */
 void MainView::draw()
 {
-	const float t = window->getRotation();
+	float t = window->getRotation();
 
 	updateTextWidget(t);
 	openglFrameSetup();
@@ -76,12 +76,12 @@ void MainView::draw()
 	else
 	{
 		drawCurve(t, true, false);
-		drawPathObjects(t);
+		drawFancyTrain(t);
 		drawSelectedControlPoint(false);
 	}
 
 	// Draw everything again with shadows if they are enabled
-	if(window->isShadowed() && viewType != overhead)
+	if( window->isShadowed() && viewType != overhead )
 	{
 		glPushMatrix();
 			// Translate down to the ground plane
@@ -95,7 +95,7 @@ void MainView::draw()
 			else
 			{
 				drawCurve(t, true, true);
-				drawPathObjects(t, true);
+				drawFancyTrain(t, true);
 				drawSelectedControlPoint(true);
 			}
 
@@ -170,18 +170,18 @@ int MainView::handle(int event)
 		if( k == 'a' )
 		{
 			viewType = arcball;
-			window->setViewType(0); //update widget value
+			window->setViewType(0);
 		}
 		if( k == 't' )
 		{
 			viewType = train;
-			window->setViewType(1); //update widget value
+			window->setViewType(1);
 
 		}
 		if( k == 'o' )
 		{
 			viewType = overhead;
-			window->setViewType(2); //update widget value
+			window->setViewType(2);
 		}
 		break;
 	}
@@ -249,40 +249,50 @@ void MainView::pick()
 	}
 }
 
-//float MainView::arcLengthInterpolation(float big_t, int& segment_number)
+/* 
+ * arcLengthInterpolation()
+ *
+ * TODO: remove me
 float MainView::arcLengthInterpolation(double big_t, int& segment_number)
+{
+	const Curve& curve= window->getCurve();
+	const double epsilon = 0.0000001;
+
+	if (abs(big_t) < epsilon)
+		return 0;
+	if (abs(big_t - 1) < epsilon)
+		return 1;
+
+	size_t index;
+	for (index = 1; index < curve.segmentParameters.size(); index++)
 	{
-		Curve curve= window->getCurve();
-		double epsilon = 0.0000001;
-		printf("big_t in the function call is %f \n", big_t);
-		//double epsilon = 0.000;
-		if (abs(big_t) < epsilon)
-			return 0;
-		if (abs(big_t - 1) < epsilon)
-			return 1;
-
-		size_t index;
-		for (index = 1; index < curve.parameter_table.size(); index++)
-		{
-			if (big_t < curve.parameter_table[index].fraction_of_accumulated_length)
-				break;
-		}
-		if (index >= curve.parameter_table.size())
-			throw "big_t not found.";
-
-		printf("the index found is %d \n", index);
-		/*the size of the paramer_table once fully built should be 1+num_segments()*number_of_samples*/
-		printf("curve.parameter_table.size() is %d \n", curve.parameter_table.size());
-
-		double lower_fraction = curve.parameter_table[index - 1].fraction_of_accumulated_length;
-		double upper_fraction = curve.parameter_table[index].fraction_of_accumulated_length;
-		double lower_local_t = ((curve.parameter_table[index - 1].segment_number != curve.parameter_table[index].segment_number) ? 0 : curve.parameter_table[index - 1].local_t);
-		double upper_local_t = curve.parameter_table[index].local_t;
-		float result = (float)(lower_local_t + (big_t - lower_fraction) / (upper_fraction - lower_fraction) * (upper_local_t - lower_local_t));
-		//segment_number = curve.parameter_table[index].segment_number;
-		printf("big_t: %f lil_t: %f lower fraction: %f upper_fraction: %f lower_t: %f upper_t: %f\n", big_t, result, lower_fraction, upper_fraction, lower_local_t, upper_local_t);
-		return result;
+		if (big_t < curve.segmentParameters[index].fraction_of_accum_length)
+			break;
 	}
+	if (index >= curve.segmentParameters.size())
+	{
+		printf("big_t not found"); //throw "big_t not found.";
+		return 1.f;
+	}
+
+	const ParametersVector& params = curve.segmentParameters;
+	const Parameters& currParams = params[index];
+	const Parameters& prevParams = params[index - 1];
+
+	const double lowerFraction = prevParams.fraction_of_accum_length;
+	const double upperFraction = currParams.fraction_of_accum_length;
+
+	const double lowerLocalT = (prevParams.segment != currParams.segment) ? 0 : prevParams.local_t;
+	const double upperLocalT = currParams.local_t;
+
+	const float result = static_cast<float>(
+		lowerLocalT + (big_t         - lowerFraction) 
+				    / (upperFraction - lowerFraction) 
+					* (upperLocalT   - lowerLocalT));
+
+	return result;
+}
+*/
 
 /* resetArcball() - Resets the arcball camera orientation -------- */
 void MainView::resetArcball()
@@ -337,8 +347,32 @@ void MainView::setupProjection()
 /* updateTextWidget() - Prints rotation amount to text widget ---- */
 void MainView::updateTextWidget( const float t )
 {
-	stringstream ss; ss << "t = " << t;
-	window->setDebugText(ss.str());
+	stringstream ss, ss1;
+	ss  << "t = " << t;
+	ss1 << "s = " << (window->isArcParam() ?
+		window->arcLengthStep(window->speed * 0.07f) : 0.f);
+
+	window->setDebugText(ss.str(), ss1.str());
+
+/*  Uncomment this for some debug printing...
+TODO: remove me, not using this anymore
+	cout << std::fixed << std::showpoint << std::setprecision(2);
+	int segmentNumber = 0;
+	for each(const auto& param in window->getCurve().segmentParameters)
+	{
+		if( param.segment != segmentNumber )
+		{
+			segmentNumber = param.segment;
+			cout << endl;
+		}
+		cout << "seg_#: " << std::setw(2) << param.segment << "\t"
+			 << "loc_t: " << std::setw(4) << param.local_t << "\t"
+			 << "acc_l: " << std::setw(4) << param.accum_length << "\t"
+			 << "fr_ac: " << std::setw(4) << param.fraction_of_accum_length
+			 << endl;
+	}
+	cout << std::resetiosflags(std::ios_base::scientific);
+*/
 }
 
 /* openglFrameSetup() - Clears framebuffers and sets projection -- */
@@ -401,24 +435,24 @@ void MainView::openglFrameSetup()
 
 	glLightfv(GL_LIGHT2, GL_POSITION, lightPosition3);
 	glLightfv(GL_LIGHT2, GL_DIFFUSE, yellowLight);
-
-	// -------------------------------------------
-
-	glPushMatrix();
-		//glColor4ub(255, 255, 255, 255); //this color setting originally did nothing
-		glTranslatef(0.f, -20.f, 0.f);
-		setupFloor();
-		glDisable(GL_LIGHTING);
-		drawGroundPlane(400.f);
-		glEnable(GL_LIGHTING);
-		setupObjects();
-	glPopMatrix();
 }
 
 /* drawFloor() - Draws the floor plane and assorted scenery ------ */
 void MainView::drawScenery(bool doShadows)
 {
 	if( !doShadows ) glDisable(GL_BLEND);
+
+	if( !doShadows )
+	{
+		glPushMatrix();
+			glTranslatef(0.f, -20.f, 0.f);
+			setupFloor();
+			glDisable(GL_LIGHTING);
+			drawGroundPlane(400.f);
+			glEnable(GL_LIGHTING);
+			setupObjects();
+		glPopMatrix();
+	}
 
 	glPushMatrix();
 		glTranslatef(0.f, -20.f, 0.f);
@@ -496,10 +530,7 @@ void MainView::drawTrainHeadCar(const float t, bool doShadows)
 	const Vec3f p(curve.getPosition(t));	// position  @ t
 	const Vec3f d(curve.getDirection(t));	// direction @ t (non-normalized)
 
-	if(!doShadows)
-	{
-		glColor4ub(20, 250, 20, 255);
-	}
+	if(!doShadows) glColor4ub(20, 250, 20, 255);
 
 	glPushMatrix();
 		glTranslatef(p.x(), p.y() + 2.5f, p.z());
@@ -579,10 +610,8 @@ void MainView::drawTrainHeadCar(const float t, bool doShadows)
 		//glPopMatrix();
 
 		glPushMatrix();
-			if(!doShadows)
-			{
-				glColor4ub(0, 0, 0, 255);
-			}
+			if(!doShadows) glColor4ub(0, 0, 0, 255);
+
 			//void glRotatef(GLfloat  angle,  GLfloat  x,  GLfloat  y,  GLfloat  z);
 			//drawCube(1.8f, -1.5f, 1.8f, 1.0f);
 			glTranslatef(1.8f, -1.5f, 1.8f);
@@ -593,10 +622,8 @@ void MainView::drawTrainHeadCar(const float t, bool doShadows)
 		glPopMatrix();
 
 		glPushMatrix();
-			if(!doShadows)
-			{
-				glColor4ub(0, 0, 0, 255);
-			}
+			if(!doShadows) glColor4ub(0, 0, 0, 255);
+
 			//drawCube(-1.8f, -1.5f, 1.8f, 1.0f);
 			glTranslatef(-1.8f, -1.5f, 1.8f);
 			glRotatef(90.f,  0.f,  1.f,  0.f);
@@ -605,10 +632,8 @@ void MainView::drawTrainHeadCar(const float t, bool doShadows)
 		glPopMatrix();
 
 		glPushMatrix();
-			if(!doShadows)
-			{
-				glColor4ub(0, 0, 0, 255);
-			}
+			if(!doShadows) glColor4ub(0, 0, 0, 255);
+
 			//drawCube(1.8f, -1.5f, -1.8f, 1.0f);
 			glTranslatef(1.8f, -1.5f, -1.8f);
 			glRotatef(90.f,  0.f,  1.f,  0.f);
@@ -617,10 +642,8 @@ void MainView::drawTrainHeadCar(const float t, bool doShadows)
 		glPopMatrix();
 
 		glPushMatrix();
-			if(!doShadows)
-			{
-				glColor4ub(0, 0, 0, 255);
-			}
+			if(!doShadows) glColor4ub(0, 0, 0, 255);
+
 			//drawCube(-1.8f, -1.5f, -1.8f, 1.0f);
 			glTranslatef(-1.8f, -1.5f, -1.8f);
 			glRotatef(90.f,  0.f,  1.f,  0.f);
@@ -628,14 +651,13 @@ void MainView::drawTrainHeadCar(const float t, bool doShadows)
 			
 		glPopMatrix();
 
-		if(window->isHighlightedSegPts()&&!doShadows)
+		if(window->isHighlightedSegPts() && !doShadows)
 		{
 			drawBasis(Vec3f(5.f, 0.f, 0.f),
 					  Vec3f(0.f, 5.f, 0.f),
 					  Vec3f(0.f, 0.f, 5.f));
 		}
 	glPopMatrix();
-
 }
 
 /* drawPathObject() - Draws the object that travels along the path */
@@ -645,10 +667,7 @@ void MainView::drawTrainCar(const float t, bool doShadows)
 	const Vec3f p(curve.getPosition(t));	// position  @ t
 	const Vec3f d(curve.getDirection(t));	// direction @ t (non-normalized)
 
-	if(!doShadows)
-	{
-		glColor4ub(20, 250, 20, 255);
-	}
+	if(!doShadows) glColor4ub(20, 250, 20, 255);
 
 	glPushMatrix();
 		glTranslatef(p.x(), p.y() + 2.5f, p.z());
@@ -767,8 +786,146 @@ void MainView::drawTrainCar(const float t, bool doShadows)
 
 }
 
+void MainView::drawFancyTrain( const float t, bool doingShadows )
+{
+	const Vec3f& p(window->getCurve().getPosition(t));
+	const Vec3f& d(window->getCurve().getDirection(t));
+
+	glPushMatrix();
+
+	glTranslatef(p.x(), p.y(), p.z());
+	glRotatef(90.f, 0.f, 1.f, 0.f);
+	applyBasisFromTangent(normalize(d));
+
+	if(!doingShadows) glColor3d(0.3, 0.5, 1.0);
+
+	// inside face
+	glBegin(GL_POLYGON);
+		glNormal3d(0.0, 0.0, 1.0);
+		glVertex3f( 6.f, 1.f,  2.5f);
+		glVertex3f(-3.f, 1.f,  2.5f);
+		glVertex3f(-6.f, 2.f,  2.5f);
+		glVertex3f(-6.f, 5.5f, 2.5f);
+		glVertex3f( 3.f, 6.f,  2.5f);
+	glEnd();
+
+	glBegin(GL_TRIANGLES);
+		glNormal3d(-0.29, -0.18, 0.94);
+		glVertex3f(6.f, 1.f, 2.5f);
+		glVertex3f(8.f, 3.f, 1.5f);
+		glVertex3f(3.f, 6.f, 2.5f);
+	glEnd();
+
+	// outside face
+	glBegin(GL_POLYGON);
+		glNormal3d(0.0, 0.0, -1.0);
+		glVertex3f( 6.f, 1.f,  -2.5);
+		glVertex3f(-3.f, 1.f,  -2.5);
+		glVertex3f(-6.f, 2.f,  -2.5);
+		glVertex3f(-6.f, 5.5f, -2.5);
+		glVertex3f( 3.f, 6.f,  -2.5);
+	glEnd();
+
+	glBegin(GL_TRIANGLES);
+		glNormal3d(0.29, 0.18, -0.94);
+		glVertex3f(6.f, 1.f, -2.5f);
+		glVertex3f(8.f, 3.f, -1.5f);
+		glVertex3f(3.f, 6.f, -2.5f);
+	glEnd();
+
+	// panels
+	glBegin(GL_QUADS);
+		glNormal3d(0.51, 0.86, 0.0);
+		glVertex3f(3.f, 6.f, 2.5f);
+		glVertex3f(3.f, 6.f, -2.5f);
+		glVertex3f(8.f, 3.f, -1.5f);
+		glVertex3f(8.f, 3.f, 1.5f);
+
+		glNormal3d(0.71, -0.71, 0.0);
+		glVertex3f(8.f, 3.f,  1.5f);
+		glVertex3f(8.f, 3.f, -1.5f);
+		glVertex3f(6.f, 1.f, -2.5f);
+		glVertex3f(6.f, 1.f,  2.5f);
+
+		glNormal3d(0.0, -1.0, 0.0);
+		glVertex3f( 6.f, 1.f,  2.5f);
+		glVertex3f( 6.f, 1.f, -2.5f);
+		glVertex3f(-3.f, 1.f, -2.5f);
+		glVertex3f(-3.f, 1.f,  2.5f);
+
+		glNormal3d(-0.32, -0.95, 0.0);
+		glVertex3f(-3.f, 1.f,  2.5f);
+		glVertex3f(-3.f, 1.f, -2.5f);
+		glVertex3f(-6.f, 2.f, -2.5f);
+		glVertex3f(-6.f, 2.f,  2.5f);
+
+		glNormal3d(-1.0, 0.0, 0.0);
+		glVertex3f(-6.f, 2.f,   2.5f);
+		glVertex3f(-6.f, 2.f,  -2.5f);
+		glVertex3f(-6.f, 5.5f, -2.5f);
+		glVertex3f(-6.f, 5.5f,  2.5f);
+
+		if(!doingShadows) glColor3d(0.2, 0.2, 0.2);
+
+		glNormal3d(-0.06, 0.998, 0.0);
+		glVertex3f(-6.f, 5.5f,  2.5f);
+		glVertex3f(-6.f, 5.5f, -2.5f);
+		glVertex3f( 3.f, 6.f,  -2.5f);
+		glVertex3f( 3.f, 6.f,   2.5f);
+	glEnd();
+
+	// wheels
+	if(!doingShadows) glColor3d(0.0, 0.0, 0.0);
+
+	glTranslatef(5.f, 0.f, 2.55f);
+	glBegin(GL_POLYGON);
+		glNormal3d(0.0, 0.0, -1.0);
+		glVertex3f(0.f, 2., 0);
+		glVertex3f(-0.8f, 1.4f, 0.f);
+		glVertex3f(-0.8f, 0.6f, 0.f);
+		glVertex3f( 0.f,  0.f,  0.f);
+		glVertex3f( 0.8f, 0.6f, 0.f);
+		glVertex3f( 0.8f, 1.4f, 0.f);
+	glEnd();
+
+	glTranslatef(0.f, 0.f, -5.1f);
+	glBegin(GL_POLYGON);
+		glNormal3d(0.0, 0.0, 1.0);
+		glVertex3f( 0.f,  2.f,  0.f);
+		glVertex3f(-0.8f, 1.4f, 0.f);
+		glVertex3f(-0.8f, 0.6f, 0.f);
+		glVertex3f( 0.f,  0.f,  0.f);
+		glVertex3f( 0.8f, 0.6f, 0.f);
+		glVertex3f( 0.8f, 1.4f, 0.f);
+	glEnd();
+
+	glTranslatef(-8.f, 0.f, 0.f);
+	glBegin(GL_POLYGON);
+		glNormal3d( 0.0, 0.0, 1.0);
+		glVertex3f( 0.f,   2.f,  0.f);
+		glVertex3f(-0.8f,  1.4f, 0.f);
+		glVertex3f(-0.8f,  0.6f, 0.f);
+		glVertex3f( 0.f,   0.0f, 0.f);
+		glVertex3f( 0.8f,  0.6f, 0.f);
+		glVertex3f( 0.8f,  1.4f, 0.f);
+	glEnd();
+
+	glTranslatef(0.f, 0.f, 5.1f);
+	glBegin(GL_POLYGON);
+		glNormal3d(0.0, 0.0, -1.0);
+		glVertex3f( 0.f,  2.f,  0.f);
+		glVertex3f(-0.8f, 1.4f, 0.f);
+		glVertex3f(-0.8f, 0.6f, 0.f);
+		glVertex3f( 0.f,  0.f,  0.f);
+		glVertex3f( 0.8f, 0.6f, 0.f);
+		glVertex3f( 0.8f, 1.4f, 0.f);
+	glEnd();
+
+	glPopMatrix();
+}
+
 /* drawPathObjects() - Draws several objects along the path ------ */
-void MainView::drawPathObjects(const float t, const bool doShadows)
+void MainView::drawPathObjects(const float t,  bool doShadows)
 {
 	const Curve& curve(window->getCurve());
 
@@ -812,27 +969,3 @@ void MainView::drawSelectedControlPoint(bool doShadows)
 		points[selectedPoint].draw(doShadows);
 	}
 }
-
-//TODO if not used please delete, MAB did not use as of 3/28/12, not used with current arclength param attempt
-/*void MainView::reparameterizing(Curve& curve, float big_t, bool doShadows)
-{
-	float seconds_per_sample = 1;
-	float flight_time = seconds_per_sample * curve.numSegments(); // This should actually be decoupled.
-	float time_now = (float)hpTime.TotalTime() - time_mode_started;
-
-	//AnimateEqualSamples(time_now, seconds_per_sample);
-	//DrawControlPointsAndTangents(true);
-	float dmod = fmod(time_now, flight_time);
-	float big_t = dmod / flight_time;
-	int segment;
-	float lil_t = arcLengthInterpolation(big_t, segment);
-	//printf("dmod %f segment %d big_t %f lil_t %f time_now %f\n", dmod, segment, big_t, lil_t, time_now);
-
-//bezier_segments[segment].EvaluateAt(lil_t);
-	CurveSegment* curr_segment = curve.getSegment(segment);
-	Vec3f p = curr_segment->getPosition(lil_t);//fix this using lil_t
-	glPushMatrix();
-	glTranslatef(p.x(), p.y(), p.z());
-
-	glPopMatrix();
-}*/

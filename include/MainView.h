@@ -37,7 +37,8 @@ private:
 	MainWindow    *window;
 	ArcBallCam    arcballCam;
 
-	int selectedPoint;	// TODO: only use the value in window->curve
+	// TODO: remove this and only use the value in window->curve
+	int selectedPoint;
 
 public:
 	ViewType viewType;
@@ -55,8 +56,6 @@ public:
 	MainWindow* getWindow() const;
 	int  getSelectedPoint() const;
 
-	float arcLengthInterpolation(double big_t, int& segment_number);
-
 private:
 	void resetArcball();
 	void setupProjection();
@@ -64,14 +63,13 @@ private:
 	void updateTextWidget( const float t );
 	void openglFrameSetup();
 
-	void drawScenery(bool doShadows=false);
-	void drawCurve(const float t, bool drawPoints=false, bool doShadows=false);
-	void drawTrainHeadCar(const float t, bool doShadows=false);
-	void drawTrainCar(const float t, bool doShadows=false);
-	void drawPathObjects(const float t, const bool doShadows=false);
+	void drawScenery( bool doShadows=false);
+	void drawCurve(const float t, bool drawPoints=false,  bool doShadows=false);
+	void drawTrainHeadCar(const float t,  bool doShadows=false);
+	void drawTrainCar(const float t,  bool doShadows=false);
+	void drawFancyTrain(const float t,  bool doShadows=false);
+	void drawPathObjects(const float t,  bool doingShadows=false);
 	void drawSelectedControlPoint(bool doShadows=false);
-
-	//void reparameterizing(Curve& curve, float big_t, bool doShadows);
 };
 
 inline void MainView::setWindow(MainWindow *w) { window = w; }

@@ -29,45 +29,17 @@ void idleCallback(void *pData)
 	static unsigned long lastRedraw = 0;
 
 	assert(pData != nullptr);
-
 	MainWindow *window = reinterpret_cast<MainWindow*>(pData);
-	int segment = 0;
 
 	const unsigned long delta = clock() - lastRedraw;
 	if( delta > interval ) 
 	{
-		lastRedraw = clock();
-
-		//the lower code here was put into mainwindow to bring it mor in line with the sample project
-
-		//MAIN DIFFERENCE BETWEEN PERRY's CODE AND THE TRAIN DEMO CODE:
-		//in the sample project they use arclength param to figure out the step applied to the current rotation value
-
-		//in perry's code he uses arclength param to directly translate the thing being arclength param'd
-
-		/*const float rotation = window->getRotation();
-		const float rotationStep = window->getRotationStep();
-		const float speed = window->getSpeed();
-
 		if( window->isAnimating() )
 		{
-			if(window->isArcParam())
-			{
-				float newRotationStep = window->getView().arcLengthInterpolation(rotation +speed*0.5f, segment);    //.arcLengthInterpolation((rotation + speed*0.5f), segment);
-				window->setRotation(rotation+ newRotationStep);
-			}
-			else
-			{
-				window->setRotation(rotation + (rotationStep*speed*0.5f));
-			}
-			
-			if( window->getRotation() > window->getCurve().numSegments() )
-				window->setRotation(0.f);
-		}*/
-		const int direction = 1;//new code, may be used for a future update where we can toggle a direction change
-
-		window->advanceTrain(direction);//new code, may be used for a future update where we can toggle a direction change
-		window->damageMe();
+			lastRedraw = clock();
+			window->advanceTrain();
+			window->damageMe();
+		}
 	}
 }
 
@@ -105,6 +77,7 @@ void delPointButtonCallback( Fl_Widget *widget, MainWindow *window )
 	const int selected = window->getView().getSelectedPoint();
 	try {
 		window->getCurve().delControlPoint(selected);
+
 		// Reset t so we don't try to access out of bounds
 		window->setRotation(0.f);
 	} catch(Curve::NoSuchPoint&) { }
@@ -153,32 +126,14 @@ void paramButtonCallback( Fl_Widget *widget, MainWindow *window )
 void forwardButtonCallback(Fl_Widget *widget, MainWindow *window)
 {
 	assert(window != nullptr && widget != nullptr);
-
-	const float rotation = window->getRotation();
-	const float rotationStep = window->getRotationStep();
-
-	window->setRotation(rotation + rotationStep);
-	if( window->getRotation() >= window->getCurve().numSegments() )
-	{
-		window->setRotation(0.f);
-	}
-
+	window->advanceTrain(2);
 	window->damageMe();
 }
 
 void backwardButtonCallback(Fl_Widget *widget, MainWindow *window)
 {
 	assert(window != nullptr && widget != nullptr);
-
-	const float rotation = window->getRotation();
-	const float rotationStep = window->getRotationStep();
-
-	window->setRotation(rotation - rotationStep);
-	if( window->getRotation() < 0.f )
-	{
-		window->setRotation(window->getCurve().numSegments()- rotationStep);
-	}
-
+	window->advanceTrain(-2);
 	window->damageMe();
 }
 

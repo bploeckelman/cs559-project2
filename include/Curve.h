@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <map>
 
 typedef std::vector<CtrlPoint>             ControlPointVector;
 typedef ControlPointVector::iterator       ControlPointVectorIter;
@@ -32,16 +33,7 @@ private:
 	CurveSegmentVector segments;
 
 public:
-	struct ParameterTable
-	{
-		double local_t;
-		double accumulated_length;
-		double fraction_of_accumulated_length;
-		int segment_number;
-	};
-	// Size should be 1 + numSegments() * number_of_samples 
-	std::vector<ParameterTable> parameter_table;
-
+	// TODO: make private?
 	int selectedPoint;
 	int selectedSegment;
 
@@ -70,8 +62,6 @@ public:
 	CurveSegment* getSegment(const int number);
 	ControlPointVector& getControlPoints(); 
 
-	void buildParameterTable(int number_of_samples);
-
 	class NoSuchPoint : public std::runtime_error { public: NoSuchPoint(const std::string& what_arg) : std::runtime_error(what_arg) { } };
 
 private:
@@ -83,7 +73,7 @@ private:
 	void regenerateBSplineSegments();
 };
 
-inline int Curve::numSegments()      const { return segments.size(); }
-inline int Curve::numControlPoints() const { return controlPoints.size(); }
-inline CurveType           Curve::getCurveType() const { return type; }
+inline int Curve::numSegments()        const { return segments.size(); }
+inline int Curve::numControlPoints()   const { return controlPoints.size(); }
+inline CurveType Curve::getCurveType() const { return type; }
 inline ControlPointVector& Curve::getControlPoints()   { return controlPoints; }

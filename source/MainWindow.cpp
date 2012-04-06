@@ -59,6 +59,7 @@ MainWindow::MainWindow(const int x, const int y)
 	, addPointButton  (nullptr)
 	, delPointButton  (nullptr)
 	, textOutput      (nullptr)
+	, textOutput1     (nullptr)
 	, curveTypeChoice (nullptr)
 	, viewTypeChoice  (nullptr)
 	, shadowButton    (nullptr)
@@ -84,11 +85,18 @@ MainWindow::MainWindow(const int x, const int y)
 }
 
 /* setDebugText() - Called to update fltk multiline output text -- */
-void MainWindow::setDebugText(const string& text)
+void MainWindow::setDebugText( const string& text, const string& text1 )
 {
 	assert(textOutput != nullptr);
 	textOutput->value("");
 	textOutput->value(text.c_str());
+
+	if( !text1.empty() )
+	{
+		assert(textOutput1 != nullptr);
+		textOutput1->value("");
+		textOutput1->value(text1.c_str());
+	}
 }
 
 /* createWidgets() - Called on construction to build fltk widgets  */
@@ -179,8 +187,9 @@ void MainWindow::createWidgets()
 		speedSlider->type(FL_HORIZONTAL);
 		speedSlider->callback((Fl_Callback*)speedSliderCallback, this);
 
-		// Create text display
-		textOutput = new Fl_Output(605, 130, 90, 20);
+		// Create text displays
+		textOutput  = new Fl_Output(605, 130, 90, 20);
+		textOutput1 = new Fl_Output(700, 130, 90, 20);
 
 		//Create a button for highlighting the curve's current segment pts being used
 		highlightButton = new Fl_Button(605, 155, 180, 20, "Highlight Current Segment");
@@ -286,66 +295,38 @@ void MainWindow::savePoints(const string& filename)
 
 void MainWindow::advanceTrain(int dir)
 {
-	int segment = 0;
-	float newRotationStep = 0.0;
-
-	if( isAnimating() )
+	if( isArcLengthParam )
 	{
-		// Both branches of this if do the same thing right now?
-		if(isArcParam())
-		{
-			//MAIN DIFFERENCE BETWEEN PERRY's CODE AND THE TRAIN DEMO CODE:
-			//in the sample project they use arclength param to figure out the step applied to the current rotation value
-
-			//in perry's code he uses arclength param to directly translate the thing being arclength param'd
-
-			//the following code computes the step amount (big_t) to be interpolated with in regards to a high precision timer: hpTime
-			/*double seconds_per_sample = 1;
-			double flight_time = seconds_per_sample * curve.numSegments();
-			double time_now = hpTime.TotalTime() - time_mode_started;
-			printf("time_now is %f and time_mode started is %f \n", time_now, time_mode_started);
-			double dmod = fmod(time_now, flight_time);
-			printf("dmod is %f \n", dmod);
-			double big_t = dmod / (flight_time);
-			printf("big_t is %f \n", big_t);*/
-			//newRotationStep = view->arcLengthInterpolation(big_t, segment); //actual arclengthparam function call here set up like in TrainWindow.cpp
-			//newRotationStep = rotationStep*(speed*0.5f); //my attempt at fixes
-			//newRotationStep = newRotationStep/curve.numSegments(); //my attempt at fixes
-			//newRotationStep = newRotationStep/rotation;  //my attempt at fixes
-
-			newRotationStep = rotationStep * speed * 0.5f;
-
-			if(dir > 0)
-				rotation += newRotationStep;
-			else if(dir < 0)
-				rotation -= newRotationStep; //eventually allow for going in the opposite direction
-
-			//TODO: would need to add more conditionals here to eventually allow for going in the opposite direction
-			if( rotation >= getCurve().numSegments() )
-				rotation = 0.f;
-			else if(rotation < 0.f)//assumes this condition is reached when we are still going in a pos dir (only reached when speed is negative)
-				rotation= getCurve().numSegments() + newRotationStep;
-		}
-		else
-		{
-			newRotationStep = rotationStep * speed * 0.5f;
-
-			if(dir > 0)
-				rotation += newRotationStep;
-			else if(dir < 0)
-				rotation -= newRotationStep; //eventually allow for going in the opposite direction
-
-			//TODO: would need to add more conditionals here to eventually allow for going in the opposite direction
-			if( rotation >= getCurve().numSegments() )
-				rotation = 0.f;
-			else if(rotation < 0.f)//assumes this condition is reached when we are still going in a pos dir (only reached when speed is negative)
-				rotation = getCurve().numSegments() + newRotationStep;
-		}
+		const float vel = dir * speed * 0.07f;
+		rotation += arcLengthStep(vel);
 	}
+	else
+	{
+		rotation += dir * speed * 0.01f;
+	}
+
+	if( rotation >= curve.numControlPoints() )
+		rotation = 0.f;
+	if( rotation < 0 )
+		rotation += curve.numControlPoints();
 }
 
 /* damageMe() - Called to force an update of the window ---------- */
 void MainWindow::damageMe()
 {
 	view->damage(1);
+}
+
+float MainWindow::arcLengthStep(const float vel)
+{
+	float next_t = rotation + 0.1f;
+	if( next_t >= curve.numSegments() )
+		next_t -= curve.numSegments();
+
+	const Vec3f nextPoint(curve.getPosition(next_t));
+	const Vec3f thisPoint(curve.getPosition(rotation));
+
+	const Vec3f distance(-1.f * thisPoint + nextPoint);
+
+	return (vel / distance.magnitude());
 }
