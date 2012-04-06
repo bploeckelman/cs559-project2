@@ -77,6 +77,7 @@ public:
 
 	float getSpeed()          const;
 	float getRotation()       const;
+	float& getRotation();
 	float getRotationStep()   const;
 	Curve& getCurve();
 	ControlPointVector& getPoints();
@@ -110,6 +111,7 @@ inline MainView& MainWindow::getView()             { return *view; }
 inline const MainView& MainWindow::getView() const { return *view; }
 inline float MainWindow::getSpeed()          const { return speed ; }
 inline float MainWindow::getRotation()       const { return rotation; }
+inline float& MainWindow::getRotation()            { return rotation; }
 inline float MainWindow::getRotationStep()   const { return rotationStep; }
 inline Curve& MainWindow::getCurve()               { return curve; }
 inline ControlPointVector& MainWindow::getPoints() { return curve.getControlPoints(); }

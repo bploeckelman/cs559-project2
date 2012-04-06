@@ -57,14 +57,32 @@ void addPointButtonCallback( Fl_Widget *widget, MainWindow *window )
 {
 	assert(window != nullptr && widget != nullptr);
 
-	const float x = static_cast<float>((rand() % 150) - 75);
-	const float y = static_cast<float>((rand() % 50));
-	const float z = static_cast<float>((rand() % 150) - 75);
+	Curve&              curve  = window->getCurve();
+	ControlPointVector& points = curve.getControlPoints();
 
-	window->getCurve().addControlPoint(CtrlPoint(Vec3f(x,y,z)));
+	const int numPoints     = curve.numControlPoints();
+	const int selectedIndex = window->getView().getSelectedPoint();
 
-	// Reset t so we don't try to access out of bounds
-	window->setRotation(0.f);
+	const int addIndex  = (selectedIndex >= 0) ? selectedIndex : 0;
+	const int prevIndex = (addIndex + numPoints - 1) % numPoints;
+
+	const Vec3f prevPos = points[prevIndex].pos();
+	const Vec3f addPos  = points[addIndex].pos();
+	const Vec3f newPos  = 0.5f * (prevPos + addPos);
+
+	// TODO: modify Curve::addControlPoint() to take an index to insert at
+	points.insert(points.begin() + addIndex, CtrlPoint(newPos));
+
+	curve.regenerateSegments();
+
+	// Don't move the train unless it is affected by the new point
+	float& t = window->getRotation();
+	if( std::ceil(t) > static_cast<float>(addIndex) )
+	{
+		t += 1.f;
+		if( t >= numPoints )
+			t -= numPoints;
+	}
 
 	window->damageMe();
 }
@@ -74,8 +92,8 @@ void delPointButtonCallback( Fl_Widget *widget, MainWindow *window )
 {
 	assert(window != nullptr && widget != nullptr);
 
-	// Don't allow deletion of points if we are down to just 2
-	if( window->getCurve().numControlPoints() <= 2 )
+	// Don't allow deletion of points if we are down to just 4
+	if( window->getCurve().numControlPoints() <= 4 )
 		return;
 
 	const int selected = window->getView().getSelectedPoint();
