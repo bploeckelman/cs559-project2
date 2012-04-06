@@ -99,7 +99,6 @@
     <ClCompile Include="source\CtrlPoint.cpp" />
     <ClCompile Include="source\Curve.cpp" />
     <ClCompile Include="source\CurveSegments.cpp" />
-    <ClCompile Include="source\highprecisiontime.cpp" />
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\MainView.cpp" />
     <ClCompile Include="source\MainWindow.cpp" />
@@ -121,7 +120,6 @@
     <ClInclude Include="include\Curve.h" />
     <ClInclude Include="include\CurveSegments.h" />
     <ClInclude Include="include\GLUtils.h" />
-    <ClInclude Include="include\highprecisiontime.h" />
     <ClInclude Include="include\MainView.h" />
     <ClInclude Include="include\MathUtils.h" />
     <ClInclude Include="include\MainWindow.h" />
@@ -132,7 +130,7 @@
     <None Include="tracks\loop0.txt" />
     <None Include="tracks\reset.txt" />
     <None Include="tracks\spiral.txt" />
-    <None Include="tracks\sqiggle.txt" />
+    <None Include="tracks\squiggle.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

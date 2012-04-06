@@ -23,6 +23,7 @@ using std::cout;
 using std::endl;
 
 
+/* idleCallback() - Repeatedly called by fltk while idle --------- */
 void idleCallback(void *pData)
 {
 	static const unsigned long interval = CLOCKS_PER_SEC / 30;
@@ -43,6 +44,7 @@ void idleCallback(void *pData)
 	}
 }
 
+/* animateButtonCallback() - Called by fltk when the animate button is pressed */
 void animateButtonCallback(Fl_Widget *widget, MainWindow *window)
 {
 	assert(window != nullptr && widget != nullptr);
@@ -50,6 +52,7 @@ void animateButtonCallback(Fl_Widget *widget, MainWindow *window)
 	window->damageMe();
 }
 
+/* addPointButtonCallback() - Called by fltk when the add point button is pressed */
 void addPointButtonCallback( Fl_Widget *widget, MainWindow *window )
 {
 	assert(window != nullptr && widget != nullptr);
@@ -66,6 +69,7 @@ void addPointButtonCallback( Fl_Widget *widget, MainWindow *window )
 	window->damageMe();
 }
 
+/* delPointButtonCallback() - Called by fltk when the delete point button is pressed */
 void delPointButtonCallback( Fl_Widget *widget, MainWindow *window )
 {
 	assert(window != nullptr && widget != nullptr);
@@ -85,6 +89,7 @@ void delPointButtonCallback( Fl_Widget *widget, MainWindow *window )
 	window->damageMe();
 }
 
+/* curveTypeChoiceCallback() - Called by fltk when the curve type drop box is changed */
 void curveTypeChoiceCallback( Fl_Widget *widget, MainWindow *window )
 {
 	assert(window != nullptr && widget != nullptr);
@@ -97,6 +102,7 @@ void curveTypeChoiceCallback( Fl_Widget *widget, MainWindow *window )
 	window->damageMe();
 }
 
+/* viewTypeChoiceCallback() - Called by fltk when the view type drop box is changed */
 void viewTypeChoiceCallback( Fl_Widget *widget, MainWindow *window )
 {
 	assert(window != nullptr && widget != nullptr);
@@ -109,6 +115,7 @@ void viewTypeChoiceCallback( Fl_Widget *widget, MainWindow *window )
 	window->damageMe();
 }
 
+/* shadowButtonCallback() - Called by fltk when the toggle shadow button is pressed */
 void shadowButtonCallback( Fl_Widget *widget, MainWindow *window )
 {
 	assert(window != nullptr && widget != nullptr);
@@ -116,6 +123,7 @@ void shadowButtonCallback( Fl_Widget *widget, MainWindow *window )
 	window->damageMe();
 }
 
+/* paramButtonCallback() - Called by fltk when the toggle arc-length param button is pressed */
 void paramButtonCallback( Fl_Widget *widget, MainWindow *window )
 {
 	assert(window != nullptr && widget != nullptr);
@@ -123,6 +131,7 @@ void paramButtonCallback( Fl_Widget *widget, MainWindow *window )
 	window->damageMe();
 }
 
+/* forwardButtonCallback() - Called by fltk when the move forward button is pressed */
 void forwardButtonCallback(Fl_Widget *widget, MainWindow *window)
 {
 	assert(window != nullptr && widget != nullptr);
@@ -130,6 +139,7 @@ void forwardButtonCallback(Fl_Widget *widget, MainWindow *window)
 	window->damageMe();
 }
 
+/* backwardButtonCallback() - Called by fltk when the move backward button is pressed */
 void backwardButtonCallback(Fl_Widget *widget, MainWindow *window)
 {
 	assert(window != nullptr && widget != nullptr);
@@ -137,6 +147,7 @@ void backwardButtonCallback(Fl_Widget *widget, MainWindow *window)
 	window->damageMe();
 }
 
+/* speedSliderCallback() - Called by fltk when the speed slider is moved */
 void speedSliderCallback(Fl_Widget *widget, MainWindow *window)
 {
 	assert(window != nullptr && widget != nullptr);
@@ -147,6 +158,7 @@ void speedSliderCallback(Fl_Widget *widget, MainWindow *window)
 	window->damageMe();
 }
 
+/* highlightButtonCallback() - Called by fltk when the toggle highlights button is pressed */
 void highlightButtonCallback(Fl_Widget *widget, MainWindow *window)
 {
 	assert(window != nullptr && widget != nullptr);

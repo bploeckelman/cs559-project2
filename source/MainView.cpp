@@ -249,51 +249,6 @@ void MainView::pick()
 	}
 }
 
-/* 
- * arcLengthInterpolation()
- *
- * TODO: remove me
-float MainView::arcLengthInterpolation(double big_t, int& segment_number)
-{
-	const Curve& curve= window->getCurve();
-	const double epsilon = 0.0000001;
-
-	if (abs(big_t) < epsilon)
-		return 0;
-	if (abs(big_t - 1) < epsilon)
-		return 1;
-
-	size_t index;
-	for (index = 1; index < curve.segmentParameters.size(); index++)
-	{
-		if (big_t < curve.segmentParameters[index].fraction_of_accum_length)
-			break;
-	}
-	if (index >= curve.segmentParameters.size())
-	{
-		printf("big_t not found"); //throw "big_t not found.";
-		return 1.f;
-	}
-
-	const ParametersVector& params = curve.segmentParameters;
-	const Parameters& currParams = params[index];
-	const Parameters& prevParams = params[index - 1];
-
-	const double lowerFraction = prevParams.fraction_of_accum_length;
-	const double upperFraction = currParams.fraction_of_accum_length;
-
-	const double lowerLocalT = (prevParams.segment != currParams.segment) ? 0 : prevParams.local_t;
-	const double upperLocalT = currParams.local_t;
-
-	const float result = static_cast<float>(
-		lowerLocalT + (big_t         - lowerFraction) 
-				    / (upperFraction - lowerFraction) 
-					* (upperLocalT   - lowerLocalT));
-
-	return result;
-}
-*/
-
 /* resetArcball() - Resets the arcball camera orientation -------- */
 void MainView::resetArcball()
 {
@@ -353,26 +308,6 @@ void MainView::updateTextWidget( const float t )
 		window->arcLengthStep(window->speed * 0.07f) : 0.f);
 
 	window->setDebugText(ss.str(), ss1.str());
-
-/*  Uncomment this for some debug printing...
-TODO: remove me, not using this anymore
-	cout << std::fixed << std::showpoint << std::setprecision(2);
-	int segmentNumber = 0;
-	for each(const auto& param in window->getCurve().segmentParameters)
-	{
-		if( param.segment != segmentNumber )
-		{
-			segmentNumber = param.segment;
-			cout << endl;
-		}
-		cout << "seg_#: " << std::setw(2) << param.segment << "\t"
-			 << "loc_t: " << std::setw(4) << param.local_t << "\t"
-			 << "acc_l: " << std::setw(4) << param.accum_length << "\t"
-			 << "fr_ac: " << std::setw(4) << param.fraction_of_accum_length
-			 << endl;
-	}
-	cout << std::resetiosflags(std::ios_base::scientific);
-*/
 }
 
 /* openglFrameSetup() - Clears framebuffers and sets projection -- */

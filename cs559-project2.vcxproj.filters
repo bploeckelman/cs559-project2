@@ -52,9 +52,6 @@
     <ClCompile Include="source\main.cpp">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="source\highprecisiontime.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
     <ClCompile Include="source\MainView.cpp">
       <Filter>source</Filter>
     </ClCompile>
@@ -117,9 +114,6 @@
     <ClInclude Include="include\MainWindow.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\highprecisiontime.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="include\MainView.h">
       <Filter>include</Filter>
     </ClInclude>
@@ -157,7 +151,7 @@
     <None Include="tracks\spiral.txt">
       <Filter>tracks</Filter>
     </None>
-    <None Include="tracks\sqiggle.txt">
+    <None Include="tracks\squiggle.txt">
       <Filter>tracks</Filter>
     </None>
   </ItemGroup>

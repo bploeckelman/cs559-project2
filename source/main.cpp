@@ -22,6 +22,7 @@
 
 #include <iostream>
 #include <string>
+#include <conio.h>
 
 
 int main(int argc, char* argv[])
@@ -34,8 +35,8 @@ int main(int argc, char* argv[])
 	{
 		cout << "Invalid number of arguments." << endl
 			 << "usage: cs559-project2 [input-trackfile [output-trackfile]]"
-			 << endl;
-		system("PAUSE");
+			 << endl << "Press any key to quit...";
+		_getch();
 		return 0;
 	}
 

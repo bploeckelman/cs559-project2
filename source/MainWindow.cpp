@@ -71,12 +71,11 @@ MainWindow::MainWindow(const int x, const int y)
 	, curve           (catmull)
 	, animating       (false)
 	, isArcLengthParam(false)
-	, highlightSegPts (true)
+	, highlightSegPts (false)
 	, shadows         (true)
 	, speed           (2.f)
 	, rotation        (0.f)
 	, rotationStep    (0.01f)
-//  , time_mode_started(hpTime.TotalTime()) //only use if using the HpTime to set up the big_t for arclength param
 {
 	createWidgets();
 	resetPoints();
@@ -194,7 +193,7 @@ void MainWindow::createWidgets()
 		//Create a button for highlighting the curve's current segment pts being used
 		highlightButton = new Fl_Button(605, 155, 180, 20, "Highlight Current Segment");
 		highlightButton->type(FL_TOGGLE_BUTTON);
-		highlightButton->value(1);                     // initially on
+		highlightButton->value(0);                     // initially off
 		highlightButton->selection_color((Fl_Color)3); // yellow when pressed
 		highlightButton->callback((Fl_Callback*)highlightButtonCallback, this);
 
@@ -230,12 +229,15 @@ void MainWindow::resetPoints()
 	}
 }
 
-// the file format is simple
-// first line: an integer with the number of control points
-// other lines: one line per control point
-// either 3 (X,Y,Z) numbers on the line, or 6 numbers (X,Y,Z, orientation)
+/* loadPoints() - Loads control points from a text file ---------- */
 void MainWindow::loadPoints(const string& filename)
 {
+	/* File Format:
+	 * ------------
+	 * [1]   - number of control points (integer)
+	 * [2..] - control point position and orientation
+	 *         (3 floats each, separated by spaces)
+	 */
 	ifstream file(filename);
 	if( file.is_open() )
 	{
@@ -265,6 +267,7 @@ void MainWindow::loadPoints(const string& filename)
 	}
 }
 
+/* savePoints() - Saves the control points to a text file -------- */
 void MainWindow::savePoints(const string& filename)
 {
 	ofstream file(filename);
@@ -293,6 +296,7 @@ void MainWindow::savePoints(const string& filename)
 	}
 }
 
+/* advanceTrain() - Moves the train in the specified direction --- */
 void MainWindow::advanceTrain(int dir)
 {
 	if( isArcLengthParam )
@@ -317,6 +321,7 @@ void MainWindow::damageMe()
 	view->damage(1);
 }
 
+/* arcLengthStep() - Calculates the arc-length step value for animation */
 float MainWindow::arcLengthStep(const float vel)
 {
 	float next_t = rotation + 0.1f;

@@ -10,6 +10,8 @@
 
 #include <GL/GL.h>
 
+
+
 CtrlPoint::CtrlPoint()
 	 : _pos(0,0,0)
 	 , _orient(0,1,0)
@@ -39,11 +41,6 @@ void CtrlPoint::draw(bool isShadowed) const
 		float theta2 = -radToDeg(acos(_orient.y()));
 		glRotatef(theta2,0,0,1);
 
-		// TODO: this has to change 
-		// if this point is selected or not
-		// pass flag into method?
-//		glColor4ub(240, 20, 20);
-		
 		glBegin(GL_QUADS);
 			glNormal3f( 0,0,1);
 			glVertex3f( size, size, size);
@@ -77,8 +74,6 @@ void CtrlPoint::draw(bool isShadowed) const
 			glVertex3f(-size,-size,-size);
 			glVertex3f(-size,-size, size);
 		glEnd();
-
-//		glColor3ub(252, 209, 22);
 
 		glBegin(GL_TRIANGLE_FAN);
 			glNormal3f(0,1.0f,0);
