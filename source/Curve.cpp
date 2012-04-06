@@ -125,7 +125,7 @@ void Curve::delControlPoint( const int id )
 
 /* getPosition() - Lerp across curve segments to find position --- */
 /* Throws NoSuchPoint exception on bad segment index ------------- */
-Vec3f Curve::getPosition( const float t )
+Vec3f Curve::getPosition( const float t ) const
 {
 	const int segmentNumber = static_cast<int>(std::floor(t));
 	try {
@@ -145,7 +145,7 @@ Vec3f Curve::getPosition( const float t )
 
 /* getDirection() - Lerp across curve segments to find direction - */
 /* Throws NoSuchPoint exception on bad segment index ------------- */
-Vec3f Curve::getDirection( const float t )
+Vec3f Curve::getDirection( const float t ) const
 {
 	const int segmentNumber = static_cast<int>(std::floor(t));
 	try	{
@@ -163,7 +163,7 @@ Vec3f Curve::getDirection( const float t )
 }
 
 /* getOrientation() - Returns the interpolated orientation ------- */
-Vec3f Curve::getOrientation( const float t )
+Vec3f Curve::getOrientation( const float t ) const
 {
 	const int segmentNumber = static_cast<int>(std::floor(t));
 	try {
@@ -239,7 +239,7 @@ void Curve::regenerateLineSegments()
 		const CtrlPoint& p0(*it);
 		const CtrlPoint& p1(last ? *(controlPoints.begin()) : *(it + 1));
 
-		segments.push_back(new LineSegment(i, p0, p1));
+		segments.push_back(new LineSegment(*this, i, p0, p1));
 	}
 }
 
@@ -256,7 +256,7 @@ void Curve::regenerateCatmullSegments()
 			const CtrlPoint& p0(*(it));
 			const CtrlPoint& p1(*(it + 1));
 			const CtrlPoint& c2(*(it + 2));
-			segments.push_back(new CatmullRomSegment(i, p0, p1, c1, c2));
+			segments.push_back(new CatmullRomSegment(*this, i, p0, p1, c1, c2));
 		} else {
 			auto next1 = it + 1;
 			if( next1 >= end )
@@ -275,7 +275,7 @@ void Curve::regenerateCatmullSegments()
 			const CtrlPoint& p1(*next1);
 			const CtrlPoint& c2(*next2);
 
-			segments.push_back(new CatmullRomSegment(i, p0, p1, c1, c2));
+			segments.push_back(new CatmullRomSegment(*this, i, p0, p1, c1, c2));
 		}
 	}
 }

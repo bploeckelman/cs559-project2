@@ -3,7 +3,9 @@
  */
 #include "CurveSegments.h"
 #include "CtrlPoint.h"
+#include "MathUtils.h"
 #include "Vec3f.h"
+#include "Curve.h"
 
 #include <Windows.h>
 #define WIN32_LEAN_AND_MEAN
@@ -25,6 +27,10 @@ std::string CurveTypeNames[] = {
  * CurveSegment base class
  * ==================================================================
  */
+const int   CurveSegment::numLines = 25;
+const float CurveSegment::step     = 1.f / CurveSegment::numLines;
+const float CurveSegment::radius   = 2.9f;
+
 Vec3f CurveSegment::getOrientation(float t)
 {
 	return lerp(-t, startPoint.orient(), endPoint.orient());
@@ -45,8 +51,6 @@ CtrlPoint& CurveSegment::getControl2   () { return control2; }
  */
 void LineSegment::draw(bool drawPoints, bool isShadowed) 
 {
-	static const float radius = 2.9f;	  // TODO: extract this to base class
-
 	const Vec3f& start(startPoint.pos());
 	const Vec3f& end(endPoint.pos());
 
@@ -107,13 +111,9 @@ Vec3f LineSegment::getDirection( float t )
  */
 void CatmullRomSegment::draw(bool drawPoints, bool isShadowed) 
 {
-	static const int   lines = 25;
-	static const float step  = 1.f / lines;
-	static const float radius = 2.9f;	  // TODO: extract this to base class
-
 	float t = 0.f;
 	glBegin(GL_LINE_STRIP);
-		for(int i = 0; i <= lines; ++i, t += step)
+		for(int i = 0; i <= numLines; ++i, t += step)
 		{
 			const Vec3f p(getPosition(t));
 			const Vec3f dir(normalize(getDirection(t)));
@@ -126,16 +126,38 @@ void CatmullRomSegment::draw(bool drawPoints, bool isShadowed)
 
 	t = 0.f;
 	glBegin(GL_LINE_STRIP);
-		for(int i = 0; i <= lines; ++i, t += step)
+		for(int i = 0; i <= numLines; ++i, t += step)
 		{
 			const Vec3f p(getPosition(t));
 			const Vec3f dir(normalize(getDirection(t)));
 			const Vec3f up(normalize(getOrientation(t)));
 			const Vec3f side(normalize(cross(up, dir)));
+			// TODO: this might be why curve segments aren't oriented quite right
 			const Vec3f v(p.x() - radius * side.x()
 						, p.y() + radius * side.y()
 						, p.z() - radius * side.z());
 			glVertex3fv(v.v());
+		}
+	glEnd();
+
+	// Draw ties
+	if( !isShadowed ) glColor4ub(139, 69, 19, 255); // brown
+	glBegin(GL_LINES);
+		for(float t = 0.f, arc_t = 0.f; arc_t <= 1.f; t += step)
+		{
+			const Vec3f p(getPosition(arc_t));
+			const Vec3f dir(normalize(getDirection(arc_t)));
+			const Vec3f up(normalize(getOrientation(arc_t)));
+			const Vec3f side(normalize(cross(up, dir)));
+			const Vec3f v1(p + radius * side);
+			// TODO: this might be why curve segments aren't oriented quite right
+			const Vec3f v2(p.x() - radius * side.x()
+						,  p.y() + radius * side.y()
+						,  p.z() - radius * side.z());
+			glVertex3fv(v1.v());
+			glVertex3fv(v2.v());
+
+			arc_t += arcLengthStep(parentCurve, t);
 		}
 	glEnd();
 

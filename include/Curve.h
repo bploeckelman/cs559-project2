@@ -55,9 +55,9 @@ public:
 	void clearPoints();
 	void delControlPoint(const int id);
 
-	Vec3f getPosition (const float t);
-	Vec3f getDirection(const float t);
-	Vec3f getOrientation(const float t);
+	Vec3f getPosition (const float t) const;
+	Vec3f getDirection(const float t) const;
+	Vec3f getOrientation(const float t) const;
 	CtrlPoint& getPoint(int id);
 	CurveType  getCurveType() const;
 	CurveSegment* getSegment(const int number);

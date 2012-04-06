@@ -14,6 +14,8 @@ enum CurveType {
 
 extern std::string CurveTypeNames[];
 
+class Curve;
+
 
 /* ==================================================================
  * CurveSegment base class
@@ -22,16 +24,23 @@ extern std::string CurveTypeNames[];
 class CurveSegment
 {
 protected:
+	static const int   numLines;
+	static const float step;
+	static const float radius;
+
+	const Curve& parentCurve;
 	int number;
 	CurveType curveType;
 	CtrlPoint startPoint, endPoint;
 	CtrlPoint control1, control2;
 
 public:
-	CurveSegment(const int number, const CurveType& curveType, 
+	CurveSegment(const Curve& parentCurve,
+				 const int number, const CurveType& curveType,
 				 const CtrlPoint& startPoint, const CtrlPoint& endPoint, 
 				 const CtrlPoint& control1,   const CtrlPoint& control2)
-		: number(number)
+		: parentCurve(parentCurve)
+		, number(number)
 		, curveType(curveType)
 		, startPoint(startPoint)
 		, endPoint(endPoint)
@@ -62,11 +71,11 @@ public:
 class LineSegment : public CurveSegment
 {
 public:
-	LineSegment(const int number, 
+	LineSegment(const Curve& parentCurve, const int number,
 				const CtrlPoint& startPoint, const CtrlPoint& endPoint,
 				const CtrlPoint& control1=CtrlPoint(),
 				const CtrlPoint& control2=CtrlPoint())
-		: CurveSegment(number, lines, startPoint, endPoint, control1, control2) 
+		: CurveSegment(parentCurve, number, lines, startPoint, endPoint, control1, control2)
 	{ }
 
 	void draw(bool drawPoints=false, bool isShadowed=false);
@@ -83,10 +92,10 @@ public:
 class CatmullRomSegment : public CurveSegment
 {
 public:
-	CatmullRomSegment(const int number, 
+	CatmullRomSegment(const Curve& parentCurve, const int number,
 					  const CtrlPoint& startPoint, const CtrlPoint& endPoint,
 					  const CtrlPoint& control1,   const CtrlPoint& control2)
-		: CurveSegment(number, catmull, startPoint, endPoint, control1, control2) 
+		: CurveSegment(parentCurve, number, catmull, startPoint, endPoint, control1, control2)
 	{ }
 
 	void draw(bool drawPoints=false, bool isShadowed=false);

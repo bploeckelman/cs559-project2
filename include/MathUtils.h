@@ -3,6 +3,7 @@
  * MathUtils.h
  */
 #include "Vec3f.h"
+#include "Curve.h"
 
 #include <cmath>
 
@@ -23,6 +24,33 @@ inline float degToRad(const float deg)
 {
 	static const float factor = PI / 180.f;
 	return deg * factor;
+}
+
+
+/*
+ * arcLengthStep()
+ * Calculates an arc-length parameterized step for the specified curve
+ * based on the specified step 't' and velocity
+ *
+ * Right now this is only used in CurveSegments for drawing rail ties
+ *
+ * TODO: this is duplicated code, also found in MainWindow
+ * had to leave the MainWindow version for now to prevent
+ * segment lookup errors when using this method to get
+ * debug output for MainView::updateDebugText()
+ */
+inline float arcLengthStep(const Curve& curve, const float t, const float vel=1.f)
+{
+	float next_t = t + 0.1f;
+	if( next_t >= curve.numSegments() )
+		next_t -= curve.numSegments();
+
+	const Vec3f thisPoint(curve.getPosition(t));
+	const Vec3f nextPoint(curve.getPosition(next_t));
+
+	const Vec3f distance(nextPoint - thisPoint);
+
+	return (vel / distance.magnitude());
 }
 
 /*

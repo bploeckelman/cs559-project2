@@ -321,8 +321,7 @@ void MainView::updateTextWidget( const float t )
 {
 	stringstream ss, ss1;
 	ss  << "t = " << t;
-	ss1 << "s = " << (window->isArcParam() ?
-		window->arcLengthStep(window->speed * 0.07f) : 0.f);
+	ss1 << "s = " << (window->isArcLengthParam ? window->arcLengthStep() : 0.f);
 
 	window->setDebugText(ss.str(), ss1.str());
 }

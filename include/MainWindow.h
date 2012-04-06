@@ -68,7 +68,7 @@ private:
 	float rotationStep;
 
 	void createWidgets();
-	float arcLengthStep(const float vel);
+	float arcLengthStep(const float vel=1.f);
 
 public:
 	friend class MainView;
