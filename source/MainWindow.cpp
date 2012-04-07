@@ -111,7 +111,7 @@ void MainWindow::createWidgets()
 		view = new MainView(5, 5, 590, 590);
 		view->setWindow(this);
 		view->setSelectedPoint(0);
-		//this->resizable(view);
+		this->resizable(view);
 
 		// Group widgets to help ease resizing
 		widgets = new Fl_Group(600, 5, 190, 590); // x,y,w,h
@@ -218,17 +218,9 @@ void MainWindow::createWidgets()
 		savePointsButton->selection_color((Fl_Color)3);
 		savePointsButton->callback((Fl_Callback*)savePointsButtonCallback, this);
 
-		// Create file write button
-		/*writeButton = new Fl_Button(700, 105, 70, 20, "File Write");
-		writeButton->type(FL_TOGGLE_BUTTON);
-		writeButton->selection_color((Fl_Color)3); // yellow when pressed
-		writeButton->callback((Fl_Callback*)writeButtonCallback, this);*/
-
 		// Create a phantom widget to help resize things
-		//this works with the train project because they have a World view as well as our trainview(mainview) view
-		//TODO: fix?
-		//Fl_Box *resizeBox = new Fl_Box(600, 595, 200, 5);
-		//widgets->resizable(resizeBox);
+		Fl_Box *resizeBox = new Fl_Box(5, 5, 590, 590);
+		widgets->resizable(resizeBox);
 
 		widgets->end();
 	}
