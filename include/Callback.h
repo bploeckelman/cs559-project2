@@ -45,3 +45,5 @@ void pointPitchLessButtonCallback( Fl_Widget *widget, MainWindow *window );
 void pointRollMoreButtonCallback( Fl_Widget *widget, MainWindow *window );
 
 void pointRollLessButtonCallback( Fl_Widget *widget, MainWindow *window );
+
+void tensionSliderCallback(Fl_Widget *widget, MainWindow *window);

@@ -74,7 +74,8 @@ MainWindow::MainWindow(const int x, const int y)
 	, pointResetButton(nullptr)
 	, pointPitchMoreButton(nullptr)
 	, pointRollMoreButton (nullptr)
-	, curve           (catmull)
+	, tensionSlider   (nullptr)
+	, curve           (cardinal)
 	, animating       (false)
 	, isArcLengthParam(true)
 	, highlightSegPts (false)
@@ -146,7 +147,7 @@ void MainWindow::createWidgets()
 		curveTypeChoice->add((CurveTypeNames[catmull]).c_str());
 		curveTypeChoice->add((CurveTypeNames[cardinal]).c_str());
 		curveTypeChoice->add((CurveTypeNames[bspline]).c_str());
-		curveTypeChoice->value(1);
+		curveTypeChoice->value(2);
 		curveTypeChoice->callback((Fl_Callback*)curveTypeChoiceCallback, this);
 
 		// Create view type browser (drop down)
@@ -254,6 +255,14 @@ void MainWindow::createWidgets()
 		// Create a phantom widget to help resize things
 		Fl_Box *resizeBox = new Fl_Box(5, 5, 590, 590);
 		widgets->resizable(resizeBox);
+
+		// Create a tension slider to alter the tension for cardinal cubics
+		tensionSlider = new Fl_Value_Slider(655, 280, 140, 20, "Tension");
+		tensionSlider->range(0,1);
+		tensionSlider->value(1);
+		tensionSlider->align(FL_ALIGN_LEFT);
+		tensionSlider->type(FL_HORIZONTAL);
+		tensionSlider->callback((Fl_Callback*)tensionSliderCallback, this);
 
 		widgets->end();
 	}

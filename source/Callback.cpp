@@ -318,3 +318,12 @@ void pointRollLessButtonCallback( Fl_Widget *widget, MainWindow *window )
 	if( window->getView().viewType != train )
 		roll(window, -1.f);
 }
+
+/* tensionSliderCallback() - Called by fltk when the tension slider is moved */
+void tensionSliderCallback( Fl_Widget *widget, MainWindow *window )
+{
+	Fl_Value_Slider *tensionSlider = dynamic_cast<Fl_Value_Slider*>(widget);
+	window->getCurve().tension = static_cast<float>(tensionSlider->value());
+
+	window->damageMe();
+}

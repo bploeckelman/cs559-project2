@@ -36,6 +36,7 @@ public:
 	// TODO: make private?
 	int selectedPoint;
 	int selectedSegment;
+	float tension;
 
 public:
 	Curve(const CurveType& type=lines);

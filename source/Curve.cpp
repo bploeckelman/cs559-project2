@@ -30,6 +30,7 @@ Curve::Curve(const CurveType& type)
 	, segments()
 	, selectedPoint(-1)
 	, selectedSegment(-1)
+	, tension(1.f)
 { }
 
 Curve::~Curve()

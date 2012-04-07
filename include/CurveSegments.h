@@ -28,14 +28,14 @@ protected:
 	static const float step;
 	static const float radius;
 
-	const Curve& parentCurve;
+	Curve& parentCurve;
 	int number;
 	CurveType curveType;
 	CtrlPoint startPoint, endPoint;
 	CtrlPoint control1, control2;
 
 public:
-	CurveSegment(const Curve& parentCurve,
+	CurveSegment(Curve& parentCurve,
 				 const int number, const CurveType& curveType,
 				 const CtrlPoint& startPoint, const CtrlPoint& endPoint, 
 				 const CtrlPoint& control1,   const CtrlPoint& control2)
@@ -71,7 +71,7 @@ public:
 class LineSegment : public CurveSegment
 {
 public:
-	LineSegment(const Curve& parentCurve, const int number,
+	LineSegment(Curve& parentCurve, const int number,
 				const CtrlPoint& startPoint, const CtrlPoint& endPoint,
 				const CtrlPoint& control1=CtrlPoint(),
 				const CtrlPoint& control2=CtrlPoint())
@@ -92,7 +92,7 @@ public:
 class CatmullRomSegment : public CurveSegment
 {
 public:
-	CatmullRomSegment(const Curve& parentCurve, const int number,
+	CatmullRomSegment(Curve& parentCurve, const int number,
 					  const CtrlPoint& startPoint, const CtrlPoint& endPoint,
 					  const CtrlPoint& control1,   const CtrlPoint& control2)
 		: CurveSegment(parentCurve, number, catmull, startPoint, endPoint, control1, control2)
@@ -109,9 +109,9 @@ public:
 class CardinalSegment : public CurveSegment
 {
 public:
-	CardinalSegment(const Curve& parentCurve, const int number,
-					  const CtrlPoint& startPoint, const CtrlPoint& endPoint,
-					  const CtrlPoint& control1,   const CtrlPoint& control2)
+	CardinalSegment(Curve& parentCurve, const int number,
+					const CtrlPoint& startPoint, const CtrlPoint& endPoint,
+					const CtrlPoint& control1,   const CtrlPoint& control2)
 		: CurveSegment(parentCurve, number, cardinal, startPoint, endPoint, control1, control2)
 	{ }
 
@@ -126,7 +126,7 @@ public:
 class BSplineSegment : public CurveSegment
 {
 public:
-	BSplineSegment(const Curve& parentCurve, const int number,
+	BSplineSegment(Curve& parentCurve, const int number,
 				   const CtrlPoint& startPoint, const CtrlPoint& endPoint,
 				   const CtrlPoint& control1,   const CtrlPoint& control2)
 		: CurveSegment(parentCurve, number, bspline, startPoint, endPoint, control1, control2)

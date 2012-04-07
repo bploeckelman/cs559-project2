@@ -221,14 +221,13 @@ Vec3f CardinalSegment::getPosition( float t )
 {
 	const Vec3f p0(startPoint.pos());
 	const Vec3f p1(endPoint.pos());
-	const Vec3f m0(control1.pos());//p1 - control1.pos());
-	const Vec3f m1(control2.pos());//control2.pos() - p0);
+	const Vec3f m0(control1.pos());
+	const Vec3f m1(control2.pos());
 
 	const float tt  = t * t;
 	const float ttt = t * tt;
 
-	// TODO: make this an adjustable parameter [0..1]
-	const float s = 1.0f;
+	const float s = parentCurve.tension;
 
 	Vec3f pos(
 		((-1.f * s) * ttt + (       2.f * s) * tt + (-1.f * s) * t      ) * m0
@@ -249,8 +248,7 @@ Vec3f CardinalSegment::getDirection( float t )
 
 	const float tt  = t * t;
 
-	// TODO: make this an adjustable parameter [0..1]
-	const float s = 1.0f;
+	const float s = parentCurve.tension;
 
 	Vec3f dir(
 		(3.f * (-1.f * s) * tt + 2.f * (       2.f * s) * t + (-1.f * s)) * m0

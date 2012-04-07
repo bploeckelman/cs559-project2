@@ -59,7 +59,8 @@ private:
 	Fl_Button  *pointRollMoreButton;
 	Fl_Button  *pointPitchLessButton;
 	Fl_Button  *pointRollLessButton;
-	Fl_Value_Slider  *speedSlider;
+	Fl_Value_Slider *speedSlider;
+	Fl_Value_Slider *tensionSlider;
 
 	Curve curve;
 
