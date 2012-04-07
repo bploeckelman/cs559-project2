@@ -317,7 +317,38 @@ void Curve::regenerateHermiteSegments()
 /* regenerateBSplineSegments() - Regenerates segments as bsplines */
 void Curve::regenerateBSplineSegments()
 {
-	throw std::exception("The method or operation is not implemented.");
+	auto it  = controlPoints.begin();
+	auto end = controlPoints.end();
+	for(int i = 0; it != end; ++i, ++it)
+	{
+		if( i == 0 && controlPoints.size() >= 4 )
+		{
+			const CtrlPoint& c1(*(end - 1));
+			const CtrlPoint& p0(*(it));
+			const CtrlPoint& p1(*(it + 1));
+			const CtrlPoint& c2(*(it + 2));
+			segments.push_back(new BSplineSegment(*this, i, p0, p1, c1, c2));
+		} else {
+			auto next1 = it + 1;
+			if( next1 >= end )
+				next1 = controlPoints.begin();
+
+			auto next2 = next1 + 1;
+			if( next2 >= end )
+				next2 = controlPoints.begin();
+
+			auto prev = it;
+			if( prev != controlPoints.begin() )
+				prev -= 1;
+
+			const CtrlPoint& c1(*prev);
+			const CtrlPoint& p0(*(it));
+			const CtrlPoint& p1(*next1);
+			const CtrlPoint& c2(*next2);
+
+			segments.push_back(new BSplineSegment(*this, i, p0, p1, c1, c2));
+		}
+	}
 }
 
 /* drawSegment() - Draws the specified segment ------------------- */

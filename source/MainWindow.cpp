@@ -145,7 +145,7 @@ void MainWindow::createWidgets()
 		curveTypeChoice->add((CurveTypeNames[lines]).c_str());
 		curveTypeChoice->add((CurveTypeNames[catmull]).c_str());
 		curveTypeChoice->add((CurveTypeNames[hermite]).c_str());
-//		curveTypeChoice->add((CurveTypeNames[bspline]).c_str());
+		curveTypeChoice->add((CurveTypeNames[bspline]).c_str());
 		curveTypeChoice->value(1);
 		curveTypeChoice->callback((Fl_Callback*)curveTypeChoiceCallback, this);
 

@@ -122,3 +122,22 @@ public:
 	Vec3f getPosition(float t);
 	Vec3f getDirection(float t);
 };
+
+/* ==================================================================
+ * BSplineSegment class
+ * ==================================================================
+ */
+class BSplineSegment : public CurveSegment
+{
+public:
+	BSplineSegment(const Curve& parentCurve, const int number,
+				   const CtrlPoint& startPoint, const CtrlPoint& endPoint,
+				   const CtrlPoint& control1,   const CtrlPoint& control2)
+		: CurveSegment(parentCurve, number, bspline, startPoint, endPoint, control1, control2)
+	{ }
+
+	void draw(bool drawPoints=false, bool isShadowed=false);
+
+	Vec3f getPosition(float t);
+	Vec3f getDirection(float t);
+};
