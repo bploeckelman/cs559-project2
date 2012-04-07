@@ -32,6 +32,14 @@ Curve::Curve(const CurveType& type)
 	, selectedSegment(-1)
 { }
 
+Curve::~Curve()
+{
+	for each(auto segment in segments)
+		delete segment;
+	segments.clear();
+	controlPoints.clear();
+}
+
 /* draw() - Draws all the segments of this curve ----------------- */
 void Curve::draw(bool drawPoints, bool isShadowed)
 {
@@ -204,6 +212,16 @@ CurveSegment* Curve::getSegment( const int number )
 	return segments[number];
 }
 
+/* drawSegment() - Draws the specified segment ------------------- */
+void Curve::drawSegment( const int number, bool isShadowed )
+{
+	if( number < 0 || number >= numSegments() )
+		return;
+
+	if( !isShadowed ) glColor4ub(255, 255, 255, 255);
+	segments[number]->draw(false, isShadowed);
+}
+
 /* regenerateSegments() - Regenerates segments based on control points and curve type */
 void Curve::regenerateSegments()
 {
@@ -222,9 +240,9 @@ void Curve::regenerateSegments()
 	switch(type)
 	{
 	case lines:    regenerateLineSegments();     break;
-	case catmull:  regenerateCatmullSegments();  break;
-	case cardinal: regenerateCardinalSegments(); break;
-	case bspline:  regenerateBSplineSegments();  break;
+	case catmull:
+	case cardinal:
+	case bspline:  regenerateCurveSegments();    break;
 	}
 }
 
@@ -244,8 +262,8 @@ void Curve::regenerateLineSegments()
 	}
 }
 
-/* regenerateCatmullSegments() - Regenerates segments as catmull-rom splines */
-void Curve::regenerateCatmullSegments()
+/* regenerateCurveSegments() - Regnerates segments as the current type of cubic curve */
+void Curve::regenerateCurveSegments()
 {
 	auto it  = controlPoints.begin();
 	auto end = controlPoints.end();
@@ -257,44 +275,12 @@ void Curve::regenerateCatmullSegments()
 			const CtrlPoint& p0(*(it));
 			const CtrlPoint& p1(*(it + 1));
 			const CtrlPoint& c2(*(it + 2));
-			segments.push_back(new CatmullRomSegment(*this, i, p0, p1, c1, c2));
-		} else {
-			auto next1 = it + 1;
-			if( next1 >= end )
-				next1 = controlPoints.begin();
-
-			auto next2 = next1 + 1; 
-			if( next2 >= end )
-				next2 = controlPoints.begin();
-
-			auto prev = it;
-			if( prev != controlPoints.begin() )
-				prev -= 1;
-
-			const CtrlPoint& c1(*prev);
-			const CtrlPoint& p0(*(it));
-			const CtrlPoint& p1(*next1);
-			const CtrlPoint& c2(*next2);
-
-			segments.push_back(new CatmullRomSegment(*this, i, p0, p1, c1, c2));
-		}
-	}
-}
-
-/* regenerateCardinalSegments() - Regenerates segments as cardinal cubic splines */
-void Curve::regenerateCardinalSegments()
-{
-	auto it  = controlPoints.begin();
-	auto end = controlPoints.end();
-	for(int i = 0; it != end; ++i, ++it)
-	{
-		if( i == 0 && controlPoints.size() >= 4 )
-		{
-			const CtrlPoint& c1(*(end - 1));
-			const CtrlPoint& p0(*(it));
-			const CtrlPoint& p1(*(it + 1));
-			const CtrlPoint& c2(*(it + 2));
-			segments.push_back(new CardinalSegment(*this, i, p0, p1, c1, c2));
+			switch(type)
+			{
+			case catmull:  segments.push_back(new CatmullRomSegment(*this, i, p0, p1, c1, c2)); break;
+			case cardinal: segments.push_back(new CardinalSegment(*this, i, p0, p1, c1, c2)); break;
+			case bspline:  segments.push_back(new BSplineSegment(*this, i, p0, p1, c1, c2)); break;
+			}
 		} else {
 			auto next1 = it + 1;
 			if( next1 >= end )
@@ -313,54 +299,12 @@ void Curve::regenerateCardinalSegments()
 			const CtrlPoint& p1(*next1);
 			const CtrlPoint& c2(*next2);
 
-			segments.push_back(new CardinalSegment(*this, i, p0, p1, c1, c2));
+			switch(type)
+			{
+			case catmull:  segments.push_back(new CatmullRomSegment(*this, i, p0, p1, c1, c2)); break;
+			case cardinal: segments.push_back(new CardinalSegment(*this, i, p0, p1, c1, c2)); break;
+			case bspline:  segments.push_back(new BSplineSegment(*this, i, p0, p1, c1, c2)); break;
+			}
 		}
 	}
-}
-
-/* regenerateBSplineSegments() - Regenerates segments as bsplines */
-void Curve::regenerateBSplineSegments()
-{
-	auto it  = controlPoints.begin();
-	auto end = controlPoints.end();
-	for(int i = 0; it != end; ++i, ++it)
-	{
-		if( i == 0 && controlPoints.size() >= 4 )
-		{
-			const CtrlPoint& c1(*(end - 1));
-			const CtrlPoint& p0(*(it));
-			const CtrlPoint& p1(*(it + 1));
-			const CtrlPoint& c2(*(it + 2));
-			segments.push_back(new BSplineSegment(*this, i, p0, p1, c1, c2));
-		} else {
-			auto next1 = it + 1;
-			if( next1 >= end )
-				next1 = controlPoints.begin();
-
-			auto next2 = next1 + 1;
-			if( next2 >= end )
-				next2 = controlPoints.begin();
-
-			auto prev = it;
-			if( prev != controlPoints.begin() )
-				prev -= 1;
-
-			const CtrlPoint& c1(*prev);
-			const CtrlPoint& p0(*(it));
-			const CtrlPoint& p1(*next1);
-			const CtrlPoint& c2(*next2);
-
-			segments.push_back(new BSplineSegment(*this, i, p0, p1, c1, c2));
-		}
-	}
-}
-
-/* drawSegment() - Draws the specified segment ------------------- */
-void Curve::drawSegment( const int number, bool isShadowed )
-{
-	if( number < 0 || number >= numSegments() )
-		return;
-
-	if( !isShadowed ) glColor4ub(255, 255, 255, 255);
-	segments[number]->draw(false, isShadowed);
 }

@@ -39,6 +39,7 @@ public:
 
 public:
 	Curve(const CurveType& type=lines);
+	~Curve();
 
 	void regenerateSegments();
 
@@ -69,9 +70,7 @@ private:
 	void drawSegment(const int number, bool isShadowed);
 
 	void regenerateLineSegments();
-	void regenerateCatmullSegments();
-	void regenerateCardinalSegments();
-	void regenerateBSplineSegments();
+	void regenerateCurveSegments();
 };
 
 inline int Curve::numSegments()        const { return segments.size(); }
