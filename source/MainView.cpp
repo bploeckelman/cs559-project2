@@ -282,6 +282,11 @@ void MainView::setupProjection()
 
 			// Calculate and apply the orientation matrix
 			Vec3f normal(curve.getOrientation(t));
+
+			// Note: this is sorta hacky, but lines shouldn't interpolate orientation
+			if( curve.getCurveType() == lines )
+				normal = curve.getSegment(curve.selectedSegment)->getStartPoint().orient();
+
 			Vec3f binormal(normalize(cross(normal, normalize(d))));
 
 			normal = normalize(cross(normalize(d), binormal));
@@ -478,11 +483,16 @@ void MainView::drawCurve(const float t, bool drawPoints, bool doShadows)
 /* drawTrain() - Draws the train at the specified parameter ------ */
 void MainView::drawTrain( const float t, bool doingShadows )
 {
-	const Vec3f& p(window->getCurve().getPosition(t));
-	const Vec3f& d(window->getCurve().getDirection(t));
+	Curve& curve = window->getCurve();
+	const Vec3f& p(curve.getPosition(t));
+	const Vec3f& d(curve.getDirection(t));
 
-	Vec3f normal(window->getCurve().getOrientation(t));
+	Vec3f normal(curve.getOrientation(t));
 	Vec3f binormal;
+
+	// Note: this is sorta hacky, but lines shouldn't interpolate orientation
+	if( curve.getCurveType() == lines )
+		normal = curve.getSegment(curve.selectedSegment)->getStartPoint().orient();
 
 	glPushMatrix();
 

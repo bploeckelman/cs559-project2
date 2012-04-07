@@ -52,13 +52,12 @@ CtrlPoint& CurveSegment::getControl2   () { return control2; }
 void LineSegment::draw(bool drawPoints, bool isShadowed) 
 {
 	const Vec3f& start(startPoint.pos());
-	const Vec3f& end(endPoint.pos());
+	const Vec3f& end  (endPoint.pos());
 
-	const Vec3f dir(normalize(start - end));
-	const Vec3f up(0.f, 1.f, 0.f); //normalize((start + end) * 0.5f));
-	const Vec3f side(normalize(cross(up, dir)));
-
-	glBegin(GL_LINES);
+	const Vec3f dir (normalize(start - end));
+	const Vec3f up  (normalize(startPoint.orient()));
+	const Vec3f side(normalize(cross(dir, up)));
+	glBegin(GL_LINE_STRIP);
 	{
 		const Vec3f v1(start + radius * side);
 		glVertex3fv(v1.v());
@@ -67,15 +66,11 @@ void LineSegment::draw(bool drawPoints, bool isShadowed)
 	}
 	glEnd();
 
-	glBegin(GL_LINES);
+	glBegin(GL_LINE_STRIP);
 	{
-		const Vec3f v1(start.x() - radius * side.x()
-					,  start.y() + radius * side.y()
-					,  start.z() - radius * side.z());
+		const Vec3f v1(start + -radius * side);
 		glVertex3fv(v1.v());
-		const Vec3f v2(end.x() - radius * side.x()
-					,  end.y() + radius * side.y()
-					,  end.z() - radius * side.z());
+		const Vec3f v2(end + -radius * side);
 		glVertex3fv(v2.v());
 	}
 	glEnd();
@@ -115,11 +110,13 @@ void CatmullRomSegment::draw(bool drawPoints, bool isShadowed)
 	glBegin(GL_LINE_STRIP);
 		for(int i = 0; i <= numLines; ++i, t += step)
 		{
-			const Vec3f p(getPosition(t));
-			const Vec3f dir(normalize(getDirection(t)));
-			const Vec3f up(normalize(getOrientation(t)));
-			const Vec3f side(normalize(cross(up, dir)));
-			const Vec3f v(p + radius * side);
+			const Vec3f pos (getPosition(t));
+			const Vec3f dir (normalize(getDirection(t)));
+			const Vec3f up  (normalize(getOrientation(t)));
+			const Vec3f side(normalize(cross(dir, up)));
+
+			const Vec3f v(pos + radius * side);
+
 			glVertex3fv(v.v());
 		}
 	glEnd();
@@ -128,14 +125,14 @@ void CatmullRomSegment::draw(bool drawPoints, bool isShadowed)
 	glBegin(GL_LINE_STRIP);
 		for(int i = 0; i <= numLines; ++i, t += step)
 		{
-			const Vec3f p(getPosition(t));
-			const Vec3f dir(normalize(getDirection(t)));
-			const Vec3f up(normalize(getOrientation(t)));
-			const Vec3f side(normalize(cross(up, dir)));
-			// TODO: this might be why curve segments aren't oriented quite right
-			const Vec3f v(p.x() - radius * side.x()
-						, p.y() + radius * side.y()
-						, p.z() - radius * side.z());
+			const Vec3f pos (getPosition(t));
+			const Vec3f dir (normalize(getDirection(t)));
+			const Vec3f up  (normalize(getOrientation(t)));
+			const Vec3f side(normalize(cross(dir, up)));
+
+			const Vec3f v(pos + -radius * side);
+			// Note:     (pos -  radius * side) doesn't work as expected
+
 			glVertex3fv(v.v());
 		}
 	glEnd();
@@ -145,15 +142,15 @@ void CatmullRomSegment::draw(bool drawPoints, bool isShadowed)
 	glBegin(GL_LINES);
 		for(float t = 0.f, arc_t = 0.f; arc_t <= 1.f; t += step)
 		{
-			const Vec3f p(getPosition(arc_t));
-			const Vec3f dir(normalize(getDirection(arc_t)));
-			const Vec3f up(normalize(getOrientation(arc_t)));
-			const Vec3f side(normalize(cross(up, dir)));
-			const Vec3f v1(p + radius * side);
-			// TODO: this might be why curve segments aren't oriented quite right
-			const Vec3f v2(p.x() - radius * side.x()
-						,  p.y() + radius * side.y()
-						,  p.z() - radius * side.z());
+			const Vec3f pos (getPosition(arc_t));
+			const Vec3f dir (normalize(getDirection(arc_t)));
+			const Vec3f up  (normalize(getOrientation(arc_t)));
+			const Vec3f side(normalize(cross(dir,up)));
+
+			const Vec3f v1(pos +  radius * side);
+			const Vec3f v2(pos + -radius * side);
+			// Note:      (pos -  radius * side) doesn't work as expected
+
 			glVertex3fv(v1.v());
 			glVertex3fv(v2.v());
 
