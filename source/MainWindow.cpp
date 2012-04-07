@@ -67,10 +67,13 @@ MainWindow::MainWindow(const int x, const int y)
 	, forwardButton   (nullptr)
 	, backwardButton  (nullptr)
 	, highlightButton (nullptr)
-	, resetPointButton(nullptr)
+	, resetPointsButton(nullptr)
 	, loadPointsButton(nullptr)
 	, savePointsButton(nullptr)
 	, speedSlider     (nullptr)
+	, pointResetButton(nullptr)
+	, pointPitchMoreButton(nullptr)
+	, pointRollMoreButton (nullptr)
 	, curve           (catmull)
 	, animating       (false)
 	, isArcLengthParam(true)
@@ -201,10 +204,10 @@ void MainWindow::createWidgets()
 		highlightButton->callback((Fl_Callback*)highlightButtonCallback, this);
 
 		// Create a button to reset the curve's control points
-		resetPointButton = new Fl_Button(605, 180, 50, 20, "Reset");
-		resetPointButton->type(FL_NORMAL_BUTTON);
-		resetPointButton->selection_color((Fl_Color)3);
-		resetPointButton->callback((Fl_Callback*)resetPointButtonCallback, this);
+		resetPointsButton = new Fl_Button(605, 180, 50, 20, "Reset");
+		resetPointsButton->type(FL_NORMAL_BUTTON);
+		resetPointsButton->selection_color((Fl_Color)3);
+		resetPointsButton->callback((Fl_Callback*)resetPointsButtonCallback, this);
 
 		// Create a button to load control points from a file
 		loadPointsButton = new Fl_Button(660, 180, 50, 20, "Load");
@@ -217,6 +220,36 @@ void MainWindow::createWidgets()
 		savePointsButton->type(FL_NORMAL_BUTTON);
 		savePointsButton->selection_color((Fl_Color)3);
 		savePointsButton->callback((Fl_Callback*)savePointsButtonCallback, this);
+
+		// Create a button to reset the orientation of the selected point
+		pointResetButton = new Fl_Button(605, 205, 80, 20, "Reset Point");
+		pointResetButton->type(FL_NORMAL_BUTTON);
+		pointResetButton->selection_color((Fl_Color)3);
+		pointResetButton->callback((Fl_Callback*)pointResetButtonCallback, this);
+
+		// Create a button to increase the pitch of the selected point
+		pointPitchMoreButton = new Fl_Button(605, 230, 50, 20, "Pitch+");
+		pointPitchMoreButton->type(FL_NORMAL_BUTTON);
+		pointPitchMoreButton->selection_color((Fl_Color)3);
+		pointPitchMoreButton->callback((Fl_Callback*)pointPitchMoreButtonCallback, this);
+
+		// Create a button to decrease the pitch of the selected point
+		pointPitchLessButton = new Fl_Button(660, 230, 50, 20, "Pitch-");
+		pointPitchLessButton->type(FL_NORMAL_BUTTON);
+		pointPitchLessButton->selection_color((Fl_Color)3);
+		pointPitchLessButton->callback((Fl_Callback*)pointPitchLessButtonCallback, this);
+
+		// Create a button to increase the roll of the selected point
+		pointRollMoreButton = new Fl_Button(605, 255, 50, 20, "Roll+");
+		pointRollMoreButton->type(FL_NORMAL_BUTTON);
+		pointRollMoreButton->selection_color((Fl_Color)3);
+		pointRollMoreButton->callback((Fl_Callback*)pointRollMoreButtonCallback, this);
+
+		// Create a button to decrease the roll of the selected point
+		pointRollLessButton = new Fl_Button(660, 255, 50, 20, "Roll-");
+		pointRollLessButton->type(FL_NORMAL_BUTTON);
+		pointRollLessButton->selection_color((Fl_Color)3);
+		pointRollLessButton->callback((Fl_Callback*)pointRollLessButtonCallback, this);
 
 		// Create a phantom widget to help resize things
 		Fl_Box *resizeBox = new Fl_Box(5, 5, 590, 590);

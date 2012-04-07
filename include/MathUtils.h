@@ -11,6 +11,7 @@
 static const float PI      = 3.141593f;
 static const float TWO_PI  = 6.283185f;
 static const float HALF_PI = 1.570796f;
+static const float QUAR_PI = 0.7853981f;
 static const float E       = 2.718282f;
 
 

@@ -51,9 +51,14 @@ private:
 	Fl_Button  *forwardButton;
 	Fl_Button  *backwardButton;
 	Fl_Button  *highlightButton;
-	Fl_Button  *resetPointButton;
+	Fl_Button  *resetPointsButton;
 	Fl_Button  *loadPointsButton;
 	Fl_Button  *savePointsButton;
+	Fl_Button  *pointResetButton;
+	Fl_Button  *pointPitchMoreButton;
+	Fl_Button  *pointRollMoreButton;
+	Fl_Button  *pointPitchLessButton;
+	Fl_Button  *pointRollLessButton;
 	Fl_Value_Slider  *speedSlider;
 
 	Curve curve;

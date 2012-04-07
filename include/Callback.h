@@ -30,8 +30,18 @@ void speedSliderCallback(Fl_Widget *widget, MainWindow *window);
 
 void highlightButtonCallback(Fl_Widget *widget, MainWindow *window);
 
-void resetPointButtonCallback(Fl_Widget *widget, MainWindow *window);
+void resetPointsButtonCallback(Fl_Widget *widget, MainWindow *window);
 
 void loadPointsButtonCallback(Fl_Widget *widget, MainWindow *window);
 
 void savePointsButtonCallback(Fl_Widget *widget, MainWindow *window);
+
+void pointResetButtonCallback( Fl_Widget *widget, MainWindow *window );
+
+void pointPitchMoreButtonCallback( Fl_Widget *widget, MainWindow *window );
+
+void pointPitchLessButtonCallback( Fl_Widget *widget, MainWindow *window );
+
+void pointRollMoreButtonCallback( Fl_Widget *widget, MainWindow *window );
+
+void pointRollLessButtonCallback( Fl_Widget *widget, MainWindow *window );

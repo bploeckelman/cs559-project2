@@ -5,6 +5,7 @@
 #include "MainWindow.h"
 #include "Curve.h"
 #include "CtrlPoint.h"
+#include "MathUtils.h"
 #include "Vec3f.h"
 
 #pragma warning(push)
@@ -186,8 +187,8 @@ void highlightButtonCallback(Fl_Widget *widget, MainWindow *window)
 	window->damageMe();
 }
 
-/* resetPointButtonCallback() - Called by fltk when the reset button is pressed */
-void resetPointButtonCallback( Fl_Widget *widget, MainWindow *window )
+/* resetPointsButtonCallback() - Called by fltk when the reset button is pressed */
+void resetPointsButtonCallback( Fl_Widget *widget, MainWindow *window )
 {
 	assert(window != nullptr && widget != nullptr);
 	window->resetPoints();
@@ -221,4 +222,99 @@ void savePointsButtonCallback( Fl_Widget *widget, MainWindow *window )
 		window->setRotation(0.f);
 		window->damageMe();
 	}
+}
+
+// ---------------------------------------------------------------
+
+/* pitch() - A helper function for pitching a control point (around x) */
+void pitch(MainWindow *window, const float dir=1)
+{
+	Curve& curve = window->getCurve();
+
+	const int selected = window->getView().getSelectedPoint(); //curve.selectedPoint;
+	if( selected < 0 || selected >= curve.numControlPoints() )
+		return;
+
+	const Vec3f oldOrient(curve.getPoint(selected).orient());
+	const float s = sin(QUAR_PI * dir);
+	const float c = cos(QUAR_PI * dir);
+
+	curve.getPoint(selected)
+		 .orient(Vec3f(oldOrient.x()
+					,  c * oldOrient.y() - s * oldOrient.z()
+					,  s * oldOrient.y() + c * oldOrient.z()));
+
+	curve.regenerateSegments();
+
+	window->damageMe();
+}
+
+/* roll() - A helper function for rolling a control point (around z) */
+void roll(MainWindow *window, const float dir=1)
+{
+	Curve& curve = window->getCurve();
+
+	const int selected = window->getView().getSelectedPoint(); //curve.selectedPoint;
+	if( selected < 0 || selected >= curve.numControlPoints() )
+		return;
+
+	const Vec3f oldOrient(curve.getPoint(selected).orient());
+	const float s = sin(QUAR_PI * dir);
+	const float c = cos(QUAR_PI * dir);
+
+	curve.getPoint(selected)
+		 .orient(Vec3f(s * oldOrient.y() + c * oldOrient.x()
+					,  c * oldOrient.y() - s * oldOrient.x()
+					,  oldOrient.z()));
+
+	curve.regenerateSegments();
+
+	window->damageMe();
+}
+
+/* pointResetButtonCallback() - Called by fltk when the reset orientation button is pressed */
+void pointResetButtonCallback( Fl_Widget *widget, MainWindow *window )
+{
+	Curve& curve = window->getCurve();
+
+	if( window->getView().viewType == train )
+		return;
+
+	const int selected = window->getView().getSelectedPoint(); //curve.selectedPoint;
+	if( selected < 0 || selected >= curve.numControlPoints() )
+		return;
+
+	curve.getPoint(selected).orient(Vec3f(0.f, 1.f, 0.f));
+
+	curve.regenerateSegments();
+
+	window->damageMe();
+}
+
+/* pointPitchMoreButtonCallback() - Called by fltk when the pitch+ button is pressed */
+void pointPitchMoreButtonCallback( Fl_Widget *widget, MainWindow *window )
+{
+	if( window->getView().viewType != train )
+		pitch(window, 1.f);
+}
+
+/* pointPitchLessButtonCallback() - Called by fltk when the pitch- button is pressed */
+void pointPitchLessButtonCallback( Fl_Widget *widget, MainWindow *window )
+{
+	if( window->getView().viewType != train )
+		pitch(window, -1.f);
+}
+
+/* pointRollMoreButtonCallback() - Called by fltk when the roll+ button is pressed */
+void pointRollMoreButtonCallback( Fl_Widget *widget, MainWindow *window )
+{
+	if( window->getView().viewType != train )
+		roll(window, 1.f);
+}
+
+/* pointRollLessButtonCallback() - Called by fltk when the roll- button is pressed */
+void pointRollLessButtonCallback( Fl_Widget *widget, MainWindow *window )
+{
+	if( window->getView().viewType != train )
+		roll(window, -1.f);
 }
