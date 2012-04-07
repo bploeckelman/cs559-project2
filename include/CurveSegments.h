@@ -48,7 +48,7 @@ public:
 		, control2(control2)
 	{ }
 
-	virtual void draw(bool drawPoints=false, bool isShadowed=false) = 0;
+	virtual void draw(bool drawPoints=false, bool isShadowed=false);
 
 	virtual Vec3f getPosition  (float t) = 0;
 	virtual Vec3f getDirection (float t) = 0;;
@@ -78,7 +78,7 @@ public:
 		: CurveSegment(parentCurve, number, lines, startPoint, endPoint, control1, control2)
 	{ }
 
-	void draw(bool drawPoints=false, bool isShadowed=false);
+	virtual void draw(bool drawPoints=false, bool isShadowed=false);
 
 	Vec3f getPosition(float t);
 	Vec3f getDirection(float t);
@@ -98,8 +98,6 @@ public:
 		: CurveSegment(parentCurve, number, catmull, startPoint, endPoint, control1, control2)
 	{ }
 
-	void draw(bool drawPoints=false, bool isShadowed=false);
-
 	Vec3f getPosition(float t);
 	Vec3f getDirection(float t);
 };
@@ -117,8 +115,6 @@ public:
 		: CurveSegment(parentCurve, number, hermite, startPoint, endPoint, control1, control2)
 	{ }
 
-	void draw(bool drawPoints=false, bool isShadowed=false);
-
 	Vec3f getPosition(float t);
 	Vec3f getDirection(float t);
 };
@@ -135,8 +131,6 @@ public:
 				   const CtrlPoint& control1,   const CtrlPoint& control2)
 		: CurveSegment(parentCurve, number, bspline, startPoint, endPoint, control1, control2)
 	{ }
-
-	void draw(bool drawPoints=false, bool isShadowed=false);
 
 	Vec3f getPosition(float t);
 	Vec3f getDirection(float t);

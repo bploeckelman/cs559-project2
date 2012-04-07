@@ -22,11 +22,6 @@ std::string CurveTypeNames[] = {
 	"B-Spline"
 };
 
-// TODO: all curve segments are drawn the same except the lines,
-// so draw() should be a virtual member of CurveSegment, then
-// LineSegment can override, and none of the other normal curves
-// have to implement it
-
 
 /* ==================================================================
  * CurveSegment base class
@@ -35,6 +30,74 @@ std::string CurveTypeNames[] = {
 const int   CurveSegment::numLines = 25;
 const float CurveSegment::step     = 1.f / CurveSegment::numLines;
 const float CurveSegment::radius   = 2.9f;
+
+void CurveSegment::draw(bool drawPoints, bool isShadowed)
+{
+	float t = 0.f;
+	glBegin(GL_LINE_STRIP);
+		for(int i = 0; i <= numLines; ++i, t += step)
+		{
+			const Vec3f pos (getPosition(t));
+			const Vec3f dir (normalize(getDirection(t)));
+			const Vec3f up  (normalize(getOrientation(t)));
+			const Vec3f side(normalize(cross(dir, up)));
+
+			const Vec3f v(pos + radius * side);
+
+			glVertex3fv(v.v());
+		}
+	glEnd();
+
+	t = 0.f;
+	glBegin(GL_LINE_STRIP);
+		for(int i = 0; i <= numLines; ++i, t += step)
+		{
+			const Vec3f pos (getPosition(t));
+			const Vec3f dir (normalize(getDirection(t)));
+			const Vec3f up  (normalize(getOrientation(t)));
+			const Vec3f side(normalize(cross(dir, up)));
+
+			const Vec3f v(pos + -radius * side);
+			// Note:     (pos -  radius * side) doesn't work as expected
+
+			glVertex3fv(v.v());
+		}
+	glEnd();
+
+	// Draw ties
+	if( !isShadowed ) glColor4ub(139, 69, 19, 255); // brown
+	glBegin(GL_LINES);
+		for(float t = 0.f, arc_t = 0.f; arc_t <= 1.f; t += step)
+		{
+			const Vec3f pos (getPosition(arc_t));
+			const Vec3f dir (normalize(getDirection(arc_t)));
+			const Vec3f up  (normalize(getOrientation(arc_t)));
+			const Vec3f side(normalize(cross(dir,up)));
+
+			const Vec3f v1(pos +  radius * side);
+			const Vec3f v2(pos + -radius * side);
+			// Note:      (pos -  radius * side) doesn't work as expected
+
+			glVertex3fv(v1.v());
+			glVertex3fv(v2.v());
+
+			arc_t += arcLengthStep(parentCurve, t);
+		}
+	glEnd();
+
+	if( drawPoints )
+	{
+		if( !isShadowed ) glColor4ub(20, 20, 255, 255);
+		startPoint.draw(isShadowed);
+		if( !isShadowed ) glColor4ub(20, 20, 255, 255);
+		endPoint.draw(isShadowed);
+
+		if( !isShadowed ) glColor4ub(128, 0, 128, 255);
+		control1.draw(isShadowed);
+		if( !isShadowed ) glColor4ub(128, 0, 128, 255);
+		control2.draw(isShadowed);
+	}
+}
 
 Vec3f CurveSegment::getOrientation(float t)
 {
@@ -110,74 +173,6 @@ Vec3f LineSegment::getDirection( float t )
  * CatmullRomSegment class
  * ==================================================================
  */
-void CatmullRomSegment::draw(bool drawPoints, bool isShadowed)
-{
-	float t = 0.f;
-	glBegin(GL_LINE_STRIP);
-		for(int i = 0; i <= numLines; ++i, t += step)
-		{
-			const Vec3f pos (getPosition(t));
-			const Vec3f dir (normalize(getDirection(t)));
-			const Vec3f up  (normalize(getOrientation(t)));
-			const Vec3f side(normalize(cross(dir, up)));
-
-			const Vec3f v(pos + radius * side);
-
-			glVertex3fv(v.v());
-		}
-	glEnd();
-
-	t = 0.f;
-	glBegin(GL_LINE_STRIP);
-		for(int i = 0; i <= numLines; ++i, t += step)
-		{
-			const Vec3f pos (getPosition(t));
-			const Vec3f dir (normalize(getDirection(t)));
-			const Vec3f up  (normalize(getOrientation(t)));
-			const Vec3f side(normalize(cross(dir, up)));
-
-			const Vec3f v(pos + -radius * side);
-			// Note:     (pos -  radius * side) doesn't work as expected
-
-			glVertex3fv(v.v());
-		}
-	glEnd();
-
-	// Draw ties
-	if( !isShadowed ) glColor4ub(139, 69, 19, 255); // brown
-	glBegin(GL_LINES);
-		for(float t = 0.f, arc_t = 0.f; arc_t <= 1.f; t += step)
-		{
-			const Vec3f pos (getPosition(arc_t));
-			const Vec3f dir (normalize(getDirection(arc_t)));
-			const Vec3f up  (normalize(getOrientation(arc_t)));
-			const Vec3f side(normalize(cross(dir,up)));
-
-			const Vec3f v1(pos +  radius * side);
-			const Vec3f v2(pos + -radius * side);
-			// Note:      (pos -  radius * side) doesn't work as expected
-
-			glVertex3fv(v1.v());
-			glVertex3fv(v2.v());
-
-			arc_t += arcLengthStep(parentCurve, t);
-		}
-	glEnd();
-
-	if( drawPoints )
-	{
-		if( !isShadowed ) glColor4ub(20, 20, 255, 255);
-		startPoint.draw(isShadowed);
-		if( !isShadowed ) glColor4ub(20, 20, 255, 255);
-		endPoint.draw(isShadowed);
-	
-		if( !isShadowed ) glColor4ub(128, 0, 128, 255);
-		control1.draw(isShadowed);
-		if( !isShadowed ) glColor4ub(128, 0, 128, 255);
-		control2.draw(isShadowed);
-	}
-}
-
 Vec3f CatmullRomSegment::getPosition( float t )
 {
 	const Vec3f p0(startPoint.pos());
@@ -222,74 +217,6 @@ Vec3f CatmullRomSegment::getDirection( float t )
  * HermiteSegment class
  * ==================================================================
  */
-void HermiteSegment::draw(bool drawPoints, bool isShadowed)
-{
-	float t = 0.f;
-	glBegin(GL_LINE_STRIP);
-		for(int i = 0; i <= numLines; ++i, t += step)
-		{
-			const Vec3f pos (getPosition(t));
-			const Vec3f dir (normalize(getDirection(t)));
-			const Vec3f up  (normalize(getOrientation(t)));
-			const Vec3f side(normalize(cross(dir, up)));
-
-			const Vec3f v(pos + radius * side);
-
-			glVertex3fv(v.v());
-		}
-	glEnd();
-
-	t = 0.f;
-	glBegin(GL_LINE_STRIP);
-		for(int i = 0; i <= numLines; ++i, t += step)
-		{
-			const Vec3f pos (getPosition(t));
-			const Vec3f dir (normalize(getDirection(t)));
-			const Vec3f up  (normalize(getOrientation(t)));
-			const Vec3f side(normalize(cross(dir, up)));
-
-			const Vec3f v(pos + -radius * side);
-			// Note:     (pos -  radius * side) doesn't work as expected
-
-			glVertex3fv(v.v());
-		}
-	glEnd();
-
-	// Draw ties
-	if( !isShadowed ) glColor4ub(139, 69, 19, 255); // brown
-	glBegin(GL_LINES);
-		for(float t = 0.f, arc_t = 0.f; arc_t <= 1.f; t += step)
-		{
-			const Vec3f pos (getPosition(arc_t));
-			const Vec3f dir (normalize(getDirection(arc_t)));
-			const Vec3f up  (normalize(getOrientation(arc_t)));
-			const Vec3f side(normalize(cross(dir,up)));
-
-			const Vec3f v1(pos +  radius * side);
-			const Vec3f v2(pos + -radius * side);
-			// Note:      (pos -  radius * side) doesn't work as expected
-
-			glVertex3fv(v1.v());
-			glVertex3fv(v2.v());
-
-			arc_t += arcLengthStep(parentCurve, t);
-		}
-	glEnd();
-
-	if( drawPoints )
-	{
-		if( !isShadowed ) glColor4ub(20, 20, 255, 255);
-		startPoint.draw(isShadowed);
-		if( !isShadowed ) glColor4ub(20, 20, 255, 255);
-		endPoint.draw(isShadowed);
-
-		if( !isShadowed ) glColor4ub(128, 0, 128, 255);
-		control1.draw(isShadowed);
-		if( !isShadowed ) glColor4ub(128, 0, 128, 255);
-		control2.draw(isShadowed);
-	}
-}
-
 Vec3f HermiteSegment::getPosition( float t )
 {
 	const Vec3f p0(startPoint.pos());
@@ -333,74 +260,6 @@ Vec3f HermiteSegment::getDirection( float t )
  * BSplineSegment class
  * ==================================================================
  */
-void BSplineSegment::draw(bool drawPoints, bool isShadowed)
-{
-	float t = 0.f;
-	glBegin(GL_LINE_STRIP);
-		for(int i = 0; i <= numLines; ++i, t += step)
-		{
-			const Vec3f pos (getPosition(t));
-			const Vec3f dir (normalize(getDirection(t)));
-			const Vec3f up  (normalize(getOrientation(t)));
-			const Vec3f side(normalize(cross(dir, up)));
-
-			const Vec3f v(pos + radius * side);
-
-			glVertex3fv(v.v());
-		}
-	glEnd();
-
-	t = 0.f;
-	glBegin(GL_LINE_STRIP);
-		for(int i = 0; i <= numLines; ++i, t += step)
-		{
-			const Vec3f pos (getPosition(t));
-			const Vec3f dir (normalize(getDirection(t)));
-			const Vec3f up  (normalize(getOrientation(t)));
-			const Vec3f side(normalize(cross(dir, up)));
-
-			const Vec3f v(pos + -radius * side);
-			// Note:     (pos -  radius * side) doesn't work as expected
-
-			glVertex3fv(v.v());
-		}
-	glEnd();
-
-	// Draw ties
-	if( !isShadowed ) glColor4ub(139, 69, 19, 255); // brown
-	glBegin(GL_LINES);
-		for(float t = 0.f, arc_t = 0.f; arc_t <= 1.f; t += step)
-		{
-			const Vec3f pos (getPosition(arc_t));
-			const Vec3f dir (normalize(getDirection(arc_t)));
-			const Vec3f up  (normalize(getOrientation(arc_t)));
-			const Vec3f side(normalize(cross(dir,up)));
-
-			const Vec3f v1(pos +  radius * side);
-			const Vec3f v2(pos + -radius * side);
-			// Note:      (pos -  radius * side) doesn't work as expected
-
-			glVertex3fv(v1.v());
-			glVertex3fv(v2.v());
-
-			arc_t += arcLengthStep(parentCurve, t);
-		}
-	glEnd();
-
-	if( drawPoints )
-	{
-		if( !isShadowed ) glColor4ub(20, 20, 255, 255);
-		startPoint.draw(isShadowed);
-		if( !isShadowed ) glColor4ub(20, 20, 255, 255);
-		endPoint.draw(isShadowed);
-
-		if( !isShadowed ) glColor4ub(128, 0, 128, 255);
-		control1.draw(isShadowed);
-		if( !isShadowed ) glColor4ub(128, 0, 128, 255);
-		control2.draw(isShadowed);
-	}
-}
-
 Vec3f BSplineSegment::getPosition( float t )
 {
 	const Vec3f p0(startPoint.pos());
