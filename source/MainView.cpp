@@ -268,7 +268,7 @@ void MainView::setupProjection()
 		case train:
 		{
 			glMatrixMode(GL_PROJECTION);
-			glLoadIdentity();
+			glLoadIdentity(); // No picking in train view
 			gluPerspective(90.0, aspect, 0.1, 1000.0);
 
 			glMatrixMode(GL_MODELVIEW);
@@ -277,21 +277,22 @@ void MainView::setupProjection()
 			Curve& curve(window->getCurve());
 			const float t = window->getRotation();
 
+			// Calculate the orientation matrix values
 			const Vec3f& p(-1.f * curve.getPosition(t));
 			const Vec3f& d(-1.f * curve.getDirection(t));
+			const Vec3f& tangent(normalize(d));
 
-			// Calculate and apply the orientation matrix
-			Vec3f normal(curve.getOrientation(t));
-
-			// Note: this is sorta hacky, but lines shouldn't interpolate orientation
-			if( curve.getCurveType() == lines )
+			Vec3f normal;
+			if( curve.getCurveType() != lines )
+				normal = curve.getOrientation(t);
+			else // lines shouldn't interpolate orientation
 				normal = curve.getSegment(curve.selectedSegment)->getStartPoint().orient();
 
-			Vec3f binormal(normalize(cross(normal, normalize(d))));
+			const Vec3f binormal(normalize(cross(normal, tangent)));
+			normal = normalize(cross(tangent, binormal));
 
-			normal = normalize(cross(normalize(d), binormal));
-
-			const Vec3f& z(normalize(d)), y(normal), x(binormal);
+			// Apply the orientation matrix
+			const Vec3f& z(tangent), y(normal), x(binormal);
 			// Note: matrix is transpose of typical orientation
 			GLfloat m[] = {
 				x.x(), y.x(), z.x(), 0.f,
@@ -484,33 +485,32 @@ void MainView::drawCurve(const float t, bool drawPoints, bool doShadows)
 void MainView::drawTrain( const float t, bool doingShadows )
 {
 	Curve& curve = window->getCurve();
+
+	// Calculate the orientation matrix values 
 	const Vec3f& p(curve.getPosition(t));
 	const Vec3f& d(curve.getDirection(t));
+	const Vec3f& tangent(normalize(d));
 
-	Vec3f normal(curve.getOrientation(t));
-	Vec3f binormal;
+	Vec3f normal;
+	if( curve.getCurveType() != lines )
+		normal = curve.getOrientation(t);
+	else // lines shouldn't interpolate orientation
+		normal = curve.getSegment(curve.selectedSegment)->getStartPoint().pos();
 
-	// Note: this is sorta hacky, but lines shouldn't interpolate orientation
-	if( curve.getCurveType() == lines )
-		normal = curve.getSegment(curve.selectedSegment)->getStartPoint().orient();
+	const Vec3f binormal(normalize(cross(normal, tangent)));
+	normal = normalize(cross(tangent, binormal));
 
 	glPushMatrix();
 
-	glTranslatef(p.x(), p.y(), p.z());
-
-	// Calculate and apply orientation matrix
-	binormal = normalize(cross(normal, normalize(d)));
-	normal   = normalize(cross(normalize(d), binormal));
-
-	const Vec3f& z(normalize(d)), y(normal), x(binormal);
+	// Apply the orientation + translation matrix
+	const Vec3f& z(tangent), y(normal), x(binormal);
 	GLfloat m[] = {
 		x.x(), x.y(), x.z(), 0.f,
 		y.x(), y.y(), y.z(), 0.f,
 		z.x(), z.y(), z.z(), 0.f,
-		0.f,   0.f,   0.f,   1.f
+		p.x(), p.y(), p.z(), 1.f
 	};
 	glMultMatrixf(m);
-
 	// Face forward
 	glRotatef(-90.f, 0.f, 1.f, 0.f);
 
