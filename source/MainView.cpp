@@ -269,7 +269,7 @@ void MainView::setupProjection()
 		{
 			glMatrixMode(GL_PROJECTION);
 			glLoadIdentity(); // No picking in train view
-			gluPerspective(90.0, aspect, 0.1, 1000.0);
+			gluPerspective(65.0, aspect, 0.1, 1000.0);
 
 			glMatrixMode(GL_MODELVIEW);
 			glLoadIdentity();
