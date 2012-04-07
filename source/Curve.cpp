@@ -223,6 +223,7 @@ void Curve::regenerateSegments()
 	{
 	case lines:   regenerateLineSegments();    break;
 	case catmull: regenerateCatmullSegments(); break;
+	case hermite: regenerateHermiteSegments(); break;
 	case bspline: regenerateBSplineSegments(); break;
 	}
 }
@@ -283,7 +284,34 @@ void Curve::regenerateCatmullSegments()
 /* regenerateHermiteSegments() - Regenerates segments as hermite splines */
 void Curve::regenerateHermiteSegments()
 {
-	throw std::exception("The method or operation is not implemented.");
+	auto it  = controlPoints.begin();
+	auto end = controlPoints.end();
+	for(int i = 0; it != end; ++i, ++it)
+	{
+		if( i == 0 && controlPoints.size() >= 4 )
+		{
+			const CtrlPoint& c1(*(it + 1));
+			const CtrlPoint& p0(*(it));
+			const CtrlPoint& p1(*(it + 1));
+			const CtrlPoint& c2(*(it + 2));
+			segments.push_back(new HermiteSegment(*this, i, p0, p1, c1, c2));
+		} else {
+			auto next1 = it + 1;
+			if( next1 >= end )
+				next1 = controlPoints.begin();
+
+			auto next2 = next1 + 1;
+			if( next2 >= end )
+				next2 = controlPoints.begin();
+
+			const CtrlPoint& c1(*next1);
+			const CtrlPoint& p0(*(it));
+			const CtrlPoint& p1(*next1);
+			const CtrlPoint& c2(*next2);
+
+			segments.push_back(new HermiteSegment(*this, i, p0, p1, c1, c2));
+		}
+	}
 }
 
 /* regenerateBSplineSegments() - Regenerates segments as bsplines */

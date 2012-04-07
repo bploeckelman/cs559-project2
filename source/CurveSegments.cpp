@@ -56,7 +56,8 @@ void LineSegment::draw(bool drawPoints, bool isShadowed)
 
 	const Vec3f dir (normalize(start - end));
 	const Vec3f up  (normalize(startPoint.orient()));
-	const Vec3f side(normalize(cross(dir, up)));
+	const Vec3f side(normalize(cross(dir, up)));
+
 	glBegin(GL_LINE_STRIP);
 	{
 		const Vec3f v1(start + radius * side);
@@ -216,8 +217,112 @@ Vec3f CatmullRomSegment::getDirection( float t )
  * HermiteSegment class
  * ==================================================================
  */
-// TODO
+void HermiteSegment::draw(bool drawPoints, bool isShadowed)
+{
+	float t = 0.f;
+	glBegin(GL_LINE_STRIP);
+		for(int i = 0; i <= numLines; ++i, t += step)
+		{
+			const Vec3f pos (getPosition(t));
+			const Vec3f dir (normalize(getDirection(t)));
+			const Vec3f up  (normalize(getOrientation(t)));
+			const Vec3f side(normalize(cross(dir, up)));
 
+			const Vec3f v(pos + radius * side);
+
+			glVertex3fv(v.v());
+		}
+	glEnd();
+
+	t = 0.f;
+	glBegin(GL_LINE_STRIP);
+		for(int i = 0; i <= numLines; ++i, t += step)
+		{
+			const Vec3f pos (getPosition(t));
+			const Vec3f dir (normalize(getDirection(t)));
+			const Vec3f up  (normalize(getOrientation(t)));
+			const Vec3f side(normalize(cross(dir, up)));
+
+			const Vec3f v(pos + -radius * side);
+			// Note:     (pos -  radius * side) doesn't work as expected
+
+			glVertex3fv(v.v());
+		}
+	glEnd();
+
+	// Draw ties
+	if( !isShadowed ) glColor4ub(139, 69, 19, 255); // brown
+	glBegin(GL_LINES);
+		for(float t = 0.f, arc_t = 0.f; arc_t <= 1.f; t += step)
+		{
+			const Vec3f pos (getPosition(arc_t));
+			const Vec3f dir (normalize(getDirection(arc_t)));
+			const Vec3f up  (normalize(getOrientation(arc_t)));
+			const Vec3f side(normalize(cross(dir,up)));
+
+			const Vec3f v1(pos +  radius * side);
+			const Vec3f v2(pos + -radius * side);
+			// Note:      (pos -  radius * side) doesn't work as expected
+
+			glVertex3fv(v1.v());
+			glVertex3fv(v2.v());
+
+			arc_t += arcLengthStep(parentCurve, t);
+		}
+	glEnd();
+
+	if( drawPoints )
+	{
+		if( !isShadowed ) glColor4ub(20, 20, 255, 255);
+		startPoint.draw(isShadowed);
+		if( !isShadowed ) glColor4ub(20, 20, 255, 255);
+		endPoint.draw(isShadowed);
+
+		if( !isShadowed ) glColor4ub(128, 0, 128, 255);
+		control1.draw(isShadowed);
+		if( !isShadowed ) glColor4ub(128, 0, 128, 255);
+		control2.draw(isShadowed);
+	}
+}
+
+Vec3f HermiteSegment::getPosition( float t )
+{
+	const Vec3f p0(startPoint.pos());
+	const Vec3f p1(endPoint.pos());
+	const Vec3f m0(control1.pos());
+	const Vec3f m1(control2.pos());
+
+	const float tt  = t * t;
+	const float ttt = t * tt;
+
+	Vec3f pos(
+		( 2.f * ttt - 3.f * tt + 1.f) * p0
+	  + (-2.f * ttt + 3.f * tt      ) * p1
+	  + (       ttt - 2.f * tt + t)   * m0
+	  + (       ttt -       tt)       * m1
+	);
+
+	return pos;
+}
+
+Vec3f HermiteSegment::getDirection( float t )
+{
+	const Vec3f p0(startPoint.pos());
+	const Vec3f p1(endPoint.pos());
+	const Vec3f m0(control1.pos());
+	const Vec3f m1(control2.pos());
+
+	const float tt  = t * t;
+
+	Vec3f dir(
+		( 6.f * tt - 6.f * t      ) * p0
+	  + (-6.f * tt + 6.f * t      ) * p1
+	  + ( 3.f * tt - 4.f * t + 1.f) * m0
+	  + ( 3.f * tt - 2.f * t      ) * m1
+	);
+
+	return dir.normalize();
+}
 
 /* ==================================================================
  * BSplineSegment class

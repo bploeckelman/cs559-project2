@@ -103,3 +103,22 @@ public:
 	Vec3f getPosition(float t);
 	Vec3f getDirection(float t);
 };
+
+/* ==================================================================
+ * HermiteSegment class
+ * ==================================================================
+ */
+class HermiteSegment : public CurveSegment
+{
+public:
+	HermiteSegment(const Curve& parentCurve, const int number,
+					  const CtrlPoint& startPoint, const CtrlPoint& endPoint,
+					  const CtrlPoint& control1,   const CtrlPoint& control2)
+		: CurveSegment(parentCurve, number, hermite, startPoint, endPoint, control1, control2)
+	{ }
+
+	void draw(bool drawPoints=false, bool isShadowed=false);
+
+	Vec3f getPosition(float t);
+	Vec3f getDirection(float t);
+};
