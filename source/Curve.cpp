@@ -221,10 +221,10 @@ void Curve::regenerateSegments()
 	// Create new segments using control points and curve type
 	switch(type)
 	{
-	case lines:   regenerateLineSegments();    break;
-	case catmull: regenerateCatmullSegments(); break;
-	case hermite: regenerateHermiteSegments(); break;
-	case bspline: regenerateBSplineSegments(); break;
+	case lines:    regenerateLineSegments();     break;
+	case catmull:  regenerateCatmullSegments();  break;
+	case cardinal: regenerateCardinalSegments(); break;
+	case bspline:  regenerateBSplineSegments();  break;
 	}
 }
 
@@ -281,8 +281,8 @@ void Curve::regenerateCatmullSegments()
 	}
 }
 
-/* regenerateHermiteSegments() - Regenerates segments as hermite splines */
-void Curve::regenerateHermiteSegments()
+/* regenerateCardinalSegments() - Regenerates segments as cardinal cubic splines */
+void Curve::regenerateCardinalSegments()
 {
 	auto it  = controlPoints.begin();
 	auto end = controlPoints.end();
@@ -290,11 +290,11 @@ void Curve::regenerateHermiteSegments()
 	{
 		if( i == 0 && controlPoints.size() >= 4 )
 		{
-			const CtrlPoint& c1(*(it + 1));
+			const CtrlPoint& c1(*(end - 1));
 			const CtrlPoint& p0(*(it));
 			const CtrlPoint& p1(*(it + 1));
 			const CtrlPoint& c2(*(it + 2));
-			segments.push_back(new HermiteSegment(*this, i, p0, p1, c1, c2));
+			segments.push_back(new CardinalSegment(*this, i, p0, p1, c1, c2));
 		} else {
 			auto next1 = it + 1;
 			if( next1 >= end )
@@ -304,12 +304,16 @@ void Curve::regenerateHermiteSegments()
 			if( next2 >= end )
 				next2 = controlPoints.begin();
 
-			const CtrlPoint& c1(*next1);
+			auto prev = it;
+			if( prev != controlPoints.begin() )
+				prev -= 1;
+
+			const CtrlPoint& c1(*prev);
 			const CtrlPoint& p0(*(it));
 			const CtrlPoint& p1(*next1);
 			const CtrlPoint& c2(*next2);
 
-			segments.push_back(new HermiteSegment(*this, i, p0, p1, c1, c2));
+			segments.push_back(new CardinalSegment(*this, i, p0, p1, c1, c2));
 		}
 	}
 }

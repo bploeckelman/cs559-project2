@@ -70,7 +70,7 @@ private:
 
 	void regenerateLineSegments();
 	void regenerateCatmullSegments();
-	void regenerateHermiteSegments();
+	void regenerateCardinalSegments();
 	void regenerateBSplineSegments();
 };
 

@@ -8,7 +8,7 @@
 enum CurveType {
 	lines = 0,
 	catmull,
-	hermite,
+	cardinal,
 	bspline
 };
 
@@ -103,16 +103,16 @@ public:
 };
 
 /* ==================================================================
- * HermiteSegment class
+ * CardinalSegment class
  * ==================================================================
  */
-class HermiteSegment : public CurveSegment
+class CardinalSegment : public CurveSegment
 {
 public:
-	HermiteSegment(const Curve& parentCurve, const int number,
+	CardinalSegment(const Curve& parentCurve, const int number,
 					  const CtrlPoint& startPoint, const CtrlPoint& endPoint,
 					  const CtrlPoint& control1,   const CtrlPoint& control2)
-		: CurveSegment(parentCurve, number, hermite, startPoint, endPoint, control1, control2)
+		: CurveSegment(parentCurve, number, cardinal, startPoint, endPoint, control1, control2)
 	{ }
 
 	Vec3f getPosition(float t);
