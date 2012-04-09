@@ -50,6 +50,8 @@ View - drop down box to choose between view points
 'Train'    - view the scene from the train's perspective
 'Overhead' - view the scene from a static top-down perspective
 
+Speed - adjust the speed parameter 
+
 Arclength Param - toggles arc-length reparameterization (constant speed)
 << / >> - moves the train forward or back a step at a time
 
@@ -69,3 +71,34 @@ Roll+/-     - adjusts the roll of the selected control point
 Tension - adjust the tension parameter for cardinal cubic curves
 
 
+Features:
+---------
+- Calculation of local coordinate system for the train/curve in order to achieve correct orientation
+- Arc-length parameterization, calculated by taking two steps along the curve, finding the distance between them, and using that to calculate a new step value for the animation parameter
+- Adjustable speed parameter
+- Movement in steps (forward and back)
+- C0 curves (lines and cardinal cubics with a tension of 0)
+- C1 curves (catmull-rom splines and cardinal cubics)
+- C2 curves (cubic b-splines)
+- Simple projected shadows
+- Addition/removal of control points in place on the curve
+- Direct manipulation of control point position and orientation
+- Saving/loading control point configurations to/from text files while the program is running via fltk gui elements
+- Different viewpoints
+- Adjustable tension parameter for cardinal cubics
+- Highlighting of the current segment and its corresponding control points
+- Basic lighting (3 sources)
+- Nice looking track with parallel rails and ties
+
+
+Implementation Details:
+-----------------------
+- Nearly all the code in this project is written from scratch, the provided framework code was used as a guide, but the only code that stayed in from the framework is the ArcBallCam and 3d picking code
+
+- Coordinate systems are calculated by taking the cross product of the tangent vector for the curve and the local orientation (normal) vector at a given location to get a binormal vector, then crossing the tangent vector with that binormal vector in order to get a proper orthonormal normal vector
+
+- Local orientation (normal) vectors are calculated by lerping between the orientation vectors of the start and end control points for a curve segment (except for lines which just use the orientation of the starting control point for a segment)
+
+- A local coordinate system for the train viewpoint is done this way also, however the orientation matrix used is the transpose of the standard orientation matrix
+
+- The fltk libraries are included in the project for ease of deployment, although this increases the overall size of the project it eliminates the need to setup environment variables and ensure the proper version of fltk is installed... the program should be able to be run by simply opening the Visual Studio project file and hitting F5.
